@@ -1,9 +1,10 @@
 // src/components/home/AgendaSection.tsx
 import Link from "next/link";
-import type { ScheduleWithProgram } from "@/lib/queries/programs";
+import type { JadwalEnriched } from "@/lib/simpel/types";
+import { formatTanggalJadwal } from "@/lib/simpel/jadwal";
 
 type Props = {
-  schedules: ScheduleWithProgram[];
+  jadwalList: JadwalEnriched[];
 };
 
 const DOCUMENTS = [
@@ -29,28 +30,14 @@ const DOCUMENTS = [
   },
 ];
 
-function formatDateRange(start: Date, end: Date): string {
-  const s = start;
-  const e = end;
-
-  const opts: Intl.DateTimeFormatOptions = { day: "numeric", month: "short" };
-  const sStr = s.toLocaleDateString("id-ID", opts);
-  const eStr = e.toLocaleDateString("id-ID", { ...opts, year: "numeric" });
-
-  if (s.getMonth() === e.getMonth() && s.getFullYear() === e.getFullYear()) {
-    return `${s.getDate()}–${eStr}`;
-  }
-  return `${sStr} – ${eStr}`;
-}
-
-export function AgendaSection({ schedules }: Props) {
+export function AgendaSection({ jadwalList }: Props) {
   return (
     <section
       style={{ backgroundColor: "var(--color-ink-8)", paddingBlock: "4rem" }}
     >
       <div className="container-content">
         <div className="agenda-grid">
-          {/* Agenda dari DB */}
+          {/* Agenda dari SIMPEL */}
           <div className="agenda-card">
             <div className="agenda-head">
               <div className="agenda-head-left">
@@ -87,78 +74,50 @@ export function AgendaSection({ schedules }: Props) {
             </div>
 
             <div className="agenda-body">
-              {schedules.length === 0 && (
+              {jadwalList.length === 0 ? (
                 <div
                   style={{
                     padding: "20px 22px",
-                    color: "var(--color-ink-4)",
                     fontSize: "13px",
+                    color: "var(--color-ink-4)",
                   }}
                 >
                   Belum ada jadwal mendatang.
                 </div>
-              )}
-              {schedules.map((item) => {
-                const startDate = item.startDate;
-                return (
-                  <div key={item.id} className="agenda-item">
-                    <div className="agenda-cal">
-                      <div className="agenda-day">
-                        {String(startDate.getDate()).padStart(2, "0")}
+              ) : (
+                jadwalList.map((item) => {
+                  const startDate = new Date(item.tgl_awal);
+                  return (
+                    <div key={item.id} className="agenda-item">
+                      <div className="agenda-cal">
+                        <div className="agenda-day">
+                          {String(startDate.getDate()).padStart(2, "0")}
+                        </div>
+                        <div className="agenda-month">
+                          {startDate.toLocaleDateString("id-ID", {
+                            month: "short",
+                          })}
+                        </div>
                       </div>
-                      <div className="agenda-month">
-                        {startDate.toLocaleDateString("id-ID", {
-                          month: "short",
-                        })}
-                      </div>
-                    </div>
-                    <div className="agenda-sep" />
-                    <div className="agenda-info">
-                      <div className="agenda-title">
-                        {item.program.name}
-                        {item.batchName && (
-                          <span
-                            style={{
-                              color: "var(--color-ink-4)",
-                              fontWeight: 400,
-                            }}
-                          >
-                            {" "}
-                            — {item.batchName}
-                          </span>
-                        )}
-                      </div>
-                      <div className="agenda-meta">
-                        {item.location && (
+                      <div className="agenda-sep" />
+                      <div className="agenda-info">
+                        <div className="agenda-title">{item.nama}</div>
+                        <div className="agenda-meta">
+                          <span>{item.jenis}</span>
+                          <span>·</span>
                           <span>
-                            <svg
-                              width="11"
-                              height="11"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              style={{ display: "inline", marginRight: "3px" }}
-                            >
-                              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                              <circle cx="12" cy="10" r="3" />
-                            </svg>
-                            {item.location}
+                            {formatTanggalJadwal(item.tgl_awal, item.tgl_akhir)}
                           </span>
-                        )}
-                        <span>·</span>
-                        <span>
-                          {formatDateRange(item.startDate, item.endDate)}
-                        </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
           </div>
 
-          {/* Unduhan — statis untuk sekarang */}
+          {/* Unduhan */}
           <div className="agenda-card">
             <div className="agenda-head">
               <div className="agenda-head-left">
@@ -192,7 +151,6 @@ export function AgendaSection({ schedules }: Props) {
                 </svg>
               </Link>
             </div>
-
             <div className="agenda-body">
               {DOCUMENTS.map((doc, i) => (
                 <Link key={i} href={doc.href} className="doc-item">

@@ -1,5 +1,8 @@
 // src/components/layout/Topbar.tsx
+"use client";
+
 import Link from "next/link";
+import { Calendar, ExternalLink } from "lucide-react";
 
 const TOPBAR_LINKS = [
   { href: "https://kaltimprov.go.id", label: "Portal Kaltim", external: true },
@@ -22,17 +25,17 @@ export function Topbar() {
   const date = getFormattedDate();
 
   return (
-    <div className="topbar-root">
+    <div className="topbar-root hidden lg:block">
       <div className="container-content flex items-center justify-between h-[34px]">
         {/* Kiri */}
-        <div className="flex h-full">
+        <div className="flex h-full overflow-x-auto no-scrollbar">
           {TOPBAR_LINKS.map((item, i) => (
             <Link
               key={item.label}
               href={item.href}
               target={item.external ? "_blank" : undefined}
               rel={item.external ? "noopener noreferrer" : undefined}
-              className="topbar-link"
+              className="topbar-link whitespace-nowrap"
               style={{
                 borderRight:
                   i < TOPBAR_LINKS.length - 1
@@ -41,26 +44,20 @@ export function Topbar() {
               }}
             >
               {item.label}
+              {item.external && (
+                <ExternalLink
+                  size={10}
+                  strokeWidth={2}
+                  className="ml-1 opacity-60 group-hover:opacity-100 transition-opacity"
+                />
+              )}
             </Link>
           ))}
         </div>
 
         {/* Kanan — tanggal */}
-        <div className="topbar-date">
-          <svg
-            width="13"
-            height="13"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            className="topbar-date-icon"
-          >
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-            <line x1="16" y1="2" x2="16" y2="6" />
-            <line x1="8" y1="2" x2="8" y2="6" />
-            <line x1="3" y1="10" x2="21" y2="10" />
-          </svg>
+        <div className="topbar-date shrink-0">
+          <Calendar size={13} strokeWidth={2} className="topbar-date-icon" />
           {date}
         </div>
       </div>

@@ -2,307 +2,404 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { db, eq, count } from "@/db";
-import { posts, programs, schedules, announcements } from "@/db/schema";
+import { posts, programs, announcements } from "@/db/schema";
 import { getLatestPosts } from "@/lib/queries/posts";
-import { getUpcomingSchedules } from "@/lib/queries/programs";
-import { formatDate, timeAgo } from "@/lib/utils";
+import { fetchJadwalMendatang } from "@/lib/simpel/jadwal";
+import { timeAgo } from "@/lib/utils";
+import { getSimpelDetailUrl } from "@/lib/simpel/jadwal";
+import {
+  FileText,
+  Briefcase,
+  CalendarDays,
+  Bell,
+  Plus,
+  Edit,
+  Clock,
+  ArrowRight,
+  AlertCircle,
+  ExternalLink,
+  Activity,
+} from "lucide-react";
 
-export const metadata: Metadata = { title: "Dashboard" };
+export const metadata: Metadata = { title: "Dashboard | Admin BPSDM" };
 
 async function getDashboardStats() {
-  const [totalPosts, totalPrograms, totalSchedules, totalAnnouncements] =
-    await Promise.all([
-      db
-        .select({ total: count() })
-        .from(posts)
-        .where(eq(posts.status, "published")),
-      db
-        .select({ total: count() })
-        .from(programs)
-        .where(eq(programs.status, "active")),
-      db
-        .select({ total: count() })
-        .from(schedules)
-        .where(eq(schedules.status, "open")),
-      db
-        .select({ total: count() })
-        .from(announcements)
-        .where(eq(announcements.isActive, true)),
-    ]);
+  const [totalPosts, totalPrograms, totalAnnouncements] = await Promise.all([
+    db
+      .select({ total: count() })
+      .from(posts)
+      .where(eq(posts.status, "published")),
+    db
+      .select({ total: count() })
+      .from(programs)
+      .where(eq(programs.status, "active")),
+    db
+      .select({ total: count() })
+      .from(announcements)
+      .where(eq(announcements.isActive, true)),
+  ]);
 
   return {
     posts: totalPosts[0]?.total ?? 0,
     programs: totalPrograms[0]?.total ?? 0,
-    schedules: totalSchedules[0]?.total ?? 0,
     announcements: totalAnnouncements[0]?.total ?? 0,
   };
 }
 
+// Tambahkan formatTanggalJadwal ke utils jika belum ada
+function formatDate(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
 export default async function AdminDashboard() {
-  const [stats, recentPosts, upcomingSchedules] = await Promise.all([
+  const [stats, recentPosts, jadwalMendatang] = await Promise.all([
     getDashboardStats(),
     getLatestPosts({ limit: 5 }),
-    getUpcomingSchedules({ limit: 4 }),
+    fetchJadwalMendatang(5),
   ]);
 
   const STAT_CARDS = [
     {
       label: "Berita Terbit",
       value: stats.posts,
-      icon: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6",
-      color: "var(--color-forest-100)",
-      icolor: "var(--color-forest-700)",
+      icon: FileText,
+      color: "var(--color-forest-700)",
+      bg: "var(--color-forest-50)",
       href: "/admin/berita",
     },
     {
       label: "Program Aktif",
       value: stats.programs,
-      icon: "M22 10v6M2 10l10-5 10 5-10 5z M6 12v5c3 3 9 3 12 0v-5",
-      color: "#eff6ff",
-      icolor: "#1d4ed8",
+      icon: Briefcase,
+      color: "#1d4ed8",
+      bg: "#eff6ff",
       href: "/admin/program",
     },
     {
-      label: "Jadwal Terbuka",
-      value: stats.schedules,
-      icon: "M3 4h18v18H3z M16 2v4 M8 2v4 M3 10h18",
-      color: "var(--color-gold-100)",
-      icolor: "var(--color-gold-700)",
-      href: "/admin/jadwal",
+      label: "Jadwal Mendatang",
+      value: jadwalMendatang.length,
+      icon: CalendarDays,
+      color: "var(--color-gold-700)",
+      bg: "var(--color-gold-100)",
+      href: "/program/jadwal",
     },
     {
       label: "Pengumuman Aktif",
       value: stats.announcements,
-      icon: "M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9 M13.73 21a2 2 0 0 1-3.46 0",
-      color: "#fdf4ff",
-      icolor: "#7e22ce",
+      icon: Bell,
+      color: "#7e22ce",
+      bg: "#fdf4ff",
       href: "/admin/pengumuman",
     },
   ];
 
   return (
     <>
+      {/* Header */}
       <div className="admin-page-header">
         <div>
           <h1 className="admin-page-title">Dashboard</h1>
           <p className="admin-page-sub">
-            Ringkasan konten dan aktivitas terkini.
+            Ringkasan konten dan aktivitas terkini BPSDM Kaltim.
           </p>
         </div>
         <Link href="/admin/berita/baru" className="admin-btn-save">
-          <svg
-            width="15"
-            height="15"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
+          <Plus size={15} />
           Tambah Berita
         </Link>
       </div>
 
-      {/* Stats */}
+      {/* Stats Grid */}
       <div className="admin-stats-grid">
-        {STAT_CARDS.map((s) => (
+        {STAT_CARDS.map((card) => (
           <Link
-            key={s.label}
-            href={s.href}
+            key={card.label}
+            href={card.href}
             className="admin-stat-card"
             style={{ textDecoration: "none" }}
           >
             <div
               className="admin-stat-icon"
-              style={{ backgroundColor: s.color }}
+              style={{ backgroundColor: card.bg }}
             >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke={s.icolor}
-                strokeWidth="2"
-                strokeLinecap="round"
-              >
-                <path d={s.icon} />
-              </svg>
+              <card.icon
+                size={22}
+                style={{ color: card.color }}
+                strokeWidth={1.5}
+              />
             </div>
             <div>
-              <div className="admin-stat-value">{s.value}</div>
-              <div className="admin-stat-label">{s.label}</div>
+              <div className="admin-stat-value">{card.value}</div>
+              <div className="admin-stat-label">{card.label}</div>
             </div>
           </Link>
         ))}
       </div>
 
-      {/* Grid konten */}
+      {/* Content Grid */}
       <div
         style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}
       >
-        {/* Berita terbaru */}
+        {/* ── Berita Terbaru ── */}
         <div className="admin-card">
           <div className="admin-card-head">
             <div className="admin-card-title">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-              </svg>
+              <FileText
+                size={16}
+                style={{ color: "var(--color-forest-700)" }}
+              />
               Berita Terbaru
             </div>
             <Link
               href="/admin/berita"
               className="admin-sidebar-back"
-              style={{ width: "auto", padding: "4px 10px" }}
+              style={{
+                width: "auto",
+                padding: "4px 10px",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+              }}
             >
-              Semua →
+              Semua <ArrowRight size={13} />
             </Link>
           </div>
-          <div className="admin-table-wrap">
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>Judul</th>
-                  <th>Status</th>
-                  <th>Tanggal</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentPosts.length === 0 && (
-                  <tr>
-                    <td
-                      colSpan={4}
+
+          <div style={{ padding: "8px 0" }}>
+            {recentPosts.length === 0 ? (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "32px",
+                  gap: "8px",
+                  color: "var(--color-ink-4)",
+                }}
+              >
+                <AlertCircle size={32} />
+                <p style={{ fontSize: "13px" }}>Belum ada berita</p>
+              </div>
+            ) : (
+              recentPosts.map((post, i) => (
+                <div
+                  key={post.id}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "12px",
+                    padding: "12px 20px",
+                    borderBottom:
+                      i < recentPosts.length - 1
+                        ? "1px solid var(--color-ink-7)"
+                        : "none",
+                  }}
+                >
+                  {/* Nomor */}
+                  <div
+                    style={{
+                      width: "24px",
+                      height: "24px",
+                      borderRadius: "50%",
+                      background: "var(--color-ink-7)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "11px",
+                      fontWeight: 700,
+                      color: "var(--color-ink-4)",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {i + 1}
+                  </div>
+
+                  {/* Info */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div
                       style={{
-                        textAlign: "center",
-                        padding: "24px",
-                        color: "var(--color-ink-4)",
+                        fontWeight: 600,
                         fontSize: "13px",
+                        color: "var(--color-ink)",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
                       }}
                     >
-                      Belum ada berita.
-                    </td>
-                  </tr>
-                )}
-                {recentPosts.map((post) => (
-                  <tr key={post.id}>
-                    <td style={{ maxWidth: "220px" }}>
-                      <div
+                      {post.title}
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        marginTop: "3px",
+                      }}
+                    >
+                      <span
                         style={{
+                          fontSize: "11px",
+                          color: "var(--color-forest-700)",
                           fontWeight: 600,
-                          color: "var(--color-ink)",
-                          fontSize: "13px",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {post.title}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "11.5px",
-                          color: "var(--color-ink-4)",
-                          marginTop: "2px",
                         }}
                       >
                         {post.category?.name ?? "—"}
-                      </div>
-                    </td>
-                    <td>
-                      <span className="status-pill status-pill-published">
-                        Terbit
                       </span>
-                    </td>
-                    <td
-                      style={{
-                        fontSize: "12px",
-                        color: "var(--color-ink-4)",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {timeAgo(post.publishedAt)}
-                    </td>
-                    <td>
-                      <Link
-                        href={`/admin/berita/${post.id}`}
-                        className="admin-table-btn admin-table-btn-edit"
+                      <span
+                        style={{
+                          color: "var(--color-ink-5)",
+                          fontSize: "11px",
+                        }}
                       >
-                        Edit
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                        ·
+                      </span>
+                      <span
+                        style={{
+                          fontSize: "11px",
+                          color: "var(--color-ink-4)",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "3px",
+                        }}
+                      >
+                        <Clock size={10} />
+                        {timeAgo(post.publishedAt)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Edit */}
+                  <Link
+                    href={`/admin/berita/${post.id}`}
+                    style={{
+                      width: "30px",
+                      height: "30px",
+                      borderRadius: "7px",
+                      border: "1px solid var(--color-ink-6)",
+                      background: "#fff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "var(--color-ink-3)",
+                      flexShrink: 0,
+                      transition: "all 0.15s",
+                    }}
+                  >
+                    <Edit size={13} />
+                  </Link>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
-        {/* Jadwal mendatang */}
+        {/* ── Jadwal Mendatang (SIMPEL) ── */}
         <div className="admin-card">
           <div className="admin-card-head">
             <div className="admin-card-title">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <rect x="3" y="4" width="18" height="18" rx="2" />
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
-              </svg>
+              <CalendarDays
+                size={16}
+                style={{ color: "var(--color-forest-700)" }}
+              />
               Jadwal Mendatang
             </div>
             <Link
-              href="/admin/jadwal"
+              href="/program/jadwal"
+              target="_blank"
               className="admin-sidebar-back"
-              style={{ width: "auto", padding: "4px 10px" }}
+              style={{
+                width: "auto",
+                padding: "4px 10px",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+              }}
             >
-              Semua →
+              SIMPEL <ExternalLink size={12} />
             </Link>
           </div>
-          <div className="admin-table-wrap">
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>Program</th>
-                  <th>Mulai</th>
-                  <th>Kuota</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {upcomingSchedules.length === 0 && (
-                  <tr>
-                    <td
-                      colSpan={4}
+
+          <div style={{ padding: "8px 0" }}>
+            {jadwalMendatang.length === 0 ? (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "32px",
+                  gap: "8px",
+                  color: "var(--color-ink-4)",
+                }}
+              >
+                <CalendarDays size={32} />
+                <p style={{ fontSize: "13px" }}>Belum ada jadwal mendatang</p>
+              </div>
+            ) : (
+              jadwalMendatang.map((jadwal, i) => {
+                const startDate = new Date(jadwal.tgl_awal);
+                const isActive = jadwal.statusJadwal === "berlangsung";
+
+                return (
+                  <div
+                    key={jadwal.id}
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: "12px",
+                      padding: "12px 20px",
+                      borderBottom:
+                        i < jadwalMendatang.length - 1
+                          ? "1px solid var(--color-ink-7)"
+                          : "none",
+                    }}
+                  >
+                    {/* Tanggal */}
+                    <div
                       style={{
+                        width: "40px",
+                        flexShrink: 0,
                         textAlign: "center",
-                        padding: "24px",
-                        color: "var(--color-ink-4)",
-                        fontSize: "13px",
+                        background: isActive
+                          ? "var(--color-forest-900)"
+                          : "var(--color-forest-700)",
+                        borderRadius: "8px",
+                        padding: "6px 4px",
                       }}
                     >
-                      Belum ada jadwal mendatang.
-                    </td>
-                  </tr>
-                )}
-                {upcomingSchedules.map((s) => (
-                  <tr key={s.id}>
-                    <td style={{ maxWidth: "200px" }}>
+                      <div
+                        style={{
+                          fontFamily: "var(--font-display)",
+                          fontSize: "18px",
+                          fontWeight: 700,
+                          color: "#fff",
+                          lineHeight: 1,
+                        }}
+                      >
+                        {String(startDate.getDate()).padStart(2, "0")}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "9px",
+                          fontWeight: 700,
+                          textTransform: "uppercase",
+                          color: "rgba(255,255,255,0.7)",
+                          marginTop: "2px",
+                        }}
+                      >
+                        {startDate.toLocaleDateString("id-ID", {
+                          month: "short",
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Info */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
                       <div
                         style={{
                           fontWeight: 600,
@@ -311,57 +408,107 @@ export default async function AdminDashboard() {
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap",
+                          marginBottom: "4px",
                         }}
                       >
-                        {s.program.name}
+                        {jadwal.nama}
                       </div>
-                      {s.batchName && (
-                        <div
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        {isActive && (
+                          <span
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "3px",
+                              fontSize: "10px",
+                              fontWeight: 700,
+                              color: "var(--color-forest-700)",
+                              background: "var(--color-forest-50)",
+                              padding: "2px 7px",
+                              borderRadius: "20px",
+                              border: "1px solid var(--color-forest-200)",
+                            }}
+                          >
+                            <Activity size={9} />
+                            Live
+                          </span>
+                        )}
+                        <span
                           style={{
-                            fontSize: "11.5px",
-                            color: "var(--color-ink-4)",
-                            marginTop: "2px",
+                            fontSize: "11px",
+                            color: "var(--color-gold-700)",
+                            fontWeight: 600,
                           }}
                         >
-                          {s.batchName}
-                        </div>
-                      )}
-                    </td>
-                    <td
+                          {jadwal.jenis}
+                        </span>
+                        <span
+                          style={{
+                            color: "var(--color-ink-5)",
+                            fontSize: "11px",
+                          }}
+                        >
+                          ·
+                        </span>
+                        <span
+                          style={{
+                            fontSize: "11px",
+                            color: "var(--color-ink-4)",
+                          }}
+                        >
+                          {jadwal.kuota} kuota
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Link SIMPEL */}
+                    <Link
+                      href={getSimpelDetailUrl(jadwal.id, jadwal.nama)}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       style={{
-                        fontSize: "12px",
-                        color: "var(--color-ink-4)",
-                        whiteSpace: "nowrap",
+                        width: "30px",
+                        height: "30px",
+                        borderRadius: "7px",
+                        border: "1px solid var(--color-ink-6)",
+                        background: "#fff",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "var(--color-ink-3)",
+                        flexShrink: 0,
                       }}
                     >
-                      {formatDate(s.startDate, {
-                        day: "numeric",
-                        month: "short",
-                      })}
-                    </td>
-                    <td>
-                      <span
-                        style={{
-                          fontSize: "13px",
-                          fontWeight: 600,
-                          color: "var(--color-forest-700)",
-                        }}
-                      >
-                        {s.quota - (s.registeredCount ?? 0)}/{s.quota}
-                      </span>
-                    </td>
-                    <td>
-                      <Link
-                        href={`/admin/jadwal/${s.id}`}
-                        className="admin-table-btn admin-table-btn-edit"
-                      >
-                        Edit
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      <ExternalLink size={13} />
+                    </Link>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          {/* Footer note */}
+          <div
+            style={{
+              padding: "10px 20px",
+              borderTop: "1px solid var(--color-ink-7)",
+              background: "var(--color-ink-8)",
+              fontSize: "11.5px",
+              color: "var(--color-ink-4)",
+              display: "flex",
+              alignItems: "center",
+              gap: "5px",
+            }}
+          >
+            <Clock size={11} />
+            Data realtime dari SIMPEL Kaltim · diperbarui setiap 1 jam
           </div>
         </div>
       </div>

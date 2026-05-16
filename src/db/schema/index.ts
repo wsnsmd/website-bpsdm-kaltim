@@ -3,6 +3,7 @@ import {
   mysqlTable,
   varchar,
   text,
+  longtext,
   int,
   boolean,
   timestamp,
@@ -266,141 +267,26 @@ export const postTags = mysqlTable(
 );
 
 // ═══════════════════════════════════════════
-// 6. PAGES
-// ═══════════════════════════════════════════
-export const pages = mysqlTable(
-  "pages",
-  {
-    id: int("id").autoincrement().primaryKey(),
-    title: varchar("title", { length: 500 }).notNull(),
-    slug: varchar("slug", { length: 500 }).notNull(),
-    content: text("content").notNull(),
-    excerpt: text("excerpt"),
-    template: mysqlEnum("template", [
-      "default",
-      "full-width",
-      "sidebar",
-      "landing",
-      "ppid",
-      "contact",
-      "profile",
-    ]).default("default"),
-    parentId: int("parent_id"),
-    featuredImage: varchar("featured_image", { length: 1000 }),
-    status: mysqlEnum("status", ["draft", "published", "archived"])
-      .default("draft")
-      .notNull(),
-    sortOrder: int("sort_order").default(0),
-    metaTitle: varchar("meta_title", { length: 255 }),
-    metaDescription: text("meta_description"),
-    wpPageId: int("wp_page_id"),
-    wpSlug: varchar("wp_slug", { length: 500 }),
-    createdAt: timestamp("created_at")
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("updated_at")
-      .default(sql`CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`)
-      .notNull(),
-  },
-  (t) => ({
-    slugIdx: uniqueIndex("pages_slug_idx").on(t.slug),
-    parentIdx: index("pages_parent_idx").on(t.parentId),
-  }),
-);
-
-// ═══════════════════════════════════════════
-// 7. MENU
-// ═══════════════════════════════════════════
-export const menuGroups = mysqlTable("menu_groups", {
-  id: int("id").autoincrement().primaryKey(),
-  name: varchar("name", { length: 150 }).notNull(),
-  slug: varchar("slug", { length: 150 }).notNull(),
-  location: mysqlEnum("location", [
-    "header",
-    "footer-col1",
-    "footer-col2",
-    "footer-col3",
-    "topbar",
-    "sidebar",
-    "mobile",
-  ]).notNull(),
-  isActive: boolean("is_active").default(true),
-  updatedAt: timestamp("updated_at")
-    .default(sql`CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`)
-    .notNull(),
-});
-
-export const menuItems = mysqlTable(
-  "menu_items",
-  {
-    id: int("id").autoincrement().primaryKey(),
-    menuGroupId: int("menu_group_id")
-      .notNull()
-      .references(() => menuGroups.id, { onDelete: "cascade" }),
-    parentId: int("parent_id"),
-    label: varchar("label", { length: 255 }).notNull(),
-    linkType: mysqlEnum("link_type", [
-      "page",
-      "post",
-      "category",
-      "external",
-      "anchor",
-      "custom",
-    ]).notNull(),
-    pageId: int("page_id").references(() => pages.id),
-    categoryId: int("category_id").references(() => categories.id),
-    customUrl: varchar("custom_url", { length: 1000 }),
-    openInNewTab: boolean("open_in_new_tab").default(false),
-    icon: varchar("icon", { length: 100 }),
-    sortOrder: int("sort_order").default(0),
-    isVisible: boolean("is_visible").default(true),
-  },
-  (t) => ({
-    groupIdx: index("menu_items_group_idx").on(t.menuGroupId),
-    parentIdx: index("menu_items_parent_idx").on(t.parentId),
-  }),
-);
-
-// ═══════════════════════════════════════════
 // 8. PROGRAM DIKLAT
 // ═══════════════════════════════════════════
 export const programs = mysqlTable(
   "programs",
   {
     id: int("id").autoincrement().primaryKey(),
-    name: varchar("name", { length: 500 }).notNull(),
-    slug: varchar("slug", { length: 500 }).notNull(),
+    name: varchar("name", { length: 255 }).notNull(),
+    slug: varchar("slug", { length: 255 }).notNull(),
     description: text("description"),
-    objectives: text("objectives"),
-    prerequisites: text("prerequisites"),
-    type: mysqlEnum("type", [
-      "teknis",
-      "fungsional",
-      "manajerial",
-      "pola-apbd",
-      "pola-kontribusi",
-      "pola-kemitraan",
-      "orientasi",
-    ]).notNull(),
-    level: mysqlEnum("level", [
-      "dasar",
-      "lanjutan",
-      "madya",
-      "utama",
-      "pimpinan",
-    ]),
-    durationDays: int("duration_days"),
-    durationHours: int("duration_hours"),
-    maxParticipants: int("max_participants"),
-    featuredImage: varchar("featured_image", { length: 1000 }),
-    brochureUrl: varchar("brochure_url", { length: 1000 }),
-    status: mysqlEnum("status", ["active", "inactive", "draft"])
-      .default("draft")
+    // Ini yang digunakan untuk filter ke SIMPEL API
+    jenisKey: varchar("jenis_key", { length: 100 }).notNull(),
+    icon: varchar("icon", { length: 100 }),
+    color: varchar("color", { length: 50 }),
+    status: mysqlEnum("status", ["active", "inactive"])
+      .default("active")
       .notNull(),
-    isHighlight: boolean("is_highlight").default(false),
+    isHighlight: boolean("is_highlight").default(true),
     sortOrder: int("sort_order").default(0),
-    metaTitle: varchar("meta_title", { length: 255 }),
-    metaDescription: text("meta_description"),
+    objectives: text("objectives"),
+    target: text("target"),
     createdAt: timestamp("created_at")
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
@@ -410,7 +296,7 @@ export const programs = mysqlTable(
   },
   (t) => ({
     slugIdx: uniqueIndex("programs_slug_idx").on(t.slug),
-    typeIdx: index("programs_type_idx").on(t.type),
+    jenisIdx: index("programs_jenis_idx").on(t.jenisKey),
     statusIdx: index("programs_status_idx").on(t.status),
   }),
 );
@@ -594,6 +480,136 @@ export const settings = mysqlTable("settings", {
     .default(sql`CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`)
     .notNull(),
 });
+
+// ── Pages (seperti WordPress pages) ──────────
+export const pages = mysqlTable(
+  "pages",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    title: varchar("title", { length: 255 }).notNull(),
+    slug: varchar("slug", { length: 255 }).notNull(),
+    content: longtext("content"),
+    excerpt: text("excerpt"),
+    template: varchar("template", { length: 100 }).default("default"),
+    parentId: int("parent_id"),
+    featuredImage: varchar("featured_image", { length: 500 }),
+    status: mysqlEnum("status", ["published", "draft", "archived"])
+      .default("published")
+      .notNull(),
+    sortOrder: int("sort_order").default(0),
+    metaTitle: varchar("meta_title", { length: 255 }),
+    metaDescription: varchar("meta_description", { length: 500 }),
+    showInNav: boolean("show_in_nav").default(false),
+    createdBy: varchar("created_by", { length: 36 }),
+    createdAt: timestamp("created_at")
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updated_at")
+      .default(sql`CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (t) => ({
+    slugIdx: uniqueIndex("pages_slug_idx").on(t.slug),
+    statusIdx: index("pages_status_idx").on(t.status),
+    parentIdx: index("pages_parent_idx").on(t.parentId),
+  }),
+);
+
+// ── Menu Groups ───────────────────────────────
+export const menuGroups = mysqlTable(
+  "menu_groups",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    name: varchar("name", { length: 100 }).notNull(),
+    slug: varchar("slug", { length: 100 }).notNull(),
+    location: varchar("location", { length: 100 }).default("header"),
+    createdAt: timestamp("created_at")
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (t) => ({
+    slugIdx: uniqueIndex("menu_groups_slug_idx").on(t.slug),
+  }),
+);
+
+// ── Menu Items ────────────────────────────────
+export const menuItems = mysqlTable(
+  "menu_items",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    menuGroupId: int("menu_group_id").notNull(),
+    parentId: int("parent_id"),
+    label: varchar("label", { length: 255 }).notNull(),
+    url: varchar("url", { length: 500 }),
+    pageId: int("page_id"),
+    target: varchar("target", { length: 20 }).default("_self"),
+    icon: varchar("icon", { length: 100 }),
+    sortOrder: int("sort_order").default(0),
+    isActive: boolean("is_active").default(true),
+  },
+  (t) => ({
+    groupIdx: index("menu_items_group_idx").on(t.menuGroupId),
+    parentIdx: index("menu_items_parent_idx").on(t.parentId),
+  }),
+);
+
+// ── Units (Bidang/Unit Kerja) ─────────────────
+export const units = mysqlTable(
+  "units",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    name: varchar("name", { length: 255 }).notNull(),
+    shortName: varchar("short_name", { length: 50 }),
+    description: text("description"),
+    parentId: int("parent_id"),
+    level: int("level").default(0), // 0=pimpinan, 1=sekretariat, 2=bidang, dst
+    sortOrder: int("sort_order").default(0),
+    isActive: boolean("is_active").default(true),
+    createdAt: timestamp("created_at")
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (t) => ({
+    parentIdx: index("units_parent_idx").on(t.parentId),
+  }),
+);
+
+// ── Staff (Pegawai) ───────────────────────────
+export const staff = mysqlTable(
+  "staff",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    name: varchar("name", { length: 255 }).notNull(),
+    nip: varchar("nip", { length: 30 }),
+    position: varchar("position", { length: 255 }).notNull(), // jabatan
+    unitId: int("unit_id"),
+    type: mysqlEnum("type", [
+      "kepala_badan",
+      "sekretaris",
+      "kepala_bidang",
+      "widyaiswara",
+      "pegawai",
+    ]).notNull(),
+    photo: varchar("photo", { length: 500 }),
+    email: varchar("email", { length: 255 }),
+    phone: varchar("phone", { length: 50 }),
+    education: varchar("education", { length: 255 }), // pendidikan terakhir
+    bio: text("bio"),
+    sortOrder: int("sort_order").default(0),
+    isActive: boolean("is_active").default(true),
+    createdAt: timestamp("created_at")
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updated_at")
+      .default(sql`CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (t) => ({
+    unitIdx: index("staff_unit_idx").on(t.unitId),
+    typeIdx: index("staff_type_idx").on(t.type),
+    activeIdx: index("staff_active_idx").on(t.isActive),
+  }),
+);
 
 // ═══════════════════════════════════════════
 // RELATIONS

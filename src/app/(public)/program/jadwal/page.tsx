@@ -1,15 +1,23 @@
 // src/app/(public)/program/jadwal/page.tsx
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { ScheduleCard } from "@/components/program/ScheduleCard";
-import { ScheduleFilter } from "@/components/program/ScheduleFilter";
-import { Pagination } from "@/components/ui/Pagination";
+import Link from "next/link";
 import {
-  getUpcomingSchedules,
-  getSchedulesByMonth,
-  countSchedules,
-} from "@/lib/queries/programs";
+  Info,
+  Clock,
+  CalendarDays,
+  Phone,
+  ExternalLink,
+  CalendarX,
+  Activity,
+  CalendarCheck,
+  LayoutList,
+} from "lucide-react";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { JadwalCard } from "@/components/program/JadwalCard";
+import { JadwalFilter } from "@/components/program/JadwalFilter";
+import { fetchJadwal, fetchJenisJadwal } from "@/lib/simpel/jadwal";
+import type { StatusJadwal } from "@/lib/simpel/types";
 
 export const metadata: Metadata = {
   title: "Jadwal Pelatihan",
@@ -17,61 +25,32 @@ export const metadata: Metadata = {
     "Seluruh jadwal kegiatan pelatihan dan diklat BPSDM Provinsi Kalimantan Timur.",
 };
 
-const PER_PAGE = 10;
+export const revalidate = 3600;
 
 type Props = {
   searchParams: Promise<{
-    mode?: string;
     status?: string;
-    halaman?: string;
+    jenis?: string;
   }>;
 };
 
 export default async function JadwalPage({ searchParams }: Props) {
   const params = await searchParams;
-  const page = Math.max(1, Number(params.halaman ?? 1));
-  const mode = params.mode as "online" | "offline" | "blended" | undefined;
-  const filterStatus = params.status;
+  const status = params.status as StatusJadwal | undefined;
+  const jenis = params.jenis;
 
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth() + 1;
-
-  const statusFilter =
-    filterStatus === "open"
-      ? ["open"]
-      : filterStatus === "full"
-        ? ["full"]
-        : ["open", "ongoing", "full", "closed"];
-
-  const [schedules, thisMonthSchedules, total] = await Promise.all([
-    getUpcomingSchedules({
-      mode,
-      limit: PER_PAGE,
-    }),
-    getSchedulesByMonth(year, month),
-    countSchedules({ mode, status: statusFilter }),
+  const [jadwalList, jenisOptions] = await Promise.all([
+    fetchJadwal({ status, jenis }),
+    fetchJenisJadwal(),
   ]);
 
-  const totalPages = Math.ceil(total / PER_PAGE);
-
-  // Hari-hari yang punya jadwal bulan ini
-  const scheduledDays = new Set(
-    thisMonthSchedules.map((s) => s.startDate.getDate()),
-  );
-
-  // Build calendar
-  const firstDay = new Date(year, month - 1, 1).getDay();
-  const daysInMonth = new Date(year, month, 0).getDate();
-
-  const monthName = now.toLocaleDateString("id-ID", {
-    month: "long",
-    year: "numeric",
-  });
-
-  const paginationParams: Record<string, string> = {};
-  if (mode) paginationParams.mode = mode;
-  if (filterStatus) paginationParams.status = filterStatus;
+  const stats = {
+    berlangsung: jadwalList.filter((j) => j.statusJadwal === "berlangsung")
+      .length,
+    mendatang: jadwalList.filter((j) => j.statusJadwal === "akan-datang")
+      .length,
+    selesai: jadwalList.filter((j) => j.statusJadwal === "selesai").length,
+  };
 
   return (
     <>
@@ -84,227 +63,316 @@ export default async function JadwalPage({ searchParams }: Props) {
       />
 
       {/* Hero */}
-      <div className="page-hero" style={{ paddingBlock: "2.5rem" }}>
-        <div className="container-content" style={{ position: "relative" }}>
-          <p className="page-hero-eyebrow">
-            {monthName.charAt(0).toUpperCase() + monthName.slice(1)}
-          </p>
+      <div className="page-hero" style={{ paddingBlock: "2.5rem 3rem" }}>
+        <div className="container-content">
+          <p className="page-hero-eyebrow">Data realtime dari SIMPEL Kaltim</p>
           <h1 className="page-hero-title" style={{ fontSize: "34px" }}>
             Jadwal Pelatihan &amp; Diklat
           </h1>
           <p className="page-hero-desc">
-            Seluruh jadwal kegiatan pelatihan BPSDM Kaltim — filter berdasarkan
-            mode, jenis, dan status pendaftaran.
+            Seluruh jadwal kegiatan pelatihan BPSDM Kaltim yang dikelola melalui
+            Sistem Informasi Manajemen Pelatihan (SIMPEL) Kalimantan Timur.
           </p>
+
+          {/* Stats */}
+          <div className="page-hero-stats">
+            <div className="page-hero-stat">
+              <div
+                className="page-hero-stat-num"
+                style={{ color: "var(--color-gold-400)" }}
+              >
+                {stats.berlangsung}
+              </div>
+              <div className="page-hero-stat-label">Sedang berlangsung</div>
+            </div>
+            <div className="page-hero-stat">
+              <div className="page-hero-stat-num">{stats.mendatang}</div>
+              <div className="page-hero-stat-label">Akan datang</div>
+            </div>
+            <div className="page-hero-stat">
+              <div
+                className="page-hero-stat-num"
+                style={{ color: "rgba(255,255,255,0.4)" }}
+              >
+                {stats.selesai}
+              </div>
+              <div className="page-hero-stat-label">Selesai</div>
+            </div>
+            <div className="page-hero-stat">
+              <div className="page-hero-stat-num">{jadwalList.length}</div>
+              <div className="page-hero-stat-label">Total kegiatan</div>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Content */}
       <div
-        style={{
-          backgroundColor: "var(--color-ink-8)",
-          paddingBlock: "3.5rem",
-        }}
+        style={{ backgroundColor: "var(--color-ink-8)", paddingBlock: "3rem" }}
       >
         <div className="container-content">
           <div className="jadwal-layout">
-            {/* Main */}
+            {/* ── Main ── */}
             <div>
-              {/* Filter */}
               <Suspense>
-                <ScheduleFilter />
+                <JadwalFilter jenisOptions={jenisOptions} />
               </Suspense>
 
               {/* Info */}
-              <div className="filter-info">{total} jadwal ditemukan</div>
-
-              {/* Group by month */}
-              <div className="jadwal-month-group">
-                <div className="jadwal-month-header">
-                  <div className="jadwal-month-title">
-                    {now.toLocaleDateString("id-ID", { month: "long" })}
-                  </div>
-                  <div className="jadwal-month-year">{year}</div>
-                  <div className="jadwal-month-count">
-                    {thisMonthSchedules.length} kegiatan
-                  </div>
-                </div>
-
-                {schedules.length === 0 ? (
-                  <div className="empty-state" style={{ paddingBlock: "40px" }}>
-                    <svg
-                      width="40"
-                      height="40"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      style={{ color: "var(--color-ink-5)" }}
-                    >
-                      <rect x="3" y="4" width="18" height="18" rx="2" />
-                      <line x1="16" y1="2" x2="16" y2="6" />
-                      <line x1="8" y1="2" x2="8" y2="6" />
-                      <line x1="3" y1="10" x2="21" y2="10" />
-                    </svg>
-                    <div className="empty-state-title">Belum ada jadwal</div>
-                    <div className="empty-state-desc">
-                      Tidak ada jadwal yang sesuai dengan filter yang dipilih.
-                    </div>
-                  </div>
-                ) : (
-                  <div className="jadwal-list">
-                    {schedules.map((s) => (
-                      <ScheduleCard key={s.id} schedule={s} />
-                    ))}
-                  </div>
+              <div className="filter-info">
+                Menampilkan <strong>{jadwalList.length}</strong> jadwal
+                {jenis && (
+                  <>
+                    {" "}
+                    · Jenis: <strong>{jenis}</strong>
+                  </>
                 )}
+                {status && (
+                  <>
+                    {" "}
+                    · Status: <strong>{status}</strong>
+                  </>
+                )}
+                <span
+                  style={{
+                    marginLeft: "8px",
+                    fontSize: "11px",
+                    color: "var(--color-ink-5)",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "3px",
+                  }}
+                >
+                  <Clock size={11} />
+                  diperbarui setiap 1 jam
+                </span>
               </div>
 
-              <Pagination
-                currentPage={page}
-                totalPages={totalPages}
-                basePath="/program/jadwal"
-                searchParams={paginationParams}
-              />
+              {/* ── Tanpa filter status — tampilkan per group ── */}
+              {!status && (
+                <>
+                  {/* Berlangsung */}
+                  {stats.berlangsung > 0 && (
+                    <div style={{ marginBottom: "28px" }}>
+                      <div className="jadwal-month-header">
+                        <div
+                          className="jadwal-month-title"
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                            color: "var(--color-forest-700)",
+                          }}
+                        >
+                          <Activity
+                            size={18}
+                            style={{ color: "var(--color-forest-600)" }}
+                          />
+                          Sedang Berlangsung
+                        </div>
+                        <div className="jadwal-month-count">
+                          {stats.berlangsung} kegiatan
+                        </div>
+                      </div>
+                      <div className="jadwal-list">
+                        {jadwalList
+                          .filter((j) => j.statusJadwal === "berlangsung")
+                          .map((j) => (
+                            <JadwalCard key={j.id} jadwal={j} />
+                          ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Akan Datang */}
+                  {stats.mendatang > 0 && (
+                    <div style={{ marginBottom: "28px" }}>
+                      <div className="jadwal-month-header">
+                        <div
+                          className="jadwal-month-title"
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                          }}
+                        >
+                          <CalendarDays
+                            size={18}
+                            style={{ color: "var(--color-forest-500)" }}
+                          />
+                          Akan Datang
+                        </div>
+                        <div className="jadwal-month-count">
+                          {stats.mendatang} kegiatan
+                        </div>
+                      </div>
+                      <div className="jadwal-list">
+                        {jadwalList
+                          .filter((j) => j.statusJadwal === "akan-datang")
+                          .map((j) => (
+                            <JadwalCard key={j.id} jadwal={j} />
+                          ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Selesai */}
+                  {stats.selesai > 0 && (
+                    <div>
+                      <div className="jadwal-month-header">
+                        <div
+                          className="jadwal-month-title"
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                            color: "var(--color-ink-4)",
+                          }}
+                        >
+                          <CalendarCheck
+                            size={18}
+                            style={{ color: "var(--color-ink-5)" }}
+                          />
+                          Selesai
+                        </div>
+                        <div className="jadwal-month-count">
+                          {stats.selesai} kegiatan
+                        </div>
+                      </div>
+                      <div className="jadwal-list">
+                        {jadwalList
+                          .filter((j) => j.statusJadwal === "selesai")
+                          .map((j) => (
+                            <JadwalCard key={j.id} jadwal={j} />
+                          ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* ── Dengan filter status aktif ── */}
+              {status && (
+                <div className="jadwal-list">
+                  {jadwalList.length === 0 ? (
+                    <div
+                      className="empty-state"
+                      style={{ paddingBlock: "40px" }}
+                    >
+                      <CalendarX
+                        size={40}
+                        style={{ color: "var(--color-ink-5)" }}
+                      />
+                      <div className="empty-state-title">Tidak ada jadwal</div>
+                      <div className="empty-state-desc">
+                        Tidak ada jadwal yang sesuai dengan filter yang dipilih.
+                      </div>
+                    </div>
+                  ) : (
+                    jadwalList.map((j) => <JadwalCard key={j.id} jadwal={j} />)
+                  )}
+                </div>
+              )}
             </div>
 
-            {/* Sidebar */}
+            {/* ── Sidebar ── */}
             <aside className="jadwal-sidebar">
-              {/* Mini Calendar */}
+              {/* Sumber data */}
               <div className="sidebar-widget">
                 <div className="sidebar-widget-head">
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <rect x="3" y="4" width="18" height="18" rx="2" />
-                    <line x1="16" y1="2" x2="16" y2="6" />
-                    <line x1="8" y1="2" x2="8" y2="6" />
-                    <line x1="3" y1="10" x2="21" y2="10" />
-                  </svg>
-                  Kalender {now.toLocaleDateString("id-ID", { month: "long" })}
+                  <Info size={16} />
+                  Sumber Data
                 </div>
-                <div
-                  className="sidebar-widget-body"
-                  style={{ padding: "16px" }}
-                >
-                  <div className="mini-cal">
-                    <div className="mini-cal-dow-row">
-                      {["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"].map(
-                        (d) => (
-                          <div key={d} className="mini-cal-dow">
-                            {d}
-                          </div>
-                        ),
-                      )}
-                    </div>
-                    <div className="mini-cal-grid">
-                      {/* Padding awal */}
-                      {Array.from({ length: firstDay }).map((_, i) => (
-                        <div key={`empty-${i}`} />
-                      ))}
-                      {/* Hari-hari */}
-                      {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(
-                        (day) => {
-                          const isToday = day === now.getDate();
-                          const hasEvent = scheduledDays.has(day);
-                          return (
-                            <div
-                              key={day}
-                              className={`mini-cal-day${isToday ? " mini-cal-day-today" : ""}${hasEvent ? " mini-cal-day-event" : ""}`}
-                            >
-                              {day}
-                            </div>
-                          );
-                        },
-                      )}
-                    </div>
-                  </div>
+                <div className="sidebar-widget-body">
+                  <p
+                    style={{
+                      fontSize: "13px",
+                      color: "var(--color-ink-3)",
+                      lineHeight: 1.6,
+                      marginBottom: "12px",
+                    }}
+                  >
+                    Data jadwal diambil langsung dari{" "}
+                    <strong>SIMPEL Kalimantan Timur</strong> dan diperbarui
+                    otomatis setiap 1 jam.
+                  </p>
+                  <Link
+                    href="https://simpel.kaltimprov.go.id"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="sidebar-more-link"
+                    style={{ marginTop: 0, paddingTop: 0, borderTop: "none" }}
+                  >
+                    Kunjungi SIMPEL Kaltim
+                    <ExternalLink size={13} />
+                  </Link>
                 </div>
               </div>
 
-              {/* Keterangan mode */}
+              {/* Keterangan status */}
               <div className="sidebar-widget">
                 <div className="sidebar-widget-head">
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="12" y1="8" x2="12" y2="12" />
-                    <line x1="12" y1="16" x2="12.01" y2="16" />
-                  </svg>
-                  Keterangan Mode
+                  <LayoutList size={16} />
+                  Keterangan Status
                 </div>
                 <div
                   className="sidebar-widget-body"
                   style={{
                     display: "flex",
                     flexDirection: "column",
-                    gap: "8px",
+                    gap: "10px",
                   }}
                 >
                   {[
                     {
-                      color: "#1d4ed8",
-                      label: "Daring (Online)",
-                      desc: "Via platform virtual",
+                      dot: "var(--color-forest-700)",
+                      label: "Sedang Berlangsung",
+                      desc: "Kegiatan aktif saat ini",
                     },
                     {
-                      color: "var(--color-forest-700)",
-                      label: "Luring (Offline)",
-                      desc: "Di lokasi fisik",
+                      dot: "var(--color-gold-500)",
+                      label: "Akan Datang",
+                      desc: "Jadwal yang akan datang",
                     },
                     {
-                      color: "var(--color-gold-600)",
-                      label: "Mandiri (Blended)",
-                      desc: "Kombinasi online & offline",
+                      dot: "var(--color-ink-4)",
+                      label: "Selesai",
+                      desc: "Kegiatan telah berakhir",
                     },
-                  ].map((m) => (
-                    <div key={m.label} className="mode-legend-item">
+                  ].map((item) => (
+                    <div key={item.label} className="mode-legend-item">
                       <div
-                        className="mode-legend-dot"
-                        style={{ backgroundColor: m.color }}
+                        style={{
+                          width: "10px",
+                          height: "10px",
+                          borderRadius: "50%",
+                          backgroundColor: item.dot,
+                          flexShrink: 0,
+                          marginTop: "3px",
+                        }}
                       />
                       <div>
-                        <div className="mode-legend-label">{m.label}</div>
-                        <div className="mode-legend-desc">{m.desc}</div>
+                        <div className="mode-legend-label">{item.label}</div>
+                        <div className="mode-legend-desc">{item.desc}</div>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* CTA konsultasi */}
+              {/* CTA */}
               <div className="jadwal-cta">
                 <div className="jadwal-cta-title">
-                  Belum menemukan jadwal yang sesuai?
+                  Butuh informasi lebih lanjut?
                 </div>
                 <div className="jadwal-cta-desc">
                   Hubungi tim BPSDM untuk konsultasi kebutuhan diklat instansi
                   Anda.
                 </div>
-                <a href="/kontak" className="btn-gold btn jadwal-cta-btn">
-                  <svg
-                    width="15"
-                    height="15"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.06 6.06l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
-                  </svg>
+                <Link href="/kontak" className="btn-gold btn jadwal-cta-btn">
+                  <Phone size={15} />
                   Hubungi Kami
-                </a>
+                </Link>
               </div>
             </aside>
           </div>

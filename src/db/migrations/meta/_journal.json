@@ -15,6 +15,20 @@
       "when": 1778595047650,
       "tag": "0001_square_skrulls",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1778854741094,
+      "tag": "0002_same_prodigy",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1778900866377,
+      "tag": "0003_special_james_howlett",
+      "breakpoints": true
     }
   ]
 }

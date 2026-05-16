@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "@/components/providers/SessionProvider";
+import { BackToTop } from "@/components/ui/BackToTop";
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -59,6 +60,7 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
     >
       <body className="font-sans antialiased bg-white text-ink">
+        <BackToTop />
         <SessionProvider>{children}</SessionProvider>
       </body>
     </html>
