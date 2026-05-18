@@ -161,25 +161,6 @@ export function ProfilSidebar({ menuItems }: Props) {
           );
         })}
       </div>
-
-      {/* Back link */}
-      <Link
-        href="/"
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "6px",
-          marginTop: "12px",
-          padding: "8px 12px",
-          fontSize: "12.5px",
-          color: "var(--color-ink-4)",
-          textDecoration: "none",
-          transition: "color 0.15s",
-        }}
-      >
-        <ChevronRight size={13} style={{ transform: "rotate(180deg)" }} />
-        Kembali ke Beranda
-      </Link>
     </aside>
   );
 }

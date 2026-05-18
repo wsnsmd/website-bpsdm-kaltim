@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getMenuByLocation } from "@/lib/queries/profil";
 import { ProfilSidebar } from "@/components/profil/ProfilSidebar";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 
 export const metadata: Metadata = {
   title: {
@@ -20,147 +21,90 @@ export default async function ProfilLayout({
 
   return (
     <>
-      {/* Page hero kecil */}
+      <Breadcrumb
+        items={[{ label: "Beranda", href: "/" }, { label: "Profil" }]}
+      />
+
+      {/* Page hero - SAMA PERSIS dengan halaman berita */}
+      <div className="page-hero">
+        <div className="container-content" style={{ position: "relative" }}>
+          <p
+            style={{
+              fontSize: "11px",
+              fontWeight: 700,
+              letterSpacing: "1px",
+              textTransform: "uppercase",
+              color: "rgba(255,255,255,0.55)",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              marginBottom: "10px",
+            }}
+          >
+            <span
+              style={{
+                display: "inline-block",
+                width: "20px",
+                height: "2px",
+                backgroundColor: "var(--color-gold-500)",
+              }}
+            />
+            Pemerintah Provinsi Kalimantan Timur
+          </p>
+          <h1
+            style={{
+              fontFamily: "var(--font-display)",
+              fontSize: "38px",
+              fontWeight: 700,
+              color: "#fff",
+              marginBottom: "10px",
+              lineHeight: 1.15,
+            }}
+          >
+            Profil BPSDM Kaltim
+          </h1>
+          <p
+            style={{
+              fontSize: "15px",
+              color: "rgba(255,255,255,0.6)",
+              maxWidth: "480px",
+            }}
+          >
+            Badan Pengembangan Sumber Daya Manusia Provinsi Kalimantan Timur
+            berkomitmen mewujudkan aparatur sipil negara yang kompeten,
+            profesional, dan berintegritas.
+          </p>
+        </div>
+      </div>
+
+      {/* Tab menu ringkas - di bawah hero */}
       <div
         style={{
-          background: "var(--color-forest-900)",
-          paddingBlock: "2rem 2.5rem",
-          position: "relative",
-          overflow: "hidden",
+          backgroundColor: "var(--color-ink-8)",
+          borderBottom: "1px solid var(--color-ink-6)",
         }}
       >
-        {/* Pattern background */}
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            opacity: 0.05,
-            backgroundImage:
-              "repeating-linear-gradient(-45deg, #fff 0, #fff 1px, transparent 0, transparent 20px)",
-            pointerEvents: "none",
-          }}
-        />
-
-        <div className="container-content" style={{ position: "relative" }}>
-          {/* Breadcrumb */}
-          <div style={{ marginBottom: "12px" }}>
-            <nav style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <Link
-                href="/"
-                style={{
-                  fontSize: "12px",
-                  color: "rgba(255,255,255,0.5)",
-                  textDecoration: "none",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4px",
-                }}
-              >
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                </svg>
-                Beranda
-              </Link>
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="rgba(255,255,255,0.3)"
-                strokeWidth="2"
-              >
-                <polyline points="9 18 15 12 9 6" />
-              </svg>
-              <span
-                style={{ fontSize: "12px", color: "rgba(255,255,255,0.7)" }}
-              >
-                Profil
-              </span>
-            </nav>
-          </div>
-
-          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-            {/* Icon */}
-            <div
-              style={{
-                width: "52px",
-                height: "52px",
-                borderRadius: "14px",
-                backgroundColor: "rgba(255,255,255,0.12)",
-                border: "1px solid rgba(255,255,255,0.2)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
-              }}
-            >
-              <svg
-                width="26"
-                height="26"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="rgba(255,255,255,0.9)"
-                strokeWidth="1.5"
-              >
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                <polyline points="9 22 9 12 15 12 15 22" />
-              </svg>
-            </div>
-            <div>
-              <p
-                style={{
-                  fontSize: "11px",
-                  fontWeight: 700,
-                  letterSpacing: "1px",
-                  textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.5)",
-                  marginBottom: "4px",
-                }}
-              >
-                Pemerintah Provinsi Kalimantan Timur
-              </p>
-              <h1
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontSize: "26px",
-                  fontWeight: 700,
-                  color: "#fff",
-                  lineHeight: 1.2,
-                }}
-              >
-                Badan Pengembangan Sumber Daya Manusia
-              </h1>
-            </div>
-          </div>
-
-          {/* Tab menu ringkas */}
+        <div className="container-content">
           <div
             style={{
               display: "flex",
               gap: "4px",
-              marginTop: "20px",
+              paddingBlock: "12px",
               flexWrap: "wrap",
             }}
           >
-            {menuItems.slice(0, 6).map((item) => (
+            {menuItems.slice(0, 8).map((item) => (
               <Link
                 key={item.id}
                 href={item.url ?? "#"}
                 style={{
-                  padding: "5px 14px",
-                  borderRadius: "20px",
-                  fontSize: "12.5px",
+                  padding: "6px 16px",
+                  borderRadius: "24px",
+                  fontSize: "13px",
                   fontWeight: 500,
-                  color: "rgba(255,255,255,0.7)",
-                  background: "rgba(255,255,255,0.08)",
-                  border: "1px solid rgba(255,255,255,0.12)",
+                  color: "var(--color-ink-3)",
+                  background: "transparent",
+                  border: "1px solid var(--color-ink-6)",
                   textDecoration: "none",
                   transition: "all 0.15s",
                   whiteSpace: "nowrap",
@@ -173,11 +117,11 @@ export default async function ProfilLayout({
         </div>
       </div>
 
-      {/* Content area */}
+      {/* Content area - SAMA dengan halaman berita */}
       <div
         style={{
           backgroundColor: "var(--color-ink-8)",
-          paddingBlock: "2.5rem",
+          paddingBlock: "3.5rem",
         }}
       >
         <div className="container-content">

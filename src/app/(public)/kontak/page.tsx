@@ -10,7 +10,6 @@ import {
   ExternalLink,
   MessageCircle,
   ArrowRight,
-  Building2,
 } from "lucide-react";
 import {
   FaFacebook,
@@ -106,7 +105,7 @@ export default async function KontakPage() {
 
   // Cek apakah sekarang jam kerja
   const now = new Date();
-  const dayIdx = now.getDay(); // 0=Minggu, 1=Senin, ..., 6=Sabtu
+  const dayIdx = now.getDay();
   const hour = now.getHours();
   const isOpen =
     dayIdx >= 1 && dayIdx <= 4
@@ -121,182 +120,54 @@ export default async function KontakPage() {
         items={[{ label: "Beranda", href: "/" }, { label: "Kontak" }]}
       />
 
-      {/* ── Hero ── */}
-      <div
-        style={{
-          background: "var(--color-forest-900)",
-          paddingBlock: "3rem 4rem",
-          position: "relative",
-          overflow: "hidden",
-        }}
-      >
-        {/* Pattern */}
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            backgroundImage:
-              "radial-gradient(circle at 70% 50%, rgba(219,168,0,0.08) 0%, transparent 60%), radial-gradient(circle at 20% 80%, rgba(255,255,255,0.04) 0%, transparent 50%)",
-            pointerEvents: "none",
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            opacity: 0.04,
-            backgroundImage:
-              "repeating-linear-gradient(-45deg, #fff 0, #fff 1px, transparent 0, transparent 20px)",
-            pointerEvents: "none",
-          }}
-        />
-
+      {/* Hero Section - SEDERHANA, SAMA DENGAN HALAMAN BERITA */}
+      <div className="page-hero">
         <div className="container-content" style={{ position: "relative" }}>
-          <div
+          <p
             style={{
+              fontSize: "11px",
+              fontWeight: 700,
+              letterSpacing: "1px",
+              textTransform: "uppercase",
+              color: "rgba(255,255,255,0.55)",
               display: "flex",
               alignItems: "center",
               gap: "8px",
-              marginBottom: "16px",
+              marginBottom: "10px",
             }}
           >
-            <div
+            <span
               style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-                padding: "5px 14px",
-                borderRadius: "20px",
-                background: "rgba(219,168,0,0.15)",
-                border: "1px solid rgba(219,168,0,0.25)",
+                display: "inline-block",
+                width: "20px",
+                height: "2px",
+                backgroundColor: "var(--color-gold-500)",
               }}
-            >
-              <MapPin size={13} style={{ color: "var(--color-gold-400)" }} />
-              <span
-                style={{
-                  fontSize: "12px",
-                  fontWeight: 700,
-                  color: "var(--color-gold-400)",
-                  letterSpacing: "0.5px",
-                }}
-              >
-                Samarinda, Kalimantan Timur
-              </span>
-            </div>
-            {/* Status buka/tutup */}
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "5px",
-                padding: "5px 12px",
-                borderRadius: "20px",
-                background: isOpen
-                  ? "rgba(34,197,94,0.12)"
-                  : "rgba(239,68,68,0.12)",
-                border: `1px solid ${isOpen ? "rgba(34,197,94,0.25)" : "rgba(239,68,68,0.25)"}`,
-              }}
-            >
-              <div
-                style={{
-                  width: "6px",
-                  height: "6px",
-                  borderRadius: "50%",
-                  backgroundColor: isOpen ? "#22c55e" : "#ef4444",
-                  animation: isOpen ? "pulse 2s infinite" : "none",
-                }}
-              />
-              <span
-                style={{
-                  fontSize: "12px",
-                  fontWeight: 700,
-                  color: isOpen ? "#4ade80" : "#f87171",
-                }}
-              >
-                {isOpen ? "Sedang Buka" : "Sedang Tutup"}
-              </span>
-            </div>
-          </div>
-
+            />
+            Hubungi Kami
+          </p>
           <h1
             style={{
               fontFamily: "var(--font-display)",
-              fontSize: "clamp(28px, 4vw, 44px)",
-              fontWeight: 800,
+              fontSize: "38px",
+              fontWeight: 700,
               color: "#fff",
+              marginBottom: "10px",
               lineHeight: 1.15,
-              marginBottom: "16px",
             }}
           >
-            Hubungi BPSDM
-            <br />
-            <span style={{ color: "var(--color-gold-400)" }}>
-              Kalimantan Timur
-            </span>
+            Kontak BPSDM Kaltim
           </h1>
-
           <p
             style={{
               fontSize: "15px",
               color: "rgba(255,255,255,0.6)",
-              maxWidth: "520px",
-              lineHeight: 1.7,
-              marginBottom: "32px",
+              maxWidth: "480px",
             }}
           >
-            Kami siap membantu kebutuhan pengembangan kompetensi ASN. Tim kami
-            akan merespons pertanyaan Anda secepatnya.
+            Hubungi kami untuk informasi lebih lanjut mengenai program pelatihan
+            dan pengembangan SDM di Provinsi Kalimantan Timur.
           </p>
-
-          {/* Quick action buttons */}
-          <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-            {s.contact_whatsapp && (
-              <Link
-                href={`https://wa.me/${s.contact_whatsapp}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  padding: "12px 22px",
-                  borderRadius: "10px",
-                  background: "#25d366",
-                  color: "#fff",
-                  fontSize: "14px",
-                  fontWeight: 700,
-                  textDecoration: "none",
-                  transition: "all 0.15s",
-                  boxShadow: "0 4px 12px rgba(37,211,102,0.3)",
-                }}
-              >
-                <FaWhatsapp size={18} />
-                Chat WhatsApp
-              </Link>
-            )}
-            {s.contact_email && (
-              <Link
-                href={`mailto:${s.contact_email}`}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  padding: "12px 22px",
-                  borderRadius: "10px",
-                  background: "rgba(255,255,255,0.1)",
-                  border: "1px solid rgba(255,255,255,0.2)",
-                  color: "#fff",
-                  fontSize: "14px",
-                  fontWeight: 700,
-                  textDecoration: "none",
-                  transition: "all 0.15s",
-                }}
-              >
-                <Mail size={16} />
-                Kirim Email
-              </Link>
-            )}
-          </div>
         </div>
       </div>
 
@@ -308,10 +179,10 @@ export default async function KontakPage() {
           {/* ── Peta Full Width ── */}
           <div
             style={{
-              height: "440px",
-              borderRadius: "20px",
+              height: "400px",
+              borderRadius: "16px",
               overflow: "hidden",
-              boxShadow: "0 12px 40px rgba(0,0,0,0.15)",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
               border: "1px solid var(--color-ink-6)",
               marginBottom: "32px",
               position: "relative",
@@ -326,93 +197,13 @@ export default async function KontakPage() {
               name={s.site_name || "BPSDM Kaltim"}
               address={s.contact_address}
             />
-
-            {/* Overlay badge alamat */}
-            <div
-              style={{
-                position: "absolute",
-                bottom: "20px",
-                left: "20px",
-                background: "rgba(255,255,255,0.96)",
-                backdropFilter: "blur(8px)",
-                borderRadius: "12px",
-                padding: "12px 16px",
-                boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
-                maxWidth: "320px",
-                border: "1px solid rgba(255,255,255,0.8)",
-                zIndex: 1,
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: "10px",
-                }}
-              >
-                <div
-                  style={{
-                    width: "32px",
-                    height: "32px",
-                    borderRadius: "8px",
-                    background: "var(--color-forest-700)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                  }}
-                >
-                  <Building2 size={16} color="#fff" />
-                </div>
-                <div>
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      fontWeight: 700,
-                      color: "var(--color-forest-700)",
-                      marginBottom: "2px",
-                    }}
-                  >
-                    {s.site_name || "BPSDM Kaltim"}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "11.5px",
-                      color: "var(--color-ink-3)",
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    {s.contact_address?.split(",").slice(0, 2).join(",") ||
-                      "Samarinda"}
-                  </div>
-                </div>
-              </div>
-              <Link
-                href={`https://www.google.com/maps?q=${lat},${lng}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "4px",
-                  marginTop: "10px",
-                  fontSize: "12px",
-                  fontWeight: 700,
-                  color: "var(--color-forest-700)",
-                  textDecoration: "none",
-                }}
-              >
-                <ExternalLink size={12} />
-                Buka di Google Maps
-              </Link>
-            </div>
           </div>
 
           {/* ── 3 Kolom Info ── */}
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "1fr 1fr 1fr",
+              gridTemplateColumns: "repeat(3, 1fr)",
               gap: "20px",
               marginBottom: "20px",
             }}
@@ -421,7 +212,7 @@ export default async function KontakPage() {
             <div
               style={{
                 background: "#fff",
-                borderRadius: "8px",
+                borderRadius: "12px",
                 border: "1px solid var(--color-ink-6)",
                 overflow: "hidden",
               }}
@@ -467,7 +258,6 @@ export default async function KontakPage() {
                         alignItems: "center",
                         justifyContent: "center",
                         flexShrink: 0,
-                        marginTop: "1px",
                       }}
                     >
                       <item.icon
@@ -540,7 +330,7 @@ export default async function KontakPage() {
             <div
               style={{
                 background: "#fff",
-                borderRadius: "8px",
+                borderRadius: "12px",
                 border: "1px solid var(--color-ink-6)",
                 overflow: "hidden",
               }}
@@ -660,7 +450,7 @@ export default async function KontakPage() {
               <div
                 style={{
                   background: "#fff",
-                  borderRadius: "8px",
+                  borderRadius: "12px",
                   border: "1px solid var(--color-ink-6)",
                   overflow: "hidden",
                   flex: "1",
@@ -724,7 +514,7 @@ export default async function KontakPage() {
                 <div
                   style={{
                     background: "#fff",
-                    borderRadius: "8px",
+                    borderRadius: "12px",
                     border: "1px solid var(--color-ink-6)",
                     overflow: "hidden",
                   }}
