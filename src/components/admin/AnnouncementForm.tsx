@@ -2,10 +2,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import {
   createAnnouncement,
   updateAnnouncement,
 } from "@/lib/actions/announcements";
+import { Save, ArrowLeft, Eye } from "lucide-react";
+import Link from "next/link";
 
 type AnnouncementData = {
   id: number;
@@ -28,7 +31,6 @@ type Props = {
 function toDatetimeLocal(date: Date | null): string {
   if (!date) return "";
   const d = new Date(date);
-  // Format: YYYY-MM-DDTHH:mm
   return d.toISOString().slice(0, 16);
 }
 
@@ -41,8 +43,10 @@ const TYPE_OPTIONS = [
 
 export function AnnouncementForm({ announcement }: Props) {
   const isEdit = !!announcement;
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   // State untuk checkbox & toggle
   const [showInTicker, setShowInTicker] = useState(
@@ -55,6 +59,7 @@ export function AnnouncementForm({ announcement }: Props) {
 
   async function handleSubmit(formData: FormData) {
     setError(null);
+    setSuccess(null);
 
     // Inject state dari checkbox ke formData
     formData.set("showInTicker", showInTicker ? "true" : "false");
@@ -66,27 +71,33 @@ export function AnnouncementForm({ announcement }: Props) {
         ? await updateAnnouncement(announcement.id, formData)
         : await createAnnouncement(formData);
 
-      if (result?.error) setError(result.error);
+      if (result?.error) {
+        setError(result.error);
+      } else {
+        setSuccess(
+          isEdit
+            ? "Pengumuman berhasil diperbarui!"
+            : "Pengumuman berhasil dibuat!",
+        );
+        setTimeout(() => {
+          router.push("/admin/pengumuman");
+          router.refresh();
+        }, 1500);
+      }
     });
   }
 
   return (
     <form action={handleSubmit}>
+      {/* Error & Success Messages */}
       {error && (
         <div className="login-error" style={{ marginBottom: "20px" }}>
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <circle cx="12" cy="12" r="10" />
-            <line x1="12" y1="8" x2="12" y2="12" />
-            <line x1="12" y1="16" x2="12.01" y2="16" />
-          </svg>
           {error}
+        </div>
+      )}
+      {success && (
+        <div className="login-success" style={{ marginBottom: "20px" }}>
+          {success}
         </div>
       )}
 
@@ -156,13 +167,14 @@ export function AnnouncementForm({ announcement }: Props) {
                   <input
                     id="url"
                     name="url"
-                    type="url"
+                    type="text" // Ubah dari "url" menjadi "text"
                     className="admin-input"
-                    placeholder="https://... atau /program/jadwal"
+                    placeholder="/program/tes atau https://example.com"
                     defaultValue={announcement?.url ?? ""}
                   />
                   <span className="admin-hint">
-                    Pengguna akan diarahkan ke URL ini saat klik pengumuman.
+                    Gunakan /path/url untuk link internal, atau https:// untuk
+                    link eksternal.
                   </span>
                 </div>
               </div>
@@ -413,25 +425,12 @@ export function AnnouncementForm({ announcement }: Props) {
                 disabled={isPending}
                 style={{ width: "100%", justifyContent: "center" }}
               >
-                {isPending ? (
-                  "Menyimpan..."
-                ) : (
-                  <>
-                    <svg
-                      width="15"
-                      height="15"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                      <polyline points="17 21 17 13 7 13 7 21" />
-                      <polyline points="7 3 7 8 15 8" />
-                    </svg>
-                    {isEdit ? "Simpan Perubahan" : "Simpan Pengumuman"}
-                  </>
-                )}
+                <Save size={15} />
+                {isPending
+                  ? "Menyimpan..."
+                  : isEdit
+                    ? "Simpan Perubahan"
+                    : "Simpan Pengumuman"}
               </button>
             </div>
           </div>

@@ -389,32 +389,23 @@ export const documents = mysqlTable(
   {
     id: int("id").autoincrement().primaryKey(),
     title: varchar("title", { length: 500 }).notNull(),
-    slug: varchar("slug", { length: 500 }).notNull(),
     description: text("description"),
-    fileUrl: varchar("file_url", { length: 1000 }).notNull(),
-    fileName: varchar("file_name", { length: 300 }),
+    categoryId: int("category_id"),
+    // File — bisa upload ATAU link eksternal
+    fileUrl: varchar("file_url", { length: 1000 }),
+    externalUrl: varchar("external_url", { length: 1000 }),
+    fileType: varchar("file_type", { length: 20 }),
     fileSize: int("file_size"),
-    fileType: varchar("file_type", { length: 50 }),
-    categoryId: int("category_id").references(() => categories.id),
-    type: mysqlEnum("type", [
-      "laporan",
-      "sop",
-      "panduan",
-      "peraturan",
-      "materi",
-      "formulir",
-      "surat-edaran",
-      "lainnya",
-    ]).default("lainnya"),
-    isPublic: boolean("is_public").default(true),
-    downloadCount: int("download_count").default(0),
-    publishedAt: datetime("published_at"),
-    status: mysqlEnum("status", ["draft", "published", "archived"])
+    // Metadata
+    year: int("year"),
+    tags: varchar("tags", { length: 500 }),
+    status: mysqlEnum("status", ["published", "draft", "archived"])
       .default("published")
       .notNull(),
-    uploadedBy: varchar("uploaded_by", { length: 36 }).references(
-      () => users.id,
-    ),
+    // Stats
+    downloadCount: int("download_count").default(0),
+    // Audit
+    createdBy: varchar("created_by", { length: 36 }),
     createdAt: timestamp("created_at")
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
@@ -423,9 +414,9 @@ export const documents = mysqlTable(
       .notNull(),
   },
   (t) => ({
-    slugIdx: uniqueIndex("documents_slug_idx").on(t.slug),
-    typeIdx: index("documents_type_idx").on(t.type),
+    categoryIdx: index("documents_category_idx").on(t.categoryId),
     statusIdx: index("documents_status_idx").on(t.status),
+    yearIdx: index("documents_year_idx").on(t.year),
   }),
 );
 
@@ -466,13 +457,7 @@ export const announcements = mysqlTable(
 export const settings = mysqlTable("settings", {
   key: varchar("key", { length: 200 }).primaryKey(),
   value: text("value"),
-  type: mysqlEnum("type", [
-    "string",
-    "number",
-    "boolean",
-    "json",
-    "html",
-  ]).default("string"),
+  type: varchar("type", { length: 50 }).default("text"),
   group: varchar("group", { length: 100 }).default("general"),
   label: varchar("label", { length: 255 }),
   isPublic: boolean("is_public").default(false),
@@ -608,6 +593,55 @@ export const staff = mysqlTable(
     unitIdx: index("staff_unit_idx").on(t.unitId),
     typeIdx: index("staff_type_idx").on(t.type),
     activeIdx: index("staff_active_idx").on(t.isActive),
+  }),
+);
+
+export const documentCategories = mysqlTable(
+  "document_categories",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    name: varchar("name", { length: 255 }).notNull(),
+    slug: varchar("slug", { length: 255 }).notNull(),
+    description: text("description"),
+    icon: varchar("icon", { length: 100 }),
+    color: varchar("color", { length: 50 }),
+    sortOrder: int("sort_order").default(0),
+    isActive: boolean("is_active").default(true),
+    createdAt: timestamp("created_at")
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (t) => ({
+    slugIdx: uniqueIndex("doc_cat_slug_idx").on(t.slug),
+  }),
+);
+
+// ── Platforms (Layanan Digital) ───────────────
+export const platforms = mysqlTable(
+  "platforms",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    name: varchar("name", { length: 255 }).notNull(),
+    description: text("description"),
+    url: varchar("url", { length: 500 }),
+    icon: varchar("icon", { length: 100 }), // lucide icon name
+    logo: varchar("logo", { length: 500 }), // URL gambar logo
+    color: varchar("color", { length: 50 }).default("#0e3d20"),
+    category: varchar("category", { length: 100 }), // unggulan, ekosistem, dll
+    isHighlight: boolean("is_highlight").default(false), // tampil di beranda
+    isActive: boolean("is_active").default(true),
+    sortOrder: int("sort_order").default(0),
+    createdAt: timestamp("created_at")
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updated_at")
+      .default(sql`CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (t) => ({
+    categoryIdx: index("platforms_category_idx").on(t.category),
+    highlightIdx: index("platforms_highlight_idx").on(t.isHighlight),
+    activeIdx: index("platforms_active_idx").on(t.isActive),
   }),
 );
 

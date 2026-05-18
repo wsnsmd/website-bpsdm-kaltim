@@ -8,9 +8,14 @@ import { MediaLibrary } from "./MediaLibrary";
 type Props = {
   value?: string;
   onImageChange: (url: string) => void; // callback ke parent
+  name?: string; // opsional, untuk form integration (PostForm)
 };
 
-export function FeaturedImagePicker({ value = "", onImageChange }: Props) {
+export function FeaturedImagePicker({
+  value = "",
+  onImageChange,
+  name,
+}: Props) {
   const [showLibrary, setShowLibrary] = useState(false);
   const [activeTab, setActiveTab] = useState<"upload" | "library">("upload");
 

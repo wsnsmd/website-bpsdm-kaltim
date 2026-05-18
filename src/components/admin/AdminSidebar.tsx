@@ -19,6 +19,8 @@ import {
   X,
   BookOpen,
   Menu,
+  FolderOpen,
+  LayoutGrid,
 } from "lucide-react";
 
 type NavItem = {
@@ -42,6 +44,7 @@ const NAV: NavItem[] = [
     children: [
       { href: "/admin/berita", label: "Semua Berita" },
       { href: "/admin/berita/baru", label: "Tambah Berita" },
+      { href: "/admin/kategori", label: "Kategori" }, // ← tambahkan
     ],
   },
   {
@@ -75,6 +78,23 @@ const NAV: NavItem[] = [
     ],
   },
   {
+    href: "/admin/dokumen",
+    label: "Dokumen",
+    icon: FolderOpen,
+    roles: ["superadmin", "admin", "editor"],
+    children: [
+      { href: "/admin/dokumen", label: "Semua Dokumen" },
+      { href: "/admin/dokumen/baru", label: "Tambah Dokumen" },
+      { href: "/admin/dokumen/kategori", label: "Kategori" },
+    ],
+  },
+  {
+    href: "/admin/platform",
+    label: "Platform & Layanan",
+    icon: LayoutGrid,
+    roles: ["superadmin", "admin"],
+  },
+  {
     href: "/admin/menu",
     label: "Menu Navigasi",
     icon: Menu,
@@ -90,7 +110,7 @@ const NAV: NavItem[] = [
     href: "/admin/pengaturan",
     label: "Pengaturan",
     icon: Settings,
-    roles: ["superadmin"], // ← hanya superadmin
+    roles: ["superadmin"],
   },
 ];
 

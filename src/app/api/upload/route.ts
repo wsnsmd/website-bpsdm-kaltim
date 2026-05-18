@@ -1,213 +1,124 @@
 // src/app/api/upload/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import { writeFile, mkdir } from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
 import sharp from "sharp";
-import crypto from "crypto";
+import { auth } from "@/lib/auth";
 
-// ── Konfigurasi ───────────────────────────────
-const MAX_SIZE_MB = 5;
-const MAX_SIZE = MAX_SIZE_MB * 1024 * 1024;
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "images");
-const THUMB_DIR = path.join(process.cwd(), "public", "uploads", "thumbnails");
+const UPLOAD_DIR = path.join(process.cwd(), "public/uploads");
+const IMAGE_DIR = path.join(UPLOAD_DIR, "images");
+const DOC_DIR = path.join(UPLOAD_DIR, "documents");
+const THUMB_DIR = path.join(UPLOAD_DIR, "thumbnails");
 
-// ── Generate nama file unik ───────────────────
-function generateFileName(originalName: string): string {
-  const ext = path.extname(originalName).toLowerCase();
-  const hash = crypto.randomBytes(8).toString("hex");
-  const timestamp = Date.now();
-  return `${timestamp}-${hash}${ext}`;
-}
+const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const DOC_TYPES = [
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.ms-powerpoint",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  "application/zip",
+  "application/x-zip-compressed",
+];
 
-// ── Slugify nama file ─────────────────────────
-function sanitizeFileName(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[^a-z0-9.-]/g, "-")
-    .replace(/-+/g, "-");
-}
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_DOC_SIZE = 10 * 1024 * 1024; // 10MB
 
-export async function POST(request: NextRequest) {
-  // Auth check
+export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const formData = await req.formData();
+  const file = formData.get("file") as File | null;
+
+  if (!file) {
+    return NextResponse.json({ error: "Tidak ada file" }, { status: 400 });
+  }
+
+  const isImage = IMAGE_TYPES.includes(file.type);
+  const isDoc =
+    DOC_TYPES.includes(file.type) ||
+    /\.(pdf|doc|docx|xls|xlsx|ppt|pptx|zip)$/i.test(file.name);
+
+  if (!isImage && !isDoc) {
+    return NextResponse.json(
+      {
+        error: "Tipe file tidak didukung.",
+      },
+      { status: 400 },
+    );
+  }
+
+  const maxSize = isImage ? MAX_IMAGE_SIZE : MAX_DOC_SIZE;
+  if (file.size > maxSize) {
+    return NextResponse.json(
+      {
+        error: `File terlalu besar. Maksimal ${isImage ? "5" : "50"}MB.`,
+      },
+      { status: 400 },
+    );
+  }
+
+  // Generate nama file unik
+  const timestamp = Date.now();
+  const hash = Math.random().toString(36).slice(2, 8);
+  const ext = file.name.split(".").pop()?.toLowerCase() ?? "bin";
+  const safeName = file.name
+    .replace(/\.[^.]+$/, "")
+    .replace(/[^a-zA-Z0-9]/g, "-")
+    .slice(0, 40);
+
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
+
   try {
-    const formData = await request.formData();
-    const file = formData.get("file") as File | null;
+    if (isImage) {
+      // Proses gambar dengan Sharp → WebP
+      await mkdir(IMAGE_DIR, { recursive: true });
+      await mkdir(THUMB_DIR, { recursive: true });
 
-    if (!file) {
-      return NextResponse.json(
-        { error: "File tidak ditemukan." },
-        { status: 400 },
-      );
+      const filename = `${timestamp}-${hash}-${safeName}.webp`;
+      const thumbName = `${timestamp}-${hash}-${safeName}-thumb.webp`;
+
+      await sharp(buffer)
+        .resize(1200, 900, { fit: "inside", withoutEnlargement: true })
+        .webp({ quality: 82 })
+        .toFile(path.join(IMAGE_DIR, filename));
+
+      await sharp(buffer)
+        .resize(400, 300, { fit: "cover" })
+        .webp({ quality: 75 })
+        .toFile(path.join(THUMB_DIR, thumbName));
+
+      return NextResponse.json({
+        url: `/uploads/images/${filename}`,
+        thumbnail: `/uploads/thumbnails/${thumbName}`,
+        size: file.size,
+        type: "image",
+      });
+    } else {
+      // Simpan dokumen langsung tanpa processing
+      await mkdir(DOC_DIR, { recursive: true });
+
+      const filename = `${timestamp}-${hash}-${safeName}.${ext}`;
+      await writeFile(path.join(DOC_DIR, filename), buffer);
+
+      return NextResponse.json({
+        url: `/uploads/documents/${filename}`,
+        size: file.size,
+        type: "document",
+        ext,
+      });
     }
-
-    // Validasi tipe file
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      return NextResponse.json(
-        {
-          error: "Tipe file tidak diizinkan. Gunakan JPG, PNG, WebP, atau GIF.",
-        },
-        { status: 400 },
-      );
-    }
-
-    // Validasi ukuran
-    if (file.size > MAX_SIZE) {
-      return NextResponse.json(
-        { error: `Ukuran file maksimal ${MAX_SIZE_MB}MB.` },
-        { status: 400 },
-      );
-    }
-
-    // Buat direktori jika belum ada
-    if (!existsSync(UPLOAD_DIR)) await mkdir(UPLOAD_DIR, { recursive: true });
-    if (!existsSync(THUMB_DIR)) await mkdir(THUMB_DIR, { recursive: true });
-
-    // Baca buffer
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
-    // Generate nama file
-    const fileName = generateFileName(sanitizeFileName(file.name));
-    const fileNameWebP = fileName.replace(/\.[^.]+$/, ".webp");
-    const thumbName = `thumb-${fileNameWebP}`;
-
-    const filePath = path.join(UPLOAD_DIR, fileNameWebP);
-    const thumbPath = path.join(THUMB_DIR, thumbName);
-
-    // Proses dengan Sharp:
-    // 1. Konversi ke WebP
-    // 2. Resize jika terlalu besar (max 1920px)
-    // 3. Buat thumbnail 400x300
-    await Promise.all([
-      sharp(buffer)
-        .resize(1920, 1920, {
-          fit: "inside",
-          withoutEnlargement: true,
-        })
-        .webp({ quality: 85 })
-        .toFile(filePath),
-
-      sharp(buffer)
-        .resize(400, 300, {
-          fit: "cover",
-          position: "center",
-        })
-        .webp({ quality: 80 })
-        .toFile(thumbPath),
-    ]);
-
-    // URL untuk dikembalikan
-    const imageUrl = `/uploads/images/${fileNameWebP}`;
-    const thumbUrl = `/uploads/thumbnails/${thumbName}`;
-
-    // Metadata gambar
-    const metadata = await sharp(filePath).metadata();
-
-    return NextResponse.json({
-      url: imageUrl,
-      thumbUrl,
-      fileName: fileNameWebP,
-      size: file.size,
-      width: metadata.width,
-      height: metadata.height,
-      mimeType: "image/webp",
-    });
   } catch (err) {
     console.error("Upload error:", err);
     return NextResponse.json(
-      { error: "Gagal memproses file. Coba lagi." },
-      { status: 500 },
-    );
-  }
-}
-
-// ── GET: list uploaded images ─────────────────
-export async function GET(request: NextRequest) {
-  const session = await auth();
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  try {
-    const { readdir, stat } = await import("fs/promises");
-
-    if (!existsSync(UPLOAD_DIR)) {
-      return NextResponse.json({ images: [] });
-    }
-
-    const files = await readdir(UPLOAD_DIR);
-    const images = await Promise.all(
-      files
-        .filter((f) => f !== ".gitkeep" && !f.startsWith("."))
-        .map(async (fileName) => {
-          const filePath = path.join(UPLOAD_DIR, fileName);
-          const thumbPath = path.join(THUMB_DIR, `thumb-${fileName}`);
-          const stats = await stat(filePath);
-
-          return {
-            fileName,
-            url: `/uploads/images/${fileName}`,
-            thumbUrl: existsSync(thumbPath)
-              ? `/uploads/thumbnails/thumb-${fileName}`
-              : `/uploads/images/${fileName}`,
-            size: stats.size,
-            createdAt: stats.birthtime,
-          };
-        }),
-    );
-
-    // Sort terbaru dulu
-    images.sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    );
-
-    return NextResponse.json({ images });
-  } catch (err) {
-    console.error("List error:", err);
-    return NextResponse.json({ images: [] });
-  }
-}
-
-// ── DELETE: hapus gambar ──────────────────────
-export async function DELETE(request: NextRequest) {
-  const session = await auth();
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  try {
-    const { fileName } = await request.json();
-    if (!fileName) {
-      return NextResponse.json(
-        { error: "fileName diperlukan" },
-        { status: 400 },
-      );
-    }
-
-    // Sanitasi — pastikan tidak ada path traversal
-    const safeName = path.basename(fileName);
-    const filePath = path.join(UPLOAD_DIR, safeName);
-    const thumbPath = path.join(THUMB_DIR, `thumb-${safeName}`);
-
-    const { unlink } = await import("fs/promises");
-
-    if (existsSync(filePath)) await unlink(filePath);
-    if (existsSync(thumbPath)) await unlink(thumbPath);
-
-    return NextResponse.json({ success: true });
-  } catch (err) {
-    console.error("Delete error:", err);
-    return NextResponse.json(
-      { error: "Gagal menghapus file." },
+      { error: "Gagal menyimpan file." },
       { status: 500 },
     );
   }

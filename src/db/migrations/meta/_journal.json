@@ -29,6 +29,20 @@
       "when": 1778900866377,
       "tag": "0003_special_james_howlett",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1778943166548,
+      "tag": "0004_silent_cable",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1778989641483,
+      "tag": "0005_tan_the_fury",
+      "breakpoints": true
     }
   ]
 }

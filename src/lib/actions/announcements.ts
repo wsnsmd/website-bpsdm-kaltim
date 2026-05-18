@@ -12,7 +12,20 @@ import { z } from "zod";
 const AnnouncementSchema = z.object({
   title: z.string().min(5, "Judul minimal 5 karakter"),
   content: z.string().optional(),
-  url: z.string().url("URL tidak valid").optional().or(z.literal("")),
+  url: z
+    .string()
+    .optional()
+    .or(z.literal(""))
+    .transform((val) => {
+      // Jika kosong, return null
+      if (!val) return null;
+      // Jika sudah diawali http:// atau https://, biarkan
+      if (val.startsWith("http://") || val.startsWith("https://")) return val;
+      // Jika diawali /, anggap sebagai link internal
+      if (val.startsWith("/")) return val;
+      // Selain itu, tambahkan / di depan untuk link internal
+      return `/${val}`;
+    }),
   type: z.enum(["info", "warning", "urgent", "event"]),
   showInTicker: z.coerce.boolean(),
   showInBanner: z.coerce.boolean(),

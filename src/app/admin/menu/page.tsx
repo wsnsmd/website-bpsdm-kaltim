@@ -3,17 +3,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { db, asc } from "@/db";
 import { menuGroups, menuItems } from "@/db/schema";
-import { Plus } from "lucide-react";
-import { SortableMenuTable } from "@/components/admin/menu/SortableMenuTable";
-// import { SortableSubMenuTable } from "@/components/admin/menu/SortableSubMenuTable";
+import { Plus, GripVertical } from "lucide-react";
+import SortableMenuTable from "@/components/admin/menu/SortableMenuTable";
 
 export const metadata: Metadata = { title: "Manajemen Menu" };
 
 export default async function AdminMenuPage() {
-  // Ambil semua menu groups
   const groups = await db.select().from(menuGroups).orderBy(asc(menuGroups.id));
-
-  // Ambil semua menu items dengan info group
   const allItems = await db
     .select()
     .from(menuItems)
@@ -25,8 +21,12 @@ export default async function AdminMenuPage() {
         <div>
           <h1 className="admin-page-title">Manajemen Menu</h1>
           <p className="admin-page-sub">
-            Kelola navigasi header website. Drag and drop untuk mengatur urutan
-            menu.
+            Kelola navigasi header website.
+            <strong style={{ color: "var(--color-forest-700)" }}>
+              {" "}
+              Drag and drop
+            </strong>{" "}
+            icon ≡ atau gunakan tombol panah untuk mengatur urutan menu.
           </p>
         </div>
         <Link href="/admin/menu/baru" className="admin-btn-save">
@@ -37,10 +37,11 @@ export default async function AdminMenuPage() {
 
       {groups.map((group) => {
         const groupItems = allItems.filter((i) => i.menuGroupId === group.id);
-        const rootItems = groupItems.filter((i) => !i.parentId);
+        const rootItems = groupItems
+          .filter((i) => !i.parentId)
+          .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
         const childItems = groupItems.filter((i) => i.parentId);
 
-        // Group child items by parent
         const childrenByParent: Record<number, typeof childItems> = {};
         childItems.forEach((child) => {
           if (child.parentId) {
@@ -51,13 +52,19 @@ export default async function AdminMenuPage() {
           }
         });
 
+        // Sort children
+        Object.keys(childrenByParent).forEach((parentId) => {
+          childrenByParent[Number(parentId)].sort(
+            (a, b) => (a.sortOrder || 0) - (b.sortOrder || 0),
+          );
+        });
+
         return (
           <div
             key={group.id}
             className="admin-card"
             style={{ marginBottom: "20px" }}
           >
-            {/* Group header */}
             <div className="admin-card-head">
               <div className="admin-card-title">
                 {group.name}
@@ -89,13 +96,12 @@ export default async function AdminMenuPage() {
                     <th>URL / Link</th>
                     <th style={{ width: "100px" }}>Level</th>
                     <th style={{ width: "80px" }}>Aktif</th>
-                    <th style={{ width: "120px" }}>Aksi</th>
+                    <th style={{ width: "160px" }}>Aksi</th>
                   </tr>
                 </thead>
                 <SortableMenuTable items={rootItems} groupId={group.id} />
               </table>
 
-              {/* Children tables */}
               {rootItems.map((root) => {
                 const children = childrenByParent[root.id] || [];
                 if (children.length === 0) return null;
@@ -127,7 +133,7 @@ export default async function AdminMenuPage() {
                           <th>URL / Link</th>
                           <th style={{ width: "100px" }}>Level</th>
                           <th style={{ width: "80px" }}>Aktif</th>
-                          <th style={{ width: "120px" }}>Aksi</th>
+                          <th style={{ width: "160px" }}>Aksi</th>
                         </tr>
                       </thead>
                       <SortableMenuTable
@@ -143,6 +149,33 @@ export default async function AdminMenuPage() {
           </div>
         );
       })}
+
+      {/* Info tips */}
+      <div
+        style={{
+          marginTop: "24px",
+          padding: "16px 20px",
+          background: "var(--color-ink-8)",
+          borderRadius: "12px",
+          fontSize: "13px",
+          color: "var(--color-ink-4)",
+          display: "flex",
+          alignItems: "center",
+          gap: "12px",
+          flexWrap: "wrap",
+        }}
+      >
+        <span>💡</span>
+        <span>Tips mengatur urutan menu:</span>
+        <span
+          style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}
+        >
+          <GripVertical size={14} /> Drag and drop
+        </span>
+        <span>atau gunakan tombol panah</span>
+        <span>↑↓</span>
+        <span>untuk memindahkan posisi menu.</span>
+      </div>
     </>
   );
 }

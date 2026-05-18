@@ -35,24 +35,27 @@ export function MainNavClient({
   const [openMobileDropdown, setOpenMobileDropdown] = useState<number | null>(
     null,
   );
+  const [isTransparent, setIsTransparent] = useState(false);
   const desktopNavRef = useRef<HTMLDivElement>(null);
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Filter menu items yang aktif untuk ditampilkan
   const activeMenuItems = menuItems.filter((item) => item.isActive !== false);
 
-  // Tutup dropdown desktop saat klik di luar
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (
-        desktopNavRef.current &&
-        !desktopNavRef.current.contains(e.target as Node)
-      ) {
-        setOpenDesktop(null);
-      }
+  // Handle hover untuk desktop
+  const handleMouseEnter = (id: number) => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    setOpenDesktop(id);
+  };
+
+  const handleMouseLeave = () => {
+    hoverTimeoutRef.current = setTimeout(() => {
+      setOpenDesktop(null);
+    }, 150); // Delay 150ms untuk mencegah flicker saat berpindah
+  };
 
   // Tutup menu saat route berubah
   useEffect(() => {
@@ -72,6 +75,33 @@ export function MainNavClient({
       document.body.style.overflow = "";
     };
   }, [mobileMenuOpen]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    function check() {
+      const wrapper = document.querySelector("[data-transparent]");
+      setIsTransparent(wrapper?.getAttribute("data-transparent") === "true");
+    }
+    check();
+
+    const observer = new MutationObserver(check);
+    const wrapper = document.querySelector("[data-transparent]");
+    if (wrapper) {
+      observer.observe(wrapper, {
+        attributes: true,
+        attributeFilter: ["data-transparent"],
+      });
+    }
+    return () => observer.disconnect();
+  }, []);
 
   function isActive(item: MenuItem): boolean {
     if (item.url) {
@@ -232,7 +262,7 @@ export function MainNavClient({
     );
   }
 
-  // DESKTOP NAVIGATION
+  // DESKTOP NAVIGATION - Hover untuk submenu
   return (
     <nav
       ref={desktopNavRef}
@@ -251,8 +281,12 @@ export function MainNavClient({
                 "flex items-center gap-1.5 px-3 py-2 rounded-lg",
                 "text-[13.5px] font-medium transition-all duration-150",
                 active
-                  ? "text-forest-700 bg-forest-50 font-semibold"
-                  : "text-ink-2 hover:text-forest-700 hover:bg-forest-50",
+                  ? isTransparent
+                    ? "text-white bg-white/10 font-semibold"
+                    : "text-forest-700 bg-forest-50 font-semibold"
+                  : isTransparent
+                    ? "text-white/80 hover:text-white hover:bg-white/10"
+                    : "text-ink-2 hover:text-forest-700 hover:bg-forest-50",
               )}
               target={item.target === "_blank" ? "_blank" : undefined}
               rel={item.target === "_blank" ? "noopener noreferrer" : undefined}
@@ -265,9 +299,13 @@ export function MainNavClient({
         const isOpen = openDesktop === item.id;
 
         return (
-          <div key={item.id} className="relative">
+          <div
+            key={item.id}
+            className="relative"
+            onMouseEnter={() => handleMouseEnter(item.id)}
+            onMouseLeave={handleMouseLeave}
+          >
             <button
-              onClick={() => setOpenDesktop(isOpen ? null : item.id)}
               aria-expanded={isOpen}
               aria-haspopup="true"
               className={cn(
@@ -275,21 +313,27 @@ export function MainNavClient({
                 "text-[13.5px] font-medium transition-all duration-150",
                 "border-none bg-transparent cursor-pointer",
                 active || isOpen
-                  ? "text-forest-700 bg-forest-50 font-semibold"
-                  : "text-ink-2 hover:text-forest-700 hover:bg-forest-50",
+                  ? isTransparent
+                    ? "text-white bg-white/10 font-semibold"
+                    : "text-forest-700 bg-forest-50 font-semibold"
+                  : isTransparent
+                    ? "text-white/80 hover:text-white hover:bg-white/10"
+                    : "text-ink-2 hover:text-forest-700 hover:bg-forest-50",
               )}
             >
               {item.label}
               <ChevronDown
                 size={12}
                 strokeWidth={2.5}
-                className="text-ink-4 transition-transform duration-200 shrink-0"
-                style={{
-                  transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
-                }}
+                className={cn(
+                  "transition-transform duration-200 shrink-0",
+                  isTransparent ? "text-white/40" : "text-ink-4",
+                  isOpen && "rotate-180",
+                )}
               />
             </button>
 
+            {/* Dropdown - tampil saat hover */}
             {isOpen && (
               <div
                 className="absolute top-full left-0 mt-1.5 w-64 bg-white rounded-xl overflow-hidden z-50"

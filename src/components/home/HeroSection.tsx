@@ -1,252 +1,204 @@
 // src/components/home/HeroSection.tsx
 import Link from "next/link";
+import {
+  GraduationCap,
+  CalendarDays,
+  ArrowRight,
+  Clock,
+  ChevronRight,
+  Star,
+  BadgeCheck,
+  Users,
+  Activity,
+} from "lucide-react";
 import type { PostListItem } from "@/lib/queries/posts";
+import { getPublicSettings } from "@/lib/queries/settings";
+import { timeAgo } from "@/lib/utils";
 
-// ── Helpers ───────────────────────────────────
-function timeAgo(date: Date | null): string {
-  if (!date) return "";
-  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
-  const intervals = [
-    { label: "tahun", secs: 31536000 },
-    { label: "bulan", secs: 2592000 },
-    { label: "minggu", secs: 604800 },
-    { label: "hari", secs: 86400 },
-    { label: "jam", secs: 3600 },
-    { label: "menit", secs: 60 },
-  ];
-  for (const i of intervals) {
-    const count = Math.floor(seconds / i.secs);
-    if (count >= 1) return `${count} ${i.label} lalu`;
-  }
-  return "Baru saja";
-}
-
-// ── Props ─────────────────────────────────────
 type Props = {
   featuredPost: PostListItem | null;
   recentPosts: PostListItem[];
 };
 
-const KPI_ITEMS = [
-  { num: "1,039", suffix: "K", label: "Total kunjungan\nsitus resmi" },
-  { num: "603", suffix: "+", label: "Peserta aktif\nsaat ini" },
-  { num: "48", suffix: "", label: "Program diklat\ntersedia" },
-];
+export async function HeroSection({ featuredPost, recentPosts }: Props) {
+  const s = await getPublicSettings();
 
-export function HeroSection({ featuredPost, recentPosts }: Props) {
-  // Fallback jika DB kosong
-  const featured = featuredPost ?? {
-    title: "Selamat Datang di Portal BPSDM Kaltim",
-    slug: "",
-    category: { name: "Berita Umum", slug: "berita-umum", id: 0, color: null },
-    publishedAt: new Date(),
-    viewCount: 0,
-    excerpt: null,
-    featuredImage: null,
-  };
+  const featured = featuredPost ?? recentPosts[0] ?? null;
+  const newsItems = recentPosts
+    .filter((p) => p.id !== featured?.id)
+    .slice(0, 2);
 
-  const newsItems = recentPosts.filter((p) => p.slug !== featured.slug);
+  const kpiItems = [
+    {
+      icon: Users,
+      color: "#4ade80",
+      num: s.kpi_peserta ?? "12.547",
+      suffix: "+",
+      label: "Peserta Diklat",
+      sublabel: "Tahun berjalan",
+    },
+    {
+      icon: Star,
+      color: "#fbbf24",
+      num: s.kpi_kepuasan ?? "96,8",
+      suffix: "%",
+      label: "Tingkat Kepuasan",
+      sublabel: "Indeks peserta",
+    },
+    {
+      icon: BadgeCheck,
+      color: "#60a5fa",
+      num: s.kpi_akreditasi ?? "24",
+      suffix: "",
+      label: "Terakreditasi LAN",
+      sublabel: "Program terstandar",
+    },
+    {
+      icon: Activity,
+      color: "#fb923c",
+      num: s.kpi_kegiatan ?? "603",
+      suffix: "+",
+      label: "Kegiatan Kompetensi",
+      sublabel: "Jadwal tahun ini",
+    },
+  ];
 
   return (
-    <section className="hero-root" aria-label="Hero utama">
-      <div className="hero-pattern" aria-hidden="true" />
-      <div className="hero-accent-bar" aria-hidden="true" />
+    <section className="hero-simple">
+      <div className="hero-simple-bg">
+        <div className="hero-simple-pattern" />
+        <div className="hero-simple-glow" />
+      </div>
 
-      <div className="container-content">
-        <div className="hero-grid">
-          {/* ── Kiri ── */}
-          <div className="hero-left">
-            <div className="hero-eyebrow">
-              <div className="hero-eyebrow-line" />
-              <span className="hero-eyebrow-text">
-                Pemerintah Provinsi Kalimantan Timur
-              </span>
-            </div>
-
-            <h1 className="hero-heading">
-              Aparatur <em className="hero-heading-em">Unggul,</em>
-              <br />
-              Kaltim Maju
+      <div className="container-content hero-simple-container">
+        {/* Main Content */}
+        <div className="hero-simple-grid pt-40">
+          {/* Left Column */}
+          <div className="hero-simple-left">
+            <h1 className="hero-simple-title">
+              Aparatur
+              <span className="hero-simple-title-outline">Unggul,</span>
+              <span>Kaltim Maju</span>
             </h1>
 
-            <p className="hero-desc">
-              Pusat pengembangan kompetensi ASN Kalimantan Timur — mendorong
-              profesionalisme, integritas, dan inovasi pelayanan publik.
+            <p className="hero-simple-desc">
+              {s.site_description
+                ? s.site_description.slice(0, 140)
+                : "Pusat pengembangan kompetensi ASN Kalimantan Timur — mendorong profesionalisme, integritas, dan inovasi pelayanan publik."}
             </p>
 
-            <div className="hero-actions">
-              <Link href="/program" className="btn-gold btn hero-btn-primary">
-                <svg
-                  width="17"
-                  height="17"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-                  <path d="M6 12v5c3 3 9 3 12 0v-5" />
-                </svg>
+            <div className="hero-simple-buttons">
+              <Link href="/program" className="hero-simple-btn-primary">
+                <GraduationCap size={16} />
                 Daftar Program
               </Link>
-              <Link href="/program/jadwal" className="hero-btn-ghost">
-                <svg
-                  width="17"
-                  height="17"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                  <line x1="16" y1="2" x2="16" y2="6" />
-                  <line x1="8" y1="2" x2="8" y2="6" />
-                  <line x1="3" y1="10" x2="21" y2="10" />
-                </svg>
+              <Link
+                href="/program/jadwal"
+                className="hero-simple-btn-secondary"
+              >
+                <CalendarDays size={16} />
                 Jadwal Diklat
               </Link>
-            </div>
-
-            <div className="hero-kpi">
-              {KPI_ITEMS.map((item, i) => (
-                <div
-                  key={i}
-                  className="hero-kpi-item"
-                  style={{
-                    borderRight:
-                      i < KPI_ITEMS.length - 1
-                        ? "1px solid rgba(255,255,255,0.1)"
-                        : "none",
-                  }}
-                >
-                  <div className="hero-kpi-num">
-                    {item.num}
-                    <sup className="hero-kpi-sup">{item.suffix}</sup>
-                  </div>
-                  <div className="hero-kpi-label">
-                    {item.label.split("\n").map((line, j) => (
-                      <span key={j}>
-                        {line}
-                        {j === 0 && <br />}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))}
+              <Link href="/layanan" className="hero-simple-btn-icon">
+                <ArrowRight size={16} />
+              </Link>
             </div>
           </div>
 
-          {/* ── Kanan ── */}
-          <div className="hero-right">
-            {/* Featured */}
-            <div className="hero-featured">
-              <div className="hero-featured-img">
-                <div className="hero-featured-img-pattern" aria-hidden="true" />
-                <div className="hero-featured-img-icon" aria-hidden="true">
-                  <svg
-                    width="28"
-                    height="28"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                  >
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
-                    <line x1="16" y1="13" x2="8" y2="13" />
-                    <line x1="16" y1="17" x2="8" y2="17" />
-                  </svg>
-                </div>
-                <div className="hero-featured-badge">
-                  <span className="hero-featured-tag">Terbaru</span>
-                  <span className="hero-featured-cat">
-                    {featured.category?.name ?? "Berita"}
-                  </span>
-                </div>
-              </div>
-              <div className="hero-featured-body">
-                <div className="hero-featured-meta">
-                  <span className="hero-featured-cat-label">
-                    {featured.category?.name ?? "Berita"}
-                  </span>
-                  <span className="hero-featured-time">
-                    <svg
-                      width="12"
-                      height="12"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <circle cx="12" cy="12" r="10" />
-                      <polyline points="12 6 12 12 16 14" />
-                    </svg>
-                    {timeAgo(featured.publishedAt)}
-                  </span>
-                </div>
-                <Link
-                  href={featured.slug ? `/berita/${featured.slug}` : "#"}
-                  className="hero-featured-title"
-                >
-                  {featured.title}
-                </Link>
-                <Link
-                  href={featured.slug ? `/berita/${featured.slug}` : "#"}
-                  className="hero-featured-read"
-                >
-                  Baca selengkapnya
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                    <polyline points="12 5 19 12 12 19" />
-                  </svg>
-                </Link>
-              </div>
+          {/* Right Column - News */}
+          <div className="hero-simple-right">
+            <div className="hero-simple-news-header">
+              <div className="hero-simple-news-dot" />
+              <span>Berita Terkini</span>
             </div>
 
-            {/* News list */}
-            <div className="hero-news-list">
-              {newsItems.slice(0, 3).map((item, i) => (
-                <Link
-                  key={item.id}
-                  href={`/berita/${item.slug}`}
-                  className="hero-news-item"
-                >
-                  <div className="hero-news-num">
-                    {String(i + 2).padStart(2, "0")}
+            {featured && (
+              <Link
+                href={`/berita/${featured.slug}`}
+                className="hero-simple-featured"
+              >
+                <div className="hero-simple-featured-image">
+                  {featured.featuredImage ? (
+                    <img src={featured.featuredImage} alt={featured.title} />
+                  ) : (
+                    <div className="hero-simple-featured-placeholder" />
+                  )}
+                  <span className="hero-simple-featured-badge">Terbaru</span>
+                </div>
+                <div className="hero-simple-featured-content">
+                  <div className="hero-simple-featured-meta">
+                    <span className="category">
+                      {featured.category?.name ?? "Berita"}
+                    </span>
+                    <span>·</span>
+                    <span>
+                      <Clock size={10} />
+                      {timeAgo(featured.publishedAt)}
+                    </span>
                   </div>
-                  <div className="hero-news-body">
-                    <div className="hero-news-title">{item.title}</div>
-                    <div className="hero-news-bottom">
-                      <span className="hero-news-category">
-                        {item.category?.name ?? "Berita"}
-                      </span>
-                      <span className="hero-news-time">
-                        <svg
-                          width="11"
-                          height="11"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <circle cx="12" cy="12" r="10" />
-                          <polyline points="12 6 12 12 16 14" />
-                        </svg>
+                  <h3 className="hero-simple-featured-title">
+                    {featured.title}
+                  </h3>
+                  <div className="hero-simple-featured-link">
+                    Baca selengkapnya <ArrowRight size={12} />
+                  </div>
+                </div>
+              </Link>
+            )}
+
+            {newsItems.length > 0 && (
+              <div className="hero-simple-news-list">
+                <div className="hero-simple-news-list-header">
+                  <span>Berita Lainnya</span>
+                </div>
+                {newsItems.map((item, index) => (
+                  <Link
+                    key={item.id}
+                    href={`/berita/${item.slug}`}
+                    className="hero-simple-news-item"
+                  >
+                    <span className="hero-simple-news-number">
+                      {String(index + 2).padStart(2, "0")}
+                    </span>
+                    <div className="hero-simple-news-content">
+                      <div className="hero-simple-news-title">{item.title}</div>
+                      <div className="hero-simple-news-time">
+                        <Clock size={10} />
                         {timeAgo(item.publishedAt)}
-                      </span>
+                      </div>
                     </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
+                    <ChevronRight size={14} />
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
+        </div>
+
+        {/* KPI Bar */}
+        <div className="hero-simple-kpi">
+          {kpiItems.map((kpi, index) => (
+            <div key={index} className="hero-simple-kpi-item">
+              <div
+                className="hero-simple-kpi-icon"
+                style={{
+                  background: `${kpi.color}15`,
+                  borderColor: `${kpi.color}30`,
+                  color: kpi.color,
+                }}
+              >
+                <kpi.icon size={20} />
+              </div>
+              <div className="hero-simple-kpi-info">
+                <div className="hero-simple-kpi-value">
+                  {kpi.num}
+                  <span style={{ color: kpi.color }}>{kpi.suffix}</span>
+                </div>
+                <div className="hero-simple-kpi-label">{kpi.label}</div>
+                <div className="hero-simple-kpi-sublabel">{kpi.sublabel}</div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>

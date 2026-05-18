@@ -1,5 +1,21 @@
 // src/components/layout/Footer.tsx
 import Link from "next/link";
+import {
+  MapPin,
+  Phone,
+  Mail,
+  ExternalLink,
+  Code2,
+  ChevronRight,
+} from "lucide-react";
+import {
+  FaFacebook,
+  FaInstagram,
+  FaYoutube,
+  FaTwitter,
+  FaTiktok,
+} from "react-icons/fa";
+import { getPublicSettings } from "@/lib/queries/settings";
 
 const FOOTER_NAV = [
   {
@@ -9,7 +25,7 @@ const FOOTER_NAV = [
       { href: "/profil", label: "Profil BPSDM" },
       { href: "/program", label: "Program Diklat" },
       { href: "/berita", label: "Berita & Artikel" },
-      { href: "/galeri", label: "Galeri & Video" },
+      { href: "/kontak", label: "Kontak" },
     ],
   },
   {
@@ -20,53 +36,75 @@ const FOOTER_NAV = [
       { href: "/unduhan", label: "Unduhan Dokumen" },
       { href: "/survei", label: "Survei Kepuasan" },
       { href: "/maklumat-pelayanan", label: "Maklumat Pelayanan" },
+      { href: "/program/jadwal", label: "Jadwal Pelatihan" },
     ],
   },
 ];
 
-const SOCIAL_LINKS = [
+const SOCIAL_CONFIG = [
   {
-    href: "https://facebook.com/bpsdmkaltim",
+    key: "social_facebook",
+    Icon: FaFacebook,
     label: "Facebook",
-    path: "M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z",
+    color: "#1877f2",
   },
   {
-    href: "https://instagram.com/bpsdmkaltim",
+    key: "social_instagram",
+    Icon: FaInstagram,
     label: "Instagram",
-    path: "M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z M17.5 6.5h.01 M7.5 2h9a5.5 5.5 0 0 1 5.5 5.5v9a5.5 5.5 0 0 1-5.5 5.5h-9A5.5 5.5 0 0 1 2 16.5v-9A5.5 5.5 0 0 1 7.5 2z",
+    color: "#e1306c",
   },
+  { key: "social_twitter", Icon: FaTwitter, label: "Twitter/X", color: "#fff" },
   {
-    href: "https://youtube.com/@bpsdmkaltim",
+    key: "social_youtube",
+    Icon: FaYoutube,
     label: "YouTube",
-    path: "M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z M9.75 15.02l5.75-3.02-5.75-3.02v6.04z",
+    color: "#ff4444",
   },
+  { key: "social_tiktok", Icon: FaTiktok, label: "TikTok", color: "#fff" },
 ];
 
-const CONTACT_ITEMS = [
-  {
-    text: "Jl. H.A.M.M. Rifaddin No. 88, Kota Samarinda, Kalimantan Timur 75243",
-    icon: "M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z M12 7a3 3 0 1 0 0 6 3 3 0 0 0 0-6z",
-  },
-  {
-    text: "(0541) 7270201",
-    icon: "M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.06 6.06l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z",
-  },
-  {
-    text: "bpsdm@kaltimprov.go.id",
-    icon: "M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z M22 6l-10 7L2 6",
-  },
-];
-
-export function Footer() {
+export async function Footer() {
+  const s = await getPublicSettings();
   const year = new Date().getFullYear();
+
+  const activeSocials = SOCIAL_CONFIG.filter((soc) => s[soc.key]);
+
+  const contactItems = [
+    {
+      Icon: MapPin,
+      text: s.contact_address,
+      href: null,
+    },
+    {
+      Icon: Phone,
+      text: s.contact_phone,
+      href: s.contact_phone
+        ? `tel:${s.contact_phone.replace(/[^0-9+]/g, "")}`
+        : null,
+    },
+    {
+      Icon: Mail,
+      text: s.contact_email,
+      href: s.contact_email ? `mailto:${s.contact_email}` : null,
+    },
+  ].filter((c) => c.text);
 
   return (
     <footer className="footer-root">
-      <div className="container-content py-14">
+      <div className="container-content" style={{ paddingBlock: "3.5rem" }}>
         <div className="footer-grid">
-          {/* Brand */}
+          {/* ── Brand ── */}
           <div>
-            <div className="flex items-center gap-3 mb-4">
+            {/* Logo */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                marginBottom: "16px",
+              }}
+            >
               <div className="footer-logo-mark">
                 <svg
                   width="20"
@@ -87,45 +125,69 @@ export function Footer() {
               </div>
             </div>
 
+            {/* Deskripsi dari settings */}
             <p className="footer-desc">
-              Badan Pengembangan Sumber Daya Manusia Provinsi Kalimantan Timur
-              berkomitmen mewujudkan aparatur sipil negara yang kompeten,
-              profesional, dan berintegritas demi pelayanan publik terbaik.
+              {s.footer_description ||
+                "Badan Pengembangan Sumber Daya Manusia Provinsi Kalimantan Timur berkomitmen mewujudkan aparatur sipil negara yang kompeten, profesional, dan berintegritas."}
             </p>
 
-            <div className="flex gap-2">
-              {SOCIAL_LINKS.map((s) => (
-                <Link
-                  key={s.label}
-                  href={s.href}
-                  aria-label={s.label}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="footer-social-btn"
-                >
-                  <svg
-                    width="17"
-                    height="17"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
+            {/* Sosmed */}
+            {activeSocials.length > 0 && (
+              <div
+                style={{
+                  display: "flex",
+                  gap: "8px",
+                  marginTop: "16px",
+                  flexWrap: "wrap",
+                }}
+              >
+                {activeSocials.map((soc) => (
+                  <Link
+                    key={soc.key}
+                    href={s[soc.key]}
+                    aria-label={soc.label}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="footer-social-btn"
+                    title={soc.label}
+                    style={{ color: soc.color }}
                   >
-                    <path d={s.path} />
-                  </svg>
-                </Link>
-              ))}
-            </div>
+                    <soc.Icon size={16} />
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Nav columns */}
+          {/* ── Nav columns ── */}
           {FOOTER_NAV.map((col) => (
             <div key={col.title}>
               <h4 className="footer-col-title">{col.title}</h4>
-              <ul className="flex flex-col gap-2.5 list-none p-0 m-0">
+              <ul
+                style={{
+                  listStyle: "none",
+                  padding: 0,
+                  margin: 0,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "8px",
+                }}
+              >
                 {col.links.map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href} className="footer-nav-link">
+                    <Link
+                      href={link.href}
+                      className="footer-nav-link"
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "5px",
+                      }}
+                    >
+                      <ChevronRight
+                        size={12}
+                        style={{ opacity: 0.4, flexShrink: 0 }}
+                      />
                       {link.label}
                     </Link>
                   </li>
@@ -134,24 +196,55 @@ export function Footer() {
             </div>
           ))}
 
-          {/* Kontak */}
+          {/* ── Kontak ── */}
           <div>
             <h4 className="footer-col-title">Kontak</h4>
-            <div className="flex flex-col gap-3">
-              {CONTACT_ITEMS.map((item, i) => (
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "14px" }}
+            >
+              {contactItems.map((item, i) => (
                 <div key={i} className="footer-contact-item">
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
+                  <item.Icon
+                    size={15}
                     className="footer-contact-icon"
-                  >
-                    <path d={item.icon} />
-                  </svg>
-                  <span>{item.text}</span>
+                    style={{ flexShrink: 0, marginTop: "2px" }}
+                  />
+                  <div>
+                    {item.href ? (
+                      <Link
+                        href={item.href}
+                        style={{
+                          color: "rgba(255,255,255,0.65)",
+                          textDecoration: "none",
+                          fontSize: "13px",
+                          lineHeight: 1.5,
+                        }}
+                      >
+                        {item.text}
+                      </Link>
+                    ) : (
+                      <span
+                        style={{
+                          color: "rgba(255,255,255,0.65)",
+                          fontSize: "13px",
+                          lineHeight: 1.5,
+                        }}
+                      >
+                        {item.text}
+                      </span>
+                    )}
+                    {(item as any).sub && (
+                      <div
+                        style={{
+                          fontSize: "12px",
+                          color: "rgba(255,255,255,0.35)",
+                          marginTop: "2px",
+                        }}
+                      >
+                        {(item as any).sub}
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -159,26 +252,30 @@ export function Footer() {
         </div>
       </div>
 
-      {/* Bottom bar */}
+      {/* ── Bottom bar ── */}
       <div className="footer-bottom">
-        <div className="container-content flex items-center justify-between py-5">
+        <div
+          className="container-content"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            paddingBlock: "18px",
+            flexWrap: "wrap",
+            gap: "10px",
+          }}
+        >
           <span className="footer-copy">
-            © {year} BPSDM Provinsi Kalimantan Timur. Hak cipta dilindungi.
+            {`© ${year} - ` +
+              (s.footer_copyright ||
+                `© - ${year} BPSDM Provinsi Kalimantan Timur. Hak cipta dilindungi.`)}
           </span>
-          <span className="footer-tech">
-            <svg
-              width="13"
-              height="13"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              className="footer-tech-icon"
-            >
-              <polyline points="16 18 22 12 16 6" />
-              <polyline points="8 6 2 12 8 18" />
-            </svg>
-            Next.js 16 · TypeScript · Drizzle ORM · MariaDB 10.6
+          <span
+            className="footer-tech"
+            style={{ display: "flex", alignItems: "center", gap: "6px" }}
+          >
+            <Code2 size={13} style={{ opacity: 0.5 }} />
+            Dikembangkan oleh Tim IT BPSDM Kaltim
           </span>
         </div>
       </div>

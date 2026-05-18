@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { db, eq } from "@/db";
-import { posts } from "@/db/schema";
+import { posts, categories } from "@/db/schema";
 import { createSlug, estimateReadingTime } from "@/lib/utils";
 import { z } from "zod";
 import { can } from "../auth-helpers";
@@ -174,4 +174,77 @@ export async function deletePost(id: number) {
 
   revalidatePath("/berita");
   revalidatePath("/admin/berita");
+}
+
+function toSlug(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .trim();
+}
+
+export async function createCategory(formData: FormData) {
+  const session = await auth();
+  if (!session) throw new Error("Unauthorized");
+
+  const name = formData.get("name") as string;
+  const slug = formData.get("slug") as string;
+  const description = formData.get("description") as string;
+
+  if (!name?.trim()) return { error: "Nama kategori wajib diisi." };
+
+  try {
+    await db.insert(categories).values({
+      name: name.trim(),
+      slug: slug?.trim() ? toSlug(slug) : toSlug(name),
+      description: description?.trim() || null,
+    });
+  } catch (err: any) {
+    if (err?.code === "ER_DUP_ENTRY") {
+      return { error: "Slug sudah digunakan." };
+    }
+    return { error: "Gagal menyimpan kategori." };
+  }
+
+  revalidatePath("/berita");
+  revalidatePath("/admin/kategori");
+  redirect("/admin/kategori");
+}
+
+export async function updateCategory(id: number, formData: FormData) {
+  const session = await auth();
+  if (!session) throw new Error("Unauthorized");
+
+  const name = formData.get("name") as string;
+  const slug = formData.get("slug") as string;
+  const description = formData.get("description") as string;
+
+  if (!name?.trim()) return { error: "Nama kategori wajib diisi." };
+
+  try {
+    await db
+      .update(categories)
+      .set({
+        name: name.trim(),
+        slug: slug?.trim() ? toSlug(slug) : undefined,
+        description: description?.trim() || null,
+      })
+      .where(eq(categories.id, id));
+  } catch {
+    return { error: "Gagal menyimpan perubahan." };
+  }
+
+  revalidatePath("/berita");
+  revalidatePath("/admin/kategori");
+  redirect("/admin/kategori");
+}
+
+export async function deleteCategory(id: number) {
+  const session = await auth();
+  if (!session) throw new Error("Unauthorized");
+  await db.delete(categories).where(eq(categories.id, id));
+  revalidatePath("/berita");
+  revalidatePath("/admin/kategori");
 }

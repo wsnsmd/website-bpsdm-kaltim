@@ -1,228 +1,379 @@
 // src/components/home/NewsSection.tsx
 import Link from "next/link";
+import { Clock, Eye, ArrowRight, CalendarDays, ImageIcon } from "lucide-react";
 import type { PostListItem } from "@/lib/queries/posts";
+import { timeAgo, formatDate } from "@/lib/utils";
 
 type Props = {
   featuredPost: PostListItem | null;
   posts: PostListItem[];
 };
 
-function timeAgo(date: Date | null): string {
-  if (!date) return "";
-  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
-  const intervals = [
-    { label: "tahun", secs: 31536000 },
-    { label: "bulan", secs: 2592000 },
-    { label: "minggu", secs: 604800 },
-    { label: "hari", secs: 86400 },
-    { label: "jam", secs: 3600 },
-    { label: "menit", secs: 60 },
-  ];
-  for (const i of intervals) {
-    const count = Math.floor(seconds / i.secs);
-    if (count >= 1) return `${count} ${i.label} lalu`;
+const CATEGORY_BADGE: Record<string, string> = {
+  "berita-diklat": "badge-forest",
+  "berita-kabkota": "badge-gold",
+  "berita-umum": "badge-blue",
+  artikel: "badge-red",
+};
+
+function getCategoryBadge(slug?: string): string {
+  return CATEGORY_BADGE[slug ?? ""] ?? "badge-forest";
+}
+
+function Thumb({
+  src,
+  alt,
+  size = "full",
+}: {
+  src?: string | null;
+  alt: string;
+  size?: "full" | "sm";
+}) {
+  if (src) {
+    return (
+      <img
+        src={src}
+        alt={alt}
+        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+      />
+    );
   }
-  return "Baru saja";
-}
-
-function formatDate(date: Date | null): string {
-  if (!date) return "";
-  return new Intl.DateTimeFormat("id-ID", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(date);
-}
-
-function getCategoryStyle(slug: string | undefined): string {
-  const map: Record<string, string> = {
-    "berita-diklat": "badge-forest",
-    "berita-kabkota": "badge-gold",
-    "berita-umum": "badge-blue",
-    artikel: "badge-red",
-  };
-  return map[slug ?? ""] ?? "badge-forest";
+  return (
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "var(--color-forest-900)",
+        color: "rgba(255,255,255,0.15)",
+      }}
+    >
+      <ImageIcon size={size === "sm" ? 22 : 48} strokeWidth={1} />
+    </div>
+  );
 }
 
 export function NewsSection({ featuredPost, posts }: Props) {
   const featured = featuredPost ?? posts[0] ?? null;
-  const listPosts = posts.filter((p) => p.id !== featured?.id).slice(0, 5);
+  const rest = posts.filter((p) => p.id !== featured?.id);
+  const secondary = rest.slice(0, 2);
+  const listPosts = rest.slice(2, 5);
 
   if (!featured) return null;
 
   return (
-    <section
-      style={{ backgroundColor: "var(--color-ink-8)", paddingBlock: "4rem" }}
-    >
+    <section style={{ background: "var(--color-ink-8)", paddingBlock: "4rem" }}>
       <div className="container-content">
-        <div className="flex items-end justify-between mb-8">
+        {/* Header */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "flex-end",
+            justifyContent: "space-between",
+            marginBottom: "1.75rem",
+            gap: "12px",
+            flexWrap: "wrap",
+          }}
+        >
           <div>
             <p className="sec-label">Informasi Terkini</p>
             <h2 className="sec-title">Berita &amp; Publikasi</h2>
           </div>
           <Link href="/berita" className="qs-all-link">
-            Semua berita
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <line x1="5" y1="12" x2="19" y2="12" />
-              <polyline points="12 5 19 12 12 19" />
-            </svg>
+            Semua berita <ArrowRight size={14} />
           </Link>
         </div>
 
-        <div className="news-layout">
-          {/* Feature kiri */}
-          <Link href={`/berita/${featured.slug}`} className="news-feature">
-            <div className="news-feature-img">
-              <div className="news-feature-img-placeholder" aria-hidden="true">
-                <svg
-                  width="48"
-                  height="48"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1"
-                >
-                  <rect x="3" y="3" width="18" height="18" rx="2" />
-                  <circle cx="8.5" cy="8.5" r="1.5" />
-                  <polyline points="21 15 16 10 5 21" />
-                </svg>
-              </div>
-              <span className="news-feature-cat-float">
+        {/* Grid */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1.1fr 0.9fr",
+            gap: "16px",
+            alignItems: "stretch",
+          }}
+        >
+          {/* ── Featured — full image dengan overlay ── */}
+          <Link
+            href={`/berita/${featured.slug}`}
+            className="news-featured-link"
+          >
+            {/* Gambar full */}
+            <div style={{ position: "absolute", inset: 0 }}>
+              <Thumb src={featured.featuredImage} alt={featured.title} />
+            </div>
+
+            {/* Gradient overlay — pakai class untuk hover transition */}
+            <div className="news-featured-overlay-inner" />
+
+            {/* Badge atas */}
+            <div
+              style={{
+                position: "absolute",
+                top: "16px",
+                left: "16px",
+                zIndex: 2,
+              }}
+            >
+              <span
+                className={`badge ${getCategoryBadge(featured.category?.slug)}`}
+              >
                 {featured.category?.name ?? "Berita"}
               </span>
             </div>
 
-            <div className="news-feature-body">
-              <div className="news-feature-meta">
-                <span
-                  className={`badge ${getCategoryStyle(featured.category?.slug)}`}
-                >
-                  {featured.category?.name ?? "Berita"}
-                </span>
-                <span className="news-meta-time">
-                  <svg
-                    width="12"
-                    height="12"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <rect x="3" y="4" width="18" height="18" rx="2" />
-                    <line x1="16" y1="2" x2="16" y2="6" />
-                    <line x1="8" y1="2" x2="8" y2="6" />
-                    <line x1="3" y1="10" x2="21" y2="10" />
-                  </svg>
-                  {formatDate(featured.publishedAt)}
-                </span>
+            {/* Konten bawah */}
+            <div
+              style={{
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                padding: "24px 22px",
+                zIndex: 2,
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "5px",
+                  fontSize: "12px",
+                  color: "rgba(255,255,255,0.6)",
+                  marginBottom: "8px",
+                }}
+              >
+                <CalendarDays size={12} />
+                {formatDate(featured.publishedAt)}
               </div>
 
-              <h3 className="news-feature-title">{featured.title}</h3>
-              <p className="news-feature-excerpt">{featured.excerpt}</p>
+              <h3
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: "20px",
+                  fontWeight: 700,
+                  color: "#fff",
+                  lineHeight: 1.35,
+                  margin: "0 0 8px",
+                }}
+              >
+                {featured.title}
+              </h3>
 
-              <div className="news-feature-footer">
-                <span className="news-meta-time">
-                  <svg
-                    width="13"
-                    height="13"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                    <circle cx="12" cy="12" r="3" />
-                  </svg>
+              {featured.excerpt && (
+                <p
+                  style={{
+                    fontSize: "13.5px",
+                    color: "rgba(255,255,255,0.65)",
+                    lineHeight: 1.55,
+                    margin: "0 0 14px",
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical" as const,
+                    overflow: "hidden",
+                  }}
+                >
+                  {featured.excerpt}
+                </p>
+              )}
+
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  paddingTop: "12px",
+                  borderTop: "1px solid rgba(255,255,255,0.15)",
+                }}
+              >
+                <span
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "4px",
+                    fontSize: "12px",
+                    color: "rgba(255,255,255,0.45)",
+                  }}
+                >
+                  <Eye size={12} />
                   {featured.viewCount?.toLocaleString("id-ID") ?? "0"} dibaca
                 </span>
-                <span className="news-read-more">
-                  Baca selengkapnya
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                    <polyline points="12 5 19 12 12 19" />
-                  </svg>
+                <span
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px",
+                    fontSize: "13px",
+                    fontWeight: 700,
+                    color: "var(--color-gold-400)",
+                  }}
+                >
+                  Baca selengkapnya <ArrowRight size={13} />
                 </span>
               </div>
             </div>
           </Link>
 
-          {/* List kanan */}
-          <div className="news-stack">
-            {listPosts.map((item) => (
+          {/* ── Kolom kanan ── */}
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "10px" }}
+          >
+            {/* 2 card medium */}
+            {secondary.map((item) => (
               <Link
                 key={item.id}
                 href={`/berita/${item.slug}`}
-                className="news-stack-item"
+                className="news-medium-link"
               >
-                <div className="news-stack-thumb" aria-hidden="true">
-                  <svg
-                    width="22"
-                    height="22"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                  >
-                    <rect x="3" y="3" width="18" height="18" rx="2" />
-                    <circle cx="8.5" cy="8.5" r="1.5" />
-                    <polyline points="21 15 16 10 5 21" />
-                  </svg>
+                <div className="news-medium-thumb">
+                  <Thumb src={item.featuredImage} alt={item.title} size="sm" />
                 </div>
-                <div className="news-stack-body">
+
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <span
-                    className={`badge ${getCategoryStyle(item.category?.slug)} news-stack-badge`}
+                    className={`badge ${getCategoryBadge(item.category?.slug)}`}
+                    style={{
+                      fontSize: "10.5px",
+                      marginBottom: "5px",
+                      display: "inline-block",
+                    }}
                   >
                     {item.category?.name ?? "Berita"}
                   </span>
-                  <div className="news-stack-title">{item.title}</div>
-                  <div className="news-stack-meta">
-                    <span className="news-meta-time">
-                      <svg
-                        width="11"
-                        height="11"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      >
-                        <circle cx="12" cy="12" r="10" />
-                        <polyline points="12 6 12 12 16 14" />
-                      </svg>
-                      {timeAgo(item.publishedAt)}
+                  <div
+                    style={{
+                      fontSize: "13.5px",
+                      fontWeight: 700,
+                      color: "var(--color-ink)",
+                      lineHeight: 1.35,
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical" as const,
+                      overflow: "hidden",
+                      marginBottom: "6px",
+                    }}
+                  >
+                    {item.title}
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      fontSize: "11.5px",
+                      color: "var(--color-ink-4)",
+                    }}
+                  >
+                    <span
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "3px",
+                      }}
+                    >
+                      <Clock size={11} /> {timeAgo(item.publishedAt)}
                     </span>
-                    <span className="news-meta-sep" />
-                    <span className="news-meta-time">
-                      <svg
-                        width="11"
-                        height="11"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      >
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                        <circle cx="12" cy="12" r="3" />
-                      </svg>
+                    <span style={{ color: "var(--color-ink-5)" }}>·</span>
+                    <span
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "3px",
+                      }}
+                    >
+                      <Eye size={11} />{" "}
                       {item.viewCount?.toLocaleString("id-ID") ?? "0"}
                     </span>
                   </div>
                 </div>
               </Link>
             ))}
+
+            {/* List compact */}
+            {listPosts.length > 0 && (
+              <div className="news-list-card">
+                <div
+                  style={{
+                    padding: "10px 14px",
+                    borderBottom: "1px solid var(--color-ink-7)",
+                    fontSize: "10.5px",
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.8px",
+                    color: "var(--color-ink-4)",
+                  }}
+                >
+                  Berita Lainnya
+                </div>
+
+                {listPosts.map((item, i) => (
+                  <Link
+                    key={item.id}
+                    href={`/berita/${item.slug}`}
+                    className="news-list-item-link"
+                    style={{
+                      borderBottom:
+                        i < listPosts.length - 1
+                          ? "1px solid var(--color-ink-7)"
+                          : "none",
+                    }}
+                  >
+                    {/* Nomor */}
+                    <div
+                      style={{
+                        width: "22px",
+                        height: "22px",
+                        borderRadius: "50%",
+                        background: "var(--color-forest-50)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "11px",
+                        fontWeight: 800,
+                        color: "var(--color-forest-700)",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {i + 1}
+                    </div>
+
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div
+                        style={{
+                          fontSize: "13px",
+                          fontWeight: 600,
+                          color: "var(--color-ink)",
+                          lineHeight: 1.35,
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical" as const,
+                          overflow: "hidden",
+                          marginBottom: "3px",
+                        }}
+                      >
+                        {item.title}
+                      </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "4px",
+                          fontSize: "11px",
+                          color: "var(--color-ink-4)",
+                        }}
+                      >
+                        <Clock size={10} />
+                        {timeAgo(item.publishedAt)}
+                      </div>
+                    </div>
+
+                    <ArrowRight size={13} className="news-list-arrow" />
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

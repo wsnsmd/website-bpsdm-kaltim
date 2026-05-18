@@ -1,116 +1,125 @@
 // src/components/home/ProgramsSection.tsx
 import Link from "next/link";
+import {
+  Wrench,
+  Layers,
+  Users,
+  Globe,
+  Landmark,
+  BadgeCheck,
+  BookOpen,
+  Award,
+  Target,
+  GraduationCap,
+  ArrowRight,
+  type LucideIcon,
+} from "lucide-react";
+import { getPrograms } from "@/lib/queries/programs";
 
-const PROGRAMS = [
-  {
-    num: "01",
-    icon: "M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18",
-    name: "Pelatihan Kompetensi Teknis",
-    desc: "Pendidikan dan pelatihan untuk mencapai persyaratan kompetensi teknis sesuai jabatan berdasarkan Perka LAN Nomor 25 Tahun 2015.",
-    href: "/program/teknis",
-  },
-  {
-    num: "02",
-    icon: "M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z",
-    name: "Pelatihan Kompetensi Fungsional",
-    desc: "Pelatihan untuk mencapai persyaratan kompetensi jabatan fungsional sesuai ketentuan peraturan perundang-undangan yang berlaku.",
-    href: "/program/fungsional",
-  },
-  {
-    num: "03",
-    icon: "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M23 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75 M9 7a4 4 0 1 0 0-8 4 4 0 0 0 0 8z",
-    name: "Pelatihan Kompetensi Manajerial",
-    desc: "Membangun wawasan, pengetahuan, dan bekal bagi ASN dalam mengemban tugas kepemimpinan struktural pemerintahan daerah.",
-    href: "/program/manajerial",
-  },
-  {
-    num: "04",
-    icon: "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10",
-    name: "Kompetensi Pola APBD",
-    desc: "Program diklat untuk meningkatkan kompetensi aparatur pemerintah kabupaten/kota di seluruh Kalimantan Timur.",
-    href: "/program/pola-apbd",
-  },
-  {
-    num: "05",
-    icon: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z",
-    name: "Kompetensi Pola Kontribusi",
-    desc: "Pelatihan untuk mencapai persyaratan kompetensi jabatan fungsional melalui mekanisme kontribusi antar instansi pemerintah.",
-    href: "/program/pola-kontribusi",
-  },
-  {
-    num: "06",
-    icon: "M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2 M15 2H9a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z",
-    name: "Kompetensi Pola Kemitraan",
-    desc: "Kerjasama strategis antar instansi dalam pengembangan kompetensi ASN secara terintegrasi dan berkelanjutan.",
-    href: "/program/pola-kemitraan",
-  },
-];
+const ICON_MAP: Record<string, LucideIcon> = {
+  Wrench,
+  Layers,
+  Users,
+  Globe,
+  Landmark,
+  BadgeCheck,
+  BookOpen,
+  Award,
+  Target,
+  GraduationCap,
+};
 
-export function ProgramsSection() {
+const TYPE_ICON_FALLBACK: Record<string, LucideIcon> = {
+  Teknis: Wrench,
+  Fungsional: Layers,
+  Manajerial: Users,
+  Sosiokultural: Globe,
+  "Pemerintahan Dalam Negeri": Landmark,
+  Sertifikasi: BadgeCheck,
+  Orientasi: GraduationCap,
+};
+
+const TYPE_COLOR_FALLBACK: Record<string, string> = {
+  Teknis: "#1d4ed8",
+  Fungsional: "#16a34a",
+  Manajerial: "#c2410c",
+  Sosiokultural: "#7e22ce",
+  "Pemerintahan Dalam Negeri": "#0e7490",
+  Sertifikasi: "#b45309",
+  Orientasi: "#0e3d20",
+};
+
+export async function ProgramsSection() {
+  const programs = await getPrograms({ isHighlight: true });
+
+  if (programs.length === 0) return null;
+
   return (
-    <section className="section-pad bg-white">
+    <section style={{ paddingBlock: "4rem", background: "#fff" }}>
       <div className="container-content">
         {/* Header */}
-        <div className="flex items-end justify-between mb-8">
+        <div
+          style={{
+            display: "flex",
+            alignItems: "flex-end",
+            justifyContent: "space-between",
+            marginBottom: "2rem",
+            gap: "12px",
+            flexWrap: "wrap",
+          }}
+        >
           <div>
             <p className="sec-label">Program Unggulan</p>
             <h2 className="sec-title">Pelatihan Kompetensi BPSDM</h2>
           </div>
           <Link href="/program" className="qs-all-link">
             Semua program
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <line x1="5" y1="12" x2="19" y2="12" />
-              <polyline points="12 5 19 12 12 19" />
-            </svg>
+            <ArrowRight size={15} />
           </Link>
         </div>
 
         {/* Grid */}
         <div className="prog-grid">
-          {PROGRAMS.map((item) => (
-            <Link key={item.href} href={item.href} className="prog-card">
-              <div className="prog-card-top">
-                <div className="prog-card-num">{item.num}</div>
-                <div className="prog-card-icon">
-                  <svg
-                    width="22"
-                    height="22"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+          {programs.map((program, i) => {
+            const num = String(i + 1).padStart(2, "0");
+            const color =
+              program.color ??
+              TYPE_COLOR_FALLBACK[program.jenisKey] ??
+              "var(--color-forest-700)";
+            const Icon =
+              (program.icon ? ICON_MAP[program.icon] : null) ??
+              TYPE_ICON_FALLBACK[program.jenisKey] ??
+              BookOpen;
+
+            return (
+              <Link
+                key={program.id}
+                href={`/program/${program.slug}`}
+                className="prog-card"
+              >
+                <div className="prog-card-top">
+                  <div className="prog-card-num">{num}</div>
+                  <div
+                    className="prog-card-icon"
+                    style={{ backgroundColor: `${color}18` }}
                   >
-                    <path d={item.icon} />
-                  </svg>
+                    <Icon size={22} style={{ color }} />
+                  </div>
                 </div>
-              </div>
-              <div className="prog-card-name">{item.name}</div>
-              <div className="prog-card-desc">{item.desc}</div>
-              <div className="prog-card-arrow">
-                Lihat detail
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                  <polyline points="12 5 19 12 12 19" />
-                </svg>
-              </div>
-            </Link>
-          ))}
+
+                <div className="prog-card-name">{program.name}</div>
+
+                {program.description && (
+                  <div className="prog-card-desc">{program.description}</div>
+                )}
+
+                <div className="prog-card-arrow">
+                  Lihat detail
+                  <ArrowRight size={14} />
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </section>

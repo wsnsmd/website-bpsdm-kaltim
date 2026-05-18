@@ -53,12 +53,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="id"
-      className={`${plusJakarta.variable} ${playfair.variable}`}
-      suppressHydrationWarning
-      data-scroll-behavior="smooth"
-    >
+    <html lang="id" suppressHydrationWarning data-scroll-behavior="smooth">
       <body className="font-sans antialiased bg-white text-ink">
         <BackToTop />
         <SessionProvider>{children}</SessionProvider>
