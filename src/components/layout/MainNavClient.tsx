@@ -136,7 +136,7 @@ export function MainNavClient({
             />
 
             <div
-              className="fixed top-0 left-0 h-full w-[280px] max-w-[85vw] bg-white shadow-xl z-50 lg:hidden overflow-y-auto"
+              className="fixed top-0 left-0 h-full w-70 max-w-[85vw] bg-white shadow-xl z-50 lg:hidden overflow-y-auto"
               style={{ animation: "slideInLeft 0.2s ease-out" }}
             >
               {/* Header */}
