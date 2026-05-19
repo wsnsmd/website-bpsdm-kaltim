@@ -269,6 +269,22 @@ const SETTINGS_DATA = [
     label: "KPI: Kegiatan Pengembangan Kompetensi",
     isPublic: true,
   },
+  {
+    key: "google_site_verification",
+    value: "",
+    type: "text",
+    group: "seo",
+    label: "Google Search Console Verification",
+    isPublic: false,
+  },
+  {
+    key: "ga4_id",
+    value: "",
+    type: "text",
+    group: "analitik",
+    label: "Google Analytics 4 Measurement ID",
+    isPublic: false,
+  },
 ];
 
 async function seedSettings() {

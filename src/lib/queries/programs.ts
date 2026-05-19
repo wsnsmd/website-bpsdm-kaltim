@@ -37,3 +37,8 @@ export async function getProgramBySlug(
     .limit(1);
   return result[0] ?? null;
 }
+
+export async function getAllProgramSlugs(): Promise<string[]> {
+  const result = await db.select({ slug: programs.slug }).from(programs);
+  return result.map((r) => r.slug);
+}

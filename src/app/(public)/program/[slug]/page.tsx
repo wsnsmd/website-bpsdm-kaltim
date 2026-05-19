@@ -10,20 +10,31 @@ import {
   Landmark,
   BadgeCheck,
   BookOpen,
+  GraduationCap,
   Award,
   Target,
-  GraduationCap,
   CalendarDays,
+  ArrowRight,
+  Clock,
+  Phone,
+  CheckCircle2,
   Activity,
   CalendarCheck,
-  ArrowLeft,
+  CalendarX,
   type LucideIcon,
 } from "lucide-react";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { JadwalCard } from "@/components/program/JadwalCard";
-import { getProgramBySlug } from "@/lib/queries/programs";
+import { buildMetadata } from "@/lib/seo";
+import {
+  getProgramBySlug,
+  getPrograms,
+  getAllProgramSlugs,
+} from "@/lib/queries/programs";
 import { fetchJadwal } from "@/lib/simpel/jadwal";
-import type { StatusJadwal } from "@/lib/simpel/types";
+import { BreadcrumbJsonLd } from "@/components/seo/JsonLd";
+
+type Props = { params: Promise<{ slug: string }> };
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Wrench,
@@ -33,23 +44,38 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Landmark,
   BadgeCheck,
   BookOpen,
+  GraduationCap,
   Award,
   Target,
-  GraduationCap,
 };
 
-export const revalidate = 3600;
+const JENIS_BADGE: Record<string, { bg: string; color: string }> = {
+  Teknis: { bg: "#eff6ff", color: "#1d4ed8" },
+  Fungsional: {
+    bg: "var(--color-forest-100)",
+    color: "var(--color-forest-700)",
+  },
+  Manajerial: { bg: "var(--color-gold-100)", color: "var(--color-gold-700)" },
+  Sosiokultural: { bg: "#fdf4ff", color: "#7e22ce" },
+  "Pemerintahan Dalam Negeri": { bg: "#ecfeff", color: "#0e7490" },
+  Sertifikasi: { bg: "#fff7ed", color: "#c2410c" },
+};
 
-type Props = { params: Promise<{ slug: string }> };
+export async function generateStaticParams() {
+  const slugs = await getAllProgramSlugs();
+  return slugs.map((slug) => ({ slug }));
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const program = await getProgramBySlug(slug);
-  if (!program) return { title: "Program Tidak Ditemukan" };
-  return {
+  if (!program) return {};
+
+  return buildMetadata({
     title: program.name,
     description: program.description ?? undefined,
-  };
+    path: `/program/${program.slug}`,
+  });
 }
 
 export default async function ProgramDetailPage({ params }: Props) {
@@ -57,22 +83,34 @@ export default async function ProgramDetailPage({ params }: Props) {
   const program = await getProgramBySlug(slug);
   if (!program) notFound();
 
-  // Fetch jadwal dari SIMPEL berdasarkan jenisKey program
-  const jadwalList = await fetchJadwal({ jenis: program.jenisKey });
+  // Semua program untuk sidebar
+  const [allPrograms, allJadwal] = await Promise.all([
+    getPrograms(),
+    fetchJadwal({ jenis: program.jenisKey }),
+  ]);
 
-  const stats = {
-    berlangsung: jadwalList.filter((j) => j.statusJadwal === "berlangsung")
-      .length,
-    mendatang: jadwalList.filter((j) => j.statusJadwal === "akan-datang")
-      .length,
-    selesai: jadwalList.filter((j) => j.statusJadwal === "selesai").length,
-  };
-
-  const color = program.color ?? "var(--color-forest-700)";
   const Icon = (program.icon ? ICON_MAP[program.icon] : null) ?? BookOpen;
+  const color = program.color ?? "var(--color-forest-700)";
+  const badge = JENIS_BADGE[program.jenisKey];
+
+  const jadwalBerlangsung = allJadwal.filter(
+    (j) => j.statusJadwal === "berlangsung",
+  );
+  const jadwalMendatang = allJadwal.filter(
+    (j) => j.statusJadwal === "akan-datang",
+  );
+  const jadwalSelesai = allJadwal.filter((j) => j.statusJadwal === "selesai");
 
   return (
     <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Beranda", href: "/" },
+          { name: "Program Diklat", href: "/program" },
+          { name: program.name, href: `/program/${program.slug}` },
+        ]}
+      />
+
       <Breadcrumb
         items={[
           { label: "Beranda", href: "/" },
@@ -81,361 +119,350 @@ export default async function ProgramDetailPage({ params }: Props) {
         ]}
       />
 
-      {/* Hero */}
-      <div className="page-hero" style={{ paddingBlock: "3rem" }}>
+      {/* ── Hero ── */}
+      <div className="page-hero" style={{ paddingBlock: "2.5rem 3rem" }}>
         <div className="container-content">
           <div
-            style={{ display: "flex", alignItems: "flex-start", gap: "24px" }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "16px",
+              marginBottom: "20px",
+            }}
           >
-            {/* Icon besar */}
             <div
               style={{
-                width: "72px",
-                height: "72px",
-                borderRadius: "18px",
-                backgroundColor: "rgba(255,255,255,0.12)",
+                width: "52px",
+                height: "52px",
+                borderRadius: "14px",
+                background: "rgba(255,255,255,0.1)",
+                border: "1px solid rgba(255,255,255,0.2)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 flexShrink: 0,
-                border: "1px solid rgba(255,255,255,0.2)",
               }}
             >
-              <Icon size={34} style={{ color: "#fff" }} />
+              <Icon size={26} color="#fff" />
             </div>
-
-            <div style={{ flex: 1 }}>
-              <p className="page-hero-eyebrow">
-                Program Pengembangan Kompetensi
-              </p>
-              <h1 className="page-hero-title">{program.name}</h1>
-              {program.description && (
-                <p className="page-hero-desc">{program.description}</p>
+            <div>
+              {badge && (
+                <span
+                  style={{
+                    display: "inline-block",
+                    padding: "3px 10px",
+                    borderRadius: "20px",
+                    background: "rgba(255,255,255,0.12)",
+                    color: "rgba(255,255,255,0.8)",
+                    fontSize: "11px",
+                    fontWeight: 700,
+                    marginBottom: "6px",
+                    letterSpacing: "0.5px",
+                  }}
+                >
+                  {program.jenisKey}
+                </span>
               )}
+              <h1
+                className="page-hero-title"
+                style={{ fontSize: "30px", margin: 0 }}
+              >
+                {program.name}
+              </h1>
+            </div>
+          </div>
 
-              {/* Stats jadwal */}
-              <div className="page-hero-stats">
-                <div className="page-hero-stat">
-                  <div
-                    className="page-hero-stat-num"
-                    style={{ color: "var(--color-gold-400)" }}
-                  >
-                    {stats.berlangsung}
-                  </div>
-                  <div className="page-hero-stat-label">Berlangsung</div>
-                </div>
-                <div className="page-hero-stat">
-                  <div className="page-hero-stat-num">{stats.mendatang}</div>
-                  <div className="page-hero-stat-label">Akan datang</div>
-                </div>
-                <div className="page-hero-stat">
-                  <div
-                    className="page-hero-stat-num"
-                    style={{ color: "rgba(255,255,255,0.4)" }}
-                  >
-                    {stats.selesai}
-                  </div>
-                  <div className="page-hero-stat-label">Selesai</div>
-                </div>
-                <div className="page-hero-stat">
-                  <div className="page-hero-stat-num">{jadwalList.length}</div>
-                  <div className="page-hero-stat-label">Total kegiatan</div>
-                </div>
+          {program.description && (
+            <p className="page-hero-desc" style={{ maxWidth: "600px" }}>
+              {program.description}
+            </p>
+          )}
+
+          <div className="page-hero-stats">
+            <div className="page-hero-stat">
+              <div
+                className="page-hero-stat-num"
+                style={{
+                  color:
+                    jadwalBerlangsung.length > 0
+                      ? "var(--color-gold-400)"
+                      : undefined,
+                }}
+              >
+                {jadwalBerlangsung.length}
               </div>
+              <div className="page-hero-stat-label">Sedang berlangsung</div>
+            </div>
+            <div className="page-hero-stat">
+              <div className="page-hero-stat-num">{jadwalMendatang.length}</div>
+              <div className="page-hero-stat-label">Akan datang</div>
+            </div>
+            <div className="page-hero-stat">
+              <div className="page-hero-stat-num">{allJadwal.length}</div>
+              <div className="page-hero-stat-label">Total jadwal</div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Content */}
+      {/* ── Content ── */}
       <div
         style={{ backgroundColor: "var(--color-ink-8)", paddingBlock: "3rem" }}
       >
         <div className="container-content">
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 280px",
-              gap: "28px",
-              alignItems: "start",
-            }}
-          >
-            {/* ── Jadwal ── */}
+          <div className="article-layout">
+            {/* ── Main ── */}
             <div>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  marginBottom: "20px",
-                }}
-              >
-                <h2
-                  style={{
-                    fontFamily: "var(--font-display)",
-                    fontSize: "22px",
-                    fontWeight: 700,
-                    color: "var(--color-ink)",
-                  }}
-                >
-                  Jadwal Kegiatan
-                </h2>
-                <Link href="/program/jadwal" className="qs-all-link">
-                  Semua jadwal
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                    <polyline points="12 5 19 12 12 19" />
-                  </svg>
-                </Link>
-              </div>
+              {/* Jadwal — berlangsung */}
+              {jadwalBerlangsung.length > 0 && (
+                <div style={{ marginBottom: "28px" }}>
+                  <div className="jadwal-month-header">
+                    <div
+                      className="jadwal-month-title"
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        color: "var(--color-forest-700)",
+                      }}
+                    >
+                      <Activity
+                        size={16}
+                        style={{ color: "var(--color-forest-600)" }}
+                      />
+                      Sedang Berlangsung
+                    </div>
+                    <div className="jadwal-month-count">
+                      {jadwalBerlangsung.length} kegiatan
+                    </div>
+                  </div>
+                  <div className="jadwal-list">
+                    {jadwalBerlangsung.map((j) => (
+                      <JadwalCard key={j.id} jadwal={j} />
+                    ))}
+                  </div>
+                </div>
+              )}
 
-              {jadwalList.length === 0 ? (
-                <div className="empty-state" style={{ paddingBlock: "40px" }}>
-                  <CalendarDays
+              {/* Jadwal — akan datang */}
+              {jadwalMendatang.length > 0 && (
+                <div style={{ marginBottom: "28px" }}>
+                  <div className="jadwal-month-header">
+                    <div
+                      className="jadwal-month-title"
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                      }}
+                    >
+                      <CalendarDays
+                        size={16}
+                        style={{ color: "var(--color-forest-500)" }}
+                      />
+                      Jadwal Mendatang
+                    </div>
+                    <div className="jadwal-month-count">
+                      {jadwalMendatang.length} kegiatan
+                    </div>
+                  </div>
+                  <div className="jadwal-list">
+                    {jadwalMendatang.slice(0, 10).map((j) => (
+                      <JadwalCard key={j.id} jadwal={j} />
+                    ))}
+                    {jadwalMendatang.length > 10 && (
+                      <div style={{ textAlign: "center", paddingTop: "12px" }}>
+                        <Link
+                          href={`/program/jadwal?jenis=${encodeURIComponent(program.jenisKey)}`}
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "6px",
+                            fontSize: "13px",
+                            fontWeight: 600,
+                            color: "var(--color-forest-700)",
+                            textDecoration: "none",
+                          }}
+                        >
+                          Lihat {jadwalMendatang.length - 10} jadwal lainnya
+                          <ArrowRight size={13} />
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Jadwal — selesai (collapsible) */}
+              {jadwalSelesai.length > 0 && (
+                <div>
+                  <div className="jadwal-month-header">
+                    <div
+                      className="jadwal-month-title"
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        color: "var(--color-ink-4)",
+                      }}
+                    >
+                      <CalendarCheck
+                        size={16}
+                        style={{ color: "var(--color-ink-5)" }}
+                      />
+                      Sudah Selesai
+                    </div>
+                    <div className="jadwal-month-count">
+                      {jadwalSelesai.length} kegiatan
+                    </div>
+                  </div>
+                  <div className="jadwal-list">
+                    {jadwalSelesai.slice(0, 5).map((j) => (
+                      <JadwalCard key={j.id} jadwal={j} />
+                    ))}
+                  </div>
+                  {jadwalSelesai.length > 5 && (
+                    <div style={{ textAlign: "center", paddingTop: "12px" }}>
+                      <Link
+                        href={`/program/jadwal?jenis=${encodeURIComponent(program.jenisKey)}&status=selesai`}
+                        className="qs-all-link"
+                      >
+                        Lihat semua {jadwalSelesai.length} jadwal selesai
+                        <ArrowRight size={13} />
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Empty state */}
+              {allJadwal.length === 0 && (
+                <div className="empty-state" style={{ paddingBlock: "48px" }}>
+                  <CalendarX
                     size={40}
                     style={{ color: "var(--color-ink-5)" }}
                   />
                   <div className="empty-state-title">Belum ada jadwal</div>
                   <div className="empty-state-desc">
-                    Belum ada jadwal kegiatan untuk program ini saat ini. Data
-                    diperbarui setiap 1 jam dari SIMPEL Kaltim.
+                    Belum ada jadwal untuk program ini saat ini.
                   </div>
+                  <Link
+                    href="/program/jadwal"
+                    style={{
+                      marginTop: "12px",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      padding: "9px 18px",
+                      borderRadius: "9px",
+                      background: "var(--color-forest-700)",
+                      color: "#fff",
+                      fontSize: "13px",
+                      fontWeight: 600,
+                      textDecoration: "none",
+                    }}
+                  >
+                    Lihat semua jadwal
+                    <ArrowRight size={13} />
+                  </Link>
                 </div>
-              ) : (
-                <>
-                  {/* Berlangsung */}
-                  {stats.berlangsung > 0 && (
-                    <div style={{ marginBottom: "24px" }}>
-                      <div className="jadwal-month-header">
-                        <div
-                          className="jadwal-month-title"
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "8px",
-                            color: "var(--color-forest-700)",
-                          }}
-                        >
-                          <Activity size={16} />
-                          Sedang Berlangsung
-                        </div>
-                        <div className="jadwal-month-count">
-                          {stats.berlangsung} kegiatan
-                        </div>
-                      </div>
-                      <div className="jadwal-list">
-                        {jadwalList
-                          .filter((j) => j.statusJadwal === "berlangsung")
-                          .map((j) => (
-                            <JadwalCard key={j.id} jadwal={j} />
-                          ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Akan datang */}
-                  {stats.mendatang > 0 && (
-                    <div style={{ marginBottom: "24px" }}>
-                      <div className="jadwal-month-header">
-                        <div
-                          className="jadwal-month-title"
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "8px",
-                          }}
-                        >
-                          <CalendarDays size={16} />
-                          Akan Datang
-                        </div>
-                        <div className="jadwal-month-count">
-                          {stats.mendatang} kegiatan
-                        </div>
-                      </div>
-                      <div className="jadwal-list">
-                        {jadwalList
-                          .filter((j) => j.statusJadwal === "akan-datang")
-                          .map((j) => (
-                            <JadwalCard key={j.id} jadwal={j} />
-                          ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Selesai */}
-                  {stats.selesai > 0 && (
-                    <div>
-                      <div className="jadwal-month-header">
-                        <div
-                          className="jadwal-month-title"
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "8px",
-                            color: "var(--color-ink-4)",
-                          }}
-                        >
-                          <CalendarCheck size={16} />
-                          Selesai
-                        </div>
-                        <div className="jadwal-month-count">
-                          {stats.selesai} kegiatan
-                        </div>
-                      </div>
-                      <div className="jadwal-list">
-                        {jadwalList
-                          .filter((j) => j.statusJadwal === "selesai")
-                          .map((j) => (
-                            <JadwalCard key={j.id} jadwal={j} />
-                          ))}
-                      </div>
-                    </div>
-                  )}
-                </>
               )}
             </div>
 
             {/* ── Sidebar ── */}
-            <aside
-              style={{
-                position: "sticky",
-                top: "88px",
-                display: "flex",
-                flexDirection: "column",
-                gap: "16px",
-              }}
-            >
-              {/* Info program */}
+            <aside className="article-sidebar">
+              {/* Program lain */}
               <div className="sidebar-widget">
-                <div
-                  className="sidebar-widget-head"
-                  style={{ backgroundColor: color }}
-                >
-                  <Icon size={16} />
-                  {program.name}
+                <div className="sidebar-widget-head">
+                  <GraduationCap size={16} />
+                  Program Lainnya
                 </div>
-                <div
-                  className="sidebar-widget-body"
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "12px",
-                  }}
-                >
-                  {program.objectives && (
-                    <div>
-                      <div
-                        style={{
-                          fontSize: "11px",
-                          fontWeight: 700,
-                          textTransform: "uppercase",
-                          letterSpacing: "0.5px",
-                          color: "var(--color-ink-4)",
-                          marginBottom: "4px",
-                        }}
-                      >
-                        Tujuan
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "13px",
-                          color: "var(--color-ink-2)",
-                          lineHeight: 1.6,
-                        }}
-                      >
-                        {program.objectives}
-                      </div>
-                    </div>
-                  )}
-
-                  {program.target && (
-                    <div>
-                      <div
-                        style={{
-                          fontSize: "11px",
-                          fontWeight: 700,
-                          textTransform: "uppercase",
-                          letterSpacing: "0.5px",
-                          color: "var(--color-ink-4)",
-                          marginBottom: "4px",
-                        }}
-                      >
-                        Sasaran Peserta
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "13px",
-                          color: "var(--color-ink-2)",
-                          lineHeight: 1.6,
-                        }}
-                      >
-                        {program.target}
-                      </div>
-                    </div>
-                  )}
-
-                  <div>
-                    <div
-                      style={{
-                        fontSize: "11px",
-                        fontWeight: 700,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.5px",
-                        color: "var(--color-ink-4)",
-                        marginBottom: "4px",
-                      }}
-                    >
-                      Jenis Kompetensi
-                    </div>
-                    <span className="badge badge-forest">
-                      {program.jenisKey}
-                    </span>
-                  </div>
+                <div style={{ padding: "6px 0" }}>
+                  {allPrograms
+                    .filter((p) => p.id !== program.id)
+                    .map((p) => {
+                      const PIcon =
+                        (p.icon ? ICON_MAP[p.icon] : null) ?? BookOpen;
+                      const pColor = p.color ?? "var(--color-forest-700)";
+                      return (
+                        <Link
+                          key={p.id}
+                          href={`/program/${p.slug}`}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "10px",
+                            padding: "10px 14px",
+                            textDecoration: "none",
+                            borderBottom: "1px solid var(--color-ink-7)",
+                            transition: "background 0.12s",
+                          }}
+                          className="sidebar-prog-link"
+                        >
+                          <div
+                            style={{
+                              width: "32px",
+                              height: "32px",
+                              borderRadius: "8px",
+                              background: `${pColor}15`,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              flexShrink: 0,
+                            }}
+                          >
+                            <PIcon size={16} style={{ color: pColor }} />
+                          </div>
+                          <span
+                            style={{
+                              fontSize: "13px",
+                              fontWeight: p.id === program.id ? 700 : 500,
+                              color:
+                                p.id === program.id
+                                  ? "var(--color-forest-700)"
+                                  : "var(--color-ink-2)",
+                              lineHeight: 1.3,
+                            }}
+                          >
+                            {p.name}
+                          </span>
+                        </Link>
+                      );
+                    })}
                 </div>
               </div>
 
-              {/* Semua program */}
-              <div className="sidebar-widget">
-                <div className="sidebar-widget-head">
-                  <Layers size={16} />
-                  Program Lainnya
+              {/* CTA */}
+              <div className="jadwal-cta">
+                <div className="jadwal-cta-title">Ingin mendaftar?</div>
+                <div className="jadwal-cta-desc">
+                  Hubungi tim BPSDM Kaltim untuk informasi pendaftaran program
+                  ini.
                 </div>
-                <div
-                  className="sidebar-widget-body"
-                  style={{ padding: "8px 8px" }}
+                <Link href="/kontak" className="btn-gold btn jadwal-cta-btn">
+                  <Phone size={15} />
+                  Hubungi Kami
+                </Link>
+                <Link
+                  href="/program/jadwal"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "6px",
+                    marginTop: "8px",
+                    padding: "9px",
+                    borderRadius: "9px",
+                    border: "1px solid var(--color-ink-5)",
+                    color: "var(--color-ink-6)",
+                    fontSize: "13px",
+                    fontWeight: 600,
+                    textDecoration: "none",
+                  }}
                 >
-                  <Link
-                    href="/program"
-                    className="sidebar-cat-item"
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                    }}
-                  >
-                    <ArrowLeft size={14} />
-                    Lihat semua program
-                  </Link>
-                  <Link
-                    href="/program/jadwal"
-                    className="sidebar-cat-item"
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                    }}
-                  >
-                    <CalendarDays size={14} />
-                    Semua jadwal kegiatan
-                  </Link>
-                </div>
+                  <CalendarDays size={14} />
+                  Semua Jadwal
+                </Link>
               </div>
             </aside>
           </div>

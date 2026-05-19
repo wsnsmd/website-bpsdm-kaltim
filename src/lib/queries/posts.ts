@@ -1,5 +1,5 @@
 // src/lib/queries/posts.ts
-import { db, eq, and, desc, sql, like, count } from "@/db";
+import { db, eq, and, desc, sql, like, count, or } from "@/db";
 import { posts, categories } from "@/db/schema";
 
 // ── Tipe return ───────────────────────────────
@@ -58,9 +58,11 @@ export async function getLatestPosts(
     limit?: number;
     categorySlug?: string;
     offset?: number;
+    search?: string;
+    featured?: boolean;
   } = {},
 ): Promise<PostListItem[]> {
-  const { limit = 10, categorySlug, offset = 0 } = options;
+  const { limit = 10, categorySlug, offset = 0, search, featured } = options;
 
   const result = await db
     .select(listColumns)
@@ -70,6 +72,13 @@ export async function getLatestPosts(
       and(
         eq(posts.status, "published"),
         categorySlug ? eq(categories.slug, categorySlug) : undefined,
+        featured ? eq(posts.isFeatured, true) : undefined,
+        search
+          ? or(
+              like(posts.title, `%${search}%`),
+              like(posts.excerpt, `%${search}%`),
+            )
+          : undefined,
       ),
     )
     .orderBy(desc(posts.publishedAt))
@@ -189,9 +198,10 @@ export async function searchPosts(query: string, limit = 10) {
 export async function countPosts(
   options: {
     categorySlug?: string;
+    search?: string;
   } = {},
 ): Promise<number> {
-  const { categorySlug } = options;
+  const { categorySlug, search } = options;
 
   const result = await db
     .select({ total: count() })
@@ -201,6 +211,12 @@ export async function countPosts(
       and(
         eq(posts.status, "published"),
         categorySlug ? eq(categories.slug, categorySlug) : undefined,
+        search
+          ? or(
+              like(posts.title, `%${search}%`),
+              like(posts.excerpt, `%${search}%`),
+            )
+          : undefined,
       ),
     );
 

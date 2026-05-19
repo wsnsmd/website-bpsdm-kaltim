@@ -645,6 +645,45 @@ export const platforms = mysqlTable(
   }),
 );
 
+// ── Visitor Logs ──────────────────────────────
+export const visitorLogs = mysqlTable(
+  "visitor_logs",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    sessionId: varchar("session_id", { length: 64 }).notNull(),
+    path: varchar("path", { length: 500 }),
+    ip: varchar("ip", { length: 64 }),
+    userAgent: varchar("user_agent", { length: 500 }),
+    referer: varchar("referer", { length: 500 }),
+    country: varchar("country", { length: 10 }),
+    createdAt: timestamp("created_at")
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (t) => ({
+    sessionIdx: index("vl_session_idx").on(t.sessionId),
+    createdAtIdx: index("vl_created_idx").on(t.createdAt),
+    pathIdx: index("vl_path_idx").on(t.path),
+  }),
+);
+
+// ── Visitor Stats (aggregated harian) ─────────
+export const visitorStats = mysqlTable(
+  "visitor_stats",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    date: varchar("date", { length: 10 }).notNull(), // YYYY-MM-DD
+    uniqueVisitors: int("unique_visitors").default(0),
+    pageViews: int("page_views").default(0),
+    updatedAt: timestamp("updated_at")
+      .default(sql`CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (t) => ({
+    dateIdx: uniqueIndex("vs_date_idx").on(t.date),
+  }),
+);
+
 // ═══════════════════════════════════════════
 // RELATIONS
 // ═══════════════════════════════════════════

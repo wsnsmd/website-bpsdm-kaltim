@@ -2,6 +2,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { ArticleJsonLd, BreadcrumbJsonLd } from "@/components/seo/JsonLd";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { NewsCard } from "@/components/news/NewsCard";
 import { ShareButtons } from "@/components/ui/ShareButtons";
@@ -28,6 +29,7 @@ import {
   FileText,
   CalendarDays,
 } from "lucide-react";
+import { buildMetadata } from "@/lib/seo";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -47,26 +49,36 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     : post.excerpt ||
       `Baca selengkapnya tentang ${post.title} di website resmi BPSDM Provinsi Kalimantan Timur.`;
 
-  return {
+  return buildMetadata({
     title: pageTitle,
     description: pageDescription,
-    openGraph: {
-      title: pageTitle,
-      description: pageDescription,
-      type: "article",
-      publishedTime: post.publishedAt?.toISOString(),
-      authors: [post.authorName ?? "Humas BPSDM Kaltim"],
-      tags: post.category?.name ? [post.category.name] : [],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: pageTitle,
-      description: pageDescription,
-    },
-    alternates: {
-      canonical: post.canonicalUrl ?? `/berita/${post.slug}`,
-    },
-  };
+    path: `/berita/${post.slug}`,
+    image: post.featuredImage ?? undefined,
+    type: "article",
+    publishedAt: post.publishedAt,
+    updatedAt: post.updatedAt,
+    tags: post.category ? [post.category.name] : [],
+  });
+  // return {
+  //   title: pageTitle,
+  //   description: pageDescription,
+  //   openGraph: {
+  //     title: pageTitle,
+  //     description: pageDescription,
+  //     type: "article",
+  //     publishedTime: post.publishedAt?.toISOString(),
+  //     authors: [post.authorName ?? "Humas BPSDM Kaltim"],
+  //     tags: post.category?.name ? [post.category.name] : [],
+  //   },
+  //   twitter: {
+  //     card: "summary_large_image",
+  //     title: pageTitle,
+  //     description: pageDescription,
+  //   },
+  //   alternates: {
+  //     canonical: post.canonicalUrl ?? `/berita/${post.slug}`,
+  //   },
+  // };
 }
 
 // ── Page ──────────────────────────────────────
@@ -98,6 +110,14 @@ export default async function BeritaDetailPage({ params }: Props) {
 
   return (
     <>
+      <ArticleJsonLd
+        title={post.title}
+        description={post.excerpt ?? undefined}
+        url={`/berita/${post.slug}`}
+        image={post.featuredImage ?? undefined}
+        publishedAt={post.publishedAt}
+        updatedAt={post.updatedAt}
+      />
       <Breadcrumb
         items={[
           { label: "Beranda", href: "/" },

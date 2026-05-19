@@ -43,6 +43,13 @@
       "when": 1778989641483,
       "tag": "0005_tan_the_fury",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1779108728571,
+      "tag": "0006_thin_domino",
+      "breakpoints": true
     }
   ]
 }
