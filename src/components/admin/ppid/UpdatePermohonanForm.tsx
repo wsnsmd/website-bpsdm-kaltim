@@ -87,6 +87,7 @@ export function UpdatePermohonanForm({ permohonan }: Props) {
           permohonan.id,
           status,
           catatan || undefined,
+          jawaban || undefined,
         );
         setSaved(true);
         setTimeout(() => setSaved(false), 3000);

@@ -2,9 +2,11 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { HeaderSpacer } from "@/components/layout/HeaderSpacer";
-import { VisitorTracker } from "@/components/analytics/VisitorTracker";
 import { OrganizationJsonLd, WebSiteJsonLd } from "@/components/seo/JsonLd";
-import { SurveyWidget } from "@/components/survei/SurveyWidget";
+import {
+  SurveyWidget,
+  VisitorTracker,
+} from "@/components/layout/ClientComponents";
 
 export default function PublicLayout({
   children,

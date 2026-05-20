@@ -249,6 +249,14 @@ export const posts = mysqlTable(
     publishedIdx: index("posts_published_idx").on(t.publishedAt),
     categoryIdx: index("posts_category_idx").on(t.categoryId),
     featuredIdx: index("posts_featured_idx").on(t.isFeatured),
+    statusPublishedIdx: index("posts_status_published_idx").on(
+      t.status,
+      t.publishedAt,
+    ),
+    categoryStatusIdx: index("posts_category_status_idx").on(
+      t.categoryId,
+      t.status,
+    ),
   }),
 );
 

@@ -7,6 +7,11 @@ import { auth } from "@/lib/auth";
 import { db, eq, and, desc, asc, sql, or, like } from "@/db";
 import { ppidPermohonan, ppidInformasi, ppidPejabat } from "@/db/schema";
 import { z } from "zod";
+import { transporter, MAIL_FROM, ADMIN_EMAIL, SITE_URL } from "@/lib/mailer";
+import {
+  templateKonfirmasiPemohon,
+  templateNotifAdmin,
+} from "@/lib/email-templates/ppid";
 
 // ── Helper ────────────────────────────────────
 function generateNomor(): string {
@@ -64,6 +69,49 @@ export async function submitPermohonan(formData: FormData) {
     return { error: "Gagal menyimpan permohonan. Coba lagi." };
   }
 
+  try {
+    const konfirmasi = templateKonfirmasiPemohon({
+      nomor: nomor,
+      nama: parsed.data.namaPemohon,
+      subjek: parsed.data.subjekInfo,
+      caraMendapat: parsed.data.caraMendapat,
+      siteUrl: SITE_URL,
+    });
+
+    const notifAdmin = templateNotifAdmin({
+      nomor: nomor,
+      nama: parsed.data.namaPemohon,
+      email: parsed.data.email,
+      noHp: parsed.data.noHp ?? null,
+      subjek: parsed.data.subjekInfo,
+      deskripsi: parsed.data.deskripsiInfo,
+      caraMendapat: parsed.data.caraMendapat,
+      caraMedia: parsed.data.caraMedia,
+      siteUrl: SITE_URL,
+    });
+
+    // Kirim paralel
+    await Promise.allSettled([
+      // Email ke pemohon
+      transporter.sendMail({
+        from: MAIL_FROM,
+        to: parsed.data.email,
+        subject: konfirmasi.subject,
+        html: konfirmasi.html,
+      }),
+      // Email ke admin
+      transporter.sendMail({
+        from: MAIL_FROM,
+        to: ADMIN_EMAIL,
+        subject: notifAdmin.subject,
+        html: notifAdmin.html,
+      }),
+    ]);
+  } catch (emailError) {
+    // Email gagal tidak block response
+    console.error("Email error:", emailError);
+  }
+
   revalidatePath("/admin/ppid");
   return { success: true, nomor };
 }
@@ -86,6 +134,40 @@ export async function updateStatusPermohonan(
       selesaiAt: status === "selesai" ? new Date() : null,
     })
     .where(eq(ppidPermohonan.id, id));
+
+  // Ambil data permohonan untuk email
+  try {
+    const result = await db
+      .select()
+      .from(ppidPermohonan)
+      .where(eq(ppidPermohonan.id, id))
+      .limit(1);
+    const p = result[0];
+
+    if (p?.email) {
+      const { templateUpdateStatus } =
+        await import("@/lib/email-templates/ppid");
+      const tmpl = templateUpdateStatus({
+        nomor: p.nomorPermohonan ?? "",
+        nama: p.namaPemohon,
+        status,
+        catatan: catatan ?? null,
+        jawabanUrl: jawabanUrl ?? null,
+        siteUrl: SITE_URL,
+      });
+
+      await transporter
+        .sendMail({
+          from: MAIL_FROM,
+          to: p.email,
+          subject: tmpl.subject,
+          html: tmpl.html,
+        })
+        .catch((e) => console.error("Email status error:", e));
+    }
+  } catch (e) {
+    console.error("Email update error:", e);
+  }
 
   revalidatePath("/admin/ppid");
   revalidatePath(`/admin/ppid/${id}`);

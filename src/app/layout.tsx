@@ -122,8 +122,8 @@ export default async function RootLayout({
   return (
     <html lang="id" suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
-        {/* Preconnect untuk performa */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://img.youtube.com" />
         <link
           rel="preconnect"
           href="https://fonts.gstatic.com"
@@ -132,6 +132,8 @@ export default async function RootLayout({
         {GA_ID && (
           <link rel="preconnect" href="https://www.googletagmanager.com" />
         )}
+        <link rel="dns-prefetch" href="https://simpel.kaltimprov.go.id" />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
       </head>
       <body className="font-sans antialiased">
         {/* GA4 */}
