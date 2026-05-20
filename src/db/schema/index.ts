@@ -771,6 +771,68 @@ export const ppidPermohonan = mysqlTable(
   }),
 );
 
+// ── Galeri Album ──────────────────────────────
+export const galleryAlbums = mysqlTable(
+  "gallery_albums",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    title: varchar("title", { length: 255 }).notNull(),
+    slug: varchar("slug", { length: 255 }).notNull().unique(),
+    description: text("description"),
+    coverImage: varchar("cover_image", { length: 1000 }),
+    type: mysqlEnum("type", ["photo", "video"]).default("photo").notNull(),
+    isPublished: boolean("is_published").default(true),
+    sortOrder: int("sort_order").default(0),
+    createdBy: varchar("created_by", { length: 100 }),
+    createdAt: timestamp("created_at")
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updated_at")
+      .default(sql`CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (t) => ({
+    slugIdx: uniqueIndex("gallery_albums_slug_idx").on(t.slug),
+    typeIdx: index("gallery_albums_type_idx").on(t.type),
+  }),
+);
+
+// ── Galeri Item (Foto) ────────────────────────
+export const galleryPhotos = mysqlTable("gallery_photos", {
+  id: int("id").autoincrement().primaryKey(),
+  albumId: int("album_id")
+    .notNull()
+    .references(() => galleryAlbums.id, { onDelete: "cascade" }),
+  imageUrl: varchar("image_url", { length: 1000 }).notNull(),
+  thumbUrl: varchar("thumb_url", { length: 1000 }),
+  caption: varchar("caption", { length: 500 }),
+  width: int("width"),
+  height: int("height"),
+  sortOrder: int("sort_order").default(0),
+  createdAt: timestamp("created_at")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+});
+
+// ── Galeri Item (Video) ───────────────────────
+export const galleryVideos = mysqlTable("gallery_videos", {
+  id: int("id").autoincrement().primaryKey(),
+  albumId: int("album_id")
+    .notNull()
+    .references(() => galleryAlbums.id, { onDelete: "cascade" }),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  sourceType: mysqlEnum("source_type", ["youtube", "instagram"]).notNull(),
+  sourceUrl: varchar("source_url", { length: 1000 }).notNull(),
+  videoId: varchar("video_id", { length: 100 }),
+  thumbUrl: varchar("thumb_url", { length: 1000 }),
+  duration: varchar("duration", { length: 20 }),
+  sortOrder: int("sort_order").default(0),
+  createdAt: timestamp("created_at")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+});
+
 // ── PPID: Pejabat PPID ────────────────────────
 export const ppidPejabat = mysqlTable("ppid_pejabat", {
   id: int("id").autoincrement().primaryKey(),

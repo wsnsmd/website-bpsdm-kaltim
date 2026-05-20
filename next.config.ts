@@ -24,6 +24,14 @@ const nextConfig: NextConfig = {
     ],
     formats: ["image/avif", "image/webp"],
   },
+  async rewrites() {
+    return [
+      {
+        source: "/uploads/:path*",
+        destination: "/uploads/:path*",
+      },
+    ];
+  },
 
   // Headers keamanan
   async headers() {

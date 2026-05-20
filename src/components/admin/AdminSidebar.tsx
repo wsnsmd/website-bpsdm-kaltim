@@ -22,6 +22,7 @@ import {
   FolderOpen,
   LayoutGrid,
   ShieldCheck,
+  Images,
 } from "lucide-react";
 
 type NavItem = {
@@ -77,6 +78,13 @@ const NAV: NavItem[] = [
       { href: "/admin/pengumuman", label: "Semua Pengumuman" },
       { href: "/admin/pengumuman/baru", label: "Tambah Pengumuman" },
     ],
+  },
+  // Di NAV array:
+  {
+    href: "/admin/galeri",
+    label: "Galeri",
+    icon: Images,
+    roles: ["superadmin", "admin", "editor"],
   },
   {
     href: "/admin/dokumen",

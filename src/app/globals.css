@@ -5976,3 +5976,30 @@ main > *:not(.hero-root) {
 .dip-item:hover {
   background: var(--color-ink-8) !important;
 }
+
+/* ── Galeri ── */
+.gallery-photo-btn:hover .gallery-photo-overlay {
+  opacity: 1 !important;
+}
+.gallery-photo-btn:hover img {
+  transform: scale(1.05);
+}
+
+.album-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+}
+
+.video-card:hover .video-play-btn {
+  transform: scale(1.1);
+}
+
+.video-card {
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+.video-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18) !important;
+}
