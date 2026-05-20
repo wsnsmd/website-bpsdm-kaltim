@@ -684,6 +684,108 @@ export const visitorStats = mysqlTable(
   }),
 );
 
+// ── PPID: Informasi Publik ─────────────────────
+export const ppidInformasi = mysqlTable(
+  "ppid_informasi",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    judul: varchar("judul", { length: 500 }).notNull(),
+    deskripsi: text("deskripsi"),
+    tipe: mysqlEnum("tipe", [
+      "berkala",
+      "serta_merta",
+      "setiap_saat",
+      "dikecualikan",
+    ]).notNull(),
+    fileUrl: varchar("file_url", { length: 1000 }),
+    externalUrl: varchar("external_url", { length: 1000 }),
+    fileType: varchar("file_type", { length: 20 }),
+    fileSize: int("file_size"),
+    tahun: int("tahun"),
+    status: mysqlEnum("status", ["published", "draft"])
+      .default("published")
+      .notNull(),
+    sortOrder: int("sort_order").default(0),
+    createdBy: varchar("created_by", { length: 100 }),
+    createdAt: timestamp("created_at")
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updated_at")
+      .default(sql`CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (t) => ({
+    tipeIdx: index("ppid_tipe_idx").on(t.tipe),
+    statusIdx: index("ppid_status_idx").on(t.status),
+  }),
+);
+
+// ── PPID: Permohonan Informasi ─────────────────
+export const ppidPermohonan = mysqlTable(
+  "ppid_permohonan",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    // Identitas pemohon
+    namaPemohon: varchar("nama_pemohon", { length: 255 }).notNull(),
+    nik: varchar("nik", { length: 20 }),
+    email: varchar("email", { length: 255 }).notNull(),
+    noHp: varchar("no_hp", { length: 30 }),
+    alamat: text("alamat"),
+    pekerjaan: varchar("pekerjaan", { length: 100 }),
+    // Permohonan
+    subjekInfo: varchar("subjek_info", { length: 500 }).notNull(),
+    deskripsiInfo: text("deskripsi_info").notNull(),
+    tujuanInfo: text("tujuan_info"),
+    caraMendapat: mysqlEnum("cara_mendapat", ["email", "ambil_langsung", "pos"])
+      .default("email")
+      .notNull(),
+    caraMedia: mysqlEnum("cara_media", ["softcopy", "hardcopy", "keduanya"])
+      .default("softcopy")
+      .notNull(),
+    // Status & tracking
+    nomorPermohonan: varchar("nomor_permohonan", { length: 50 }),
+    status: mysqlEnum("status", [
+      "diterima",
+      "diproses",
+      "selesai",
+      "ditolak",
+      "banding",
+    ])
+      .default("diterima")
+      .notNull(),
+    catatan: text("catatan"), // catatan admin
+    jawabanUrl: varchar("jawaban_url", { length: 1000 }),
+    // Audit
+    createdAt: timestamp("created_at")
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updated_at")
+      .default(sql`CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`)
+      .notNull(),
+    selesaiAt: timestamp("selesai_at"),
+  },
+  (t) => ({
+    statusIdx: index("ppid_perm_status_idx").on(t.status),
+    emailIdx: index("ppid_perm_email_idx").on(t.email),
+    nomorIdx: uniqueIndex("ppid_perm_nomor_idx").on(t.nomorPermohonan),
+  }),
+);
+
+// ── PPID: Pejabat PPID ────────────────────────
+export const ppidPejabat = mysqlTable("ppid_pejabat", {
+  id: int("id").autoincrement().primaryKey(),
+  nama: varchar("nama", { length: 255 }).notNull(),
+  jabatan: varchar("jabatan", { length: 255 }).notNull(),
+  foto: varchar("foto", { length: 500 }),
+  email: varchar("email", { length: 255 }),
+  noHp: varchar("no_hp", { length: 30 }),
+  tipe: mysqlEnum("tipe", ["utama", "pembantu", "atasan"])
+    .default("pembantu")
+    .notNull(),
+  sortOrder: int("sort_order").default(0),
+  isActive: boolean("is_active").default(true),
+});
+
 // ═══════════════════════════════════════════
 // RELATIONS
 // ═══════════════════════════════════════════

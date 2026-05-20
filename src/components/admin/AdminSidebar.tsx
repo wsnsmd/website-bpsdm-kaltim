@@ -21,6 +21,7 @@ import {
   Menu,
   FolderOpen,
   LayoutGrid,
+  ShieldCheck,
 } from "lucide-react";
 
 type NavItem = {
@@ -86,6 +87,16 @@ const NAV: NavItem[] = [
       { href: "/admin/dokumen", label: "Semua Dokumen" },
       { href: "/admin/dokumen/baru", label: "Tambah Dokumen" },
       { href: "/admin/dokumen/kategori", label: "Kategori" },
+    ],
+  },
+  {
+    href: "/admin/ppid",
+    label: "PPID",
+    icon: ShieldCheck,
+    roles: ["superadmin", "admin"],
+    children: [
+      { href: "/admin/ppid", label: "Permohonan" },
+      { href: "/admin/ppid/informasi", label: "Informasi Publik" },
     ],
   },
   {

@@ -5953,3 +5953,26 @@ main > *:not(.hero-root) {
     }
   }
 }
+
+/* ── PPID Menu Card hover ── */
+.ppid-menu-card:hover {
+  border-color: currentColor !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* ── PPID Nav Item hover ── */
+.ppid-nav-item:hover {
+  background: var(--color-forest-50) !important;
+}
+
+/* ── PPID Tipe Card hover ── */
+.ppid-tipe-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* ── DIP Item hover ── */
+.dip-item:hover {
+  background: var(--color-ink-8) !important;
+}

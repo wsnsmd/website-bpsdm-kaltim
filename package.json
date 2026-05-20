@@ -17,7 +17,8 @@
     "db:seed-menu": "bun src/db/seed-menu.ts",
     "db:seed-settings": "bun src/db/seed-settings.ts",
     "db:seed-documents": "bun src/db/seed-documents.ts",
-    "db:seed-platforms": "bun src/db/seed-platforms.ts"
+    "db:seed-platforms": "bun src/db/seed-platforms.ts",
+    "db:seed-ppid": "bun src/db/seed-ppid.ts"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.2",
@@ -39,6 +40,7 @@
     "@tiptap/pm": "^3.23.2",
     "@tiptap/react": "^3.23.2",
     "@tiptap/starter-kit": "^3.23.2",
+    "@xyflow/react": "^12.10.2",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.20",
     "dotenv": "^17.4.2",
