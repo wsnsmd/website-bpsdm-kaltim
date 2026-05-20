@@ -4,8 +4,10 @@ import {
   varchar,
   text,
   longtext,
+  tinyint,
   int,
   boolean,
+  decimal,
   timestamp,
   datetime,
   date,
@@ -847,6 +849,34 @@ export const ppidPejabat = mysqlTable("ppid_pejabat", {
   sortOrder: int("sort_order").default(0),
   isActive: boolean("is_active").default(true),
 });
+
+// ── Survei Kepuasan Website ───────────────────
+export const surveyResponses = mysqlTable(
+  "survey_responses",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    // Aspek penilaian
+    ratingTampilan: tinyint("rating_tampilan").notNull(), // 1-5
+    ratingKemudahan: tinyint("rating_kemudahan").notNull(),
+    ratingKonten: tinyint("rating_konten").notNull(),
+    ratingKecepatan: tinyint("rating_kecepatan").notNull(),
+    ratingLayanan: tinyint("rating_layanan").notNull(),
+    // Rata-rata
+    ratingRata: decimal("rating_rata", { precision: 3, scale: 2 }),
+    // Komentar
+    komentar: text("komentar"),
+    saran: text("saran"),
+    // Meta
+    ipAddress: varchar("ip_address", { length: 45 }),
+    userAgent: varchar("user_agent", { length: 500 }),
+    createdAt: timestamp("created_at")
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (t) => ({
+    createdAtIdx: index("survey_created_at_idx").on(t.createdAt),
+  }),
+);
 
 // ═══════════════════════════════════════════
 // RELATIONS

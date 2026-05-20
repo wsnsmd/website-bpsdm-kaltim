@@ -29,7 +29,7 @@ export function BackToTop() {
   return (
     <button
       onClick={scrollToTop}
-      className="fixed bottom-8 right-8 z-50 bg-forest-700 hover:bg-forest-800 text-white rounded-full p-3 shadow-lg transition-all duration-300 hover:scale-105"
+      className="fixed bottom-8 right-8 z-40 bg-forest-800 hover:bg-forest-900 text-white rounded-full p-3 shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer"
       aria-label="Kembali ke atas"
     >
       <ArrowUp size={20} />

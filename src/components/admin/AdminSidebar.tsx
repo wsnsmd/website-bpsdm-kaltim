@@ -23,6 +23,7 @@ import {
   LayoutGrid,
   ShieldCheck,
   Images,
+  BarChart2,
 } from "lucide-react";
 
 type NavItem = {
@@ -111,6 +112,12 @@ const NAV: NavItem[] = [
     href: "/admin/platform",
     label: "Platform & Layanan",
     icon: LayoutGrid,
+    roles: ["superadmin", "admin"],
+  },
+  {
+    href: "/admin/survei",
+    label: "Survei",
+    icon: BarChart2,
     roles: ["superadmin", "admin"],
   },
   {

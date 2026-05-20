@@ -4,6 +4,7 @@ import { Footer } from "@/components/layout/Footer";
 import { HeaderSpacer } from "@/components/layout/HeaderSpacer";
 import { VisitorTracker } from "@/components/analytics/VisitorTracker";
 import { OrganizationJsonLd, WebSiteJsonLd } from "@/components/seo/JsonLd";
+import { SurveyWidget } from "@/components/survei/SurveyWidget";
 
 export default function PublicLayout({
   children,
@@ -19,6 +20,7 @@ export default function PublicLayout({
       <HeaderSpacer />
       <main>{children}</main>
       <Footer />
+      <SurveyWidget />
     </>
   );
 }
