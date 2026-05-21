@@ -74,14 +74,7 @@ export default function PpidLayout({
         }}
       >
         <div className="container-content">
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "260px 1fr",
-              gap: "24px",
-              alignItems: "start",
-            }}
-          >
+          <div className="ppid-layout">
             <PpidSidebar />
             <main style={{ minWidth: 0, overflow: "hidden" }}>{children}</main>
           </div>

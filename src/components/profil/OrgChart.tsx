@@ -1,269 +1,227 @@
 // src/components/profil/OrgChart.tsx
 "use client";
 
-import { useState } from "react";
+import { useMemo } from "react";
+import {
+  ReactFlow,
+  Node,
+  Edge,
+  Background,
+  BackgroundVariant,
+  Controls,
+  useNodesState,
+  useEdgesState,
+  Handle,
+  Position,
+  NodeProps,
+} from "@xyflow/react";
+import "@xyflow/react/dist/style.css";
 import type { UnitItem } from "@/lib/queries/profil";
 
 type Props = { units: UnitItem[] };
 
+// ── Level config ──────────────────────────────
 const LEVEL_CONFIG = [
   {
-    bg: "var(--color-forest-900)",
-    color: "#fff",
-    border: "var(--color-forest-900)",
-    label: "Pimpinan",
+    bg: "linear-gradient(135deg, #0e3d20, #1e7a40)",
+    shadow: "rgba(14,61,32,0.4)",
+    width: 220,
   },
   {
-    bg: "var(--color-forest-700)",
-    color: "#fff",
-    border: "var(--color-forest-700)",
-    label: "Sekretariat",
+    bg: "linear-gradient(135deg, #1e7a40, #339770)",
+    shadow: "rgba(30,122,64,0.35)",
+    width: 200,
   },
   {
-    bg: "#fff",
-    color: "var(--color-forest-900)",
-    border: "var(--color-forest-700)",
-    label: "Bidang / UPT",
+    bg: "linear-gradient(135deg, #60a5fa, #3b82f6)",
+    shadow: "rgba(59,130,246,0.35)",
+    width: 190,
   },
   {
-    bg: "var(--color-ink-8)",
-    color: "var(--color-ink-2)",
-    border: "var(--color-ink-5)",
-    label: "Sub Bagian",
+    bg: "linear-gradient(135deg, #94a3b8, #64748b)",
+    shadow: "rgba(100,116,139,0.3)",
+    width: 180,
   },
 ];
 
-function getLevel(unit: UnitItem): number {
-  return unit.level ?? 0;
-}
+// ── Custom Node ───────────────────────────────
+function OrgNode({ data }: NodeProps) {
+  const d = data as {
+    name: string;
+    shortName: string | null;
+    level: number;
+    bg: string;
+    shadow: string;
+    width: number;
+  };
 
-function OrgNode({
-  unit,
-  children,
-  isRoot,
-}: {
-  unit: UnitItem;
-  children?: React.ReactNode;
-  isRoot: boolean;
-}) {
-  const [expanded, setExpanded] = useState(true);
-  const level = getLevel(unit);
-  const cfg = LEVEL_CONFIG[Math.min(level, 3)];
-  const hasKids = !!children;
+  const cfg = LEVEL_CONFIG[Math.min(d.level, 3)];
+  const isRoot = d.level === 0;
 
   return (
-    <div
-      style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
-    >
-      {/* Garis vertikal turun dari parent — hanya jika BUKAN root */}
-      {!isRoot && (
-        <div
-          style={{
-            width: "2px",
-            height: "24px",
-            background: "var(--color-ink-4)",
-            flexShrink: 0,
-          }}
-        />
-      )}
+    <>
+      <Handle
+        type="target"
+        position={Position.Top}
+        style={{ background: "#94a3b8", border: "none", width: 8, height: 8 }}
+      />
 
-      {/* Node box */}
       <div
-        onClick={() => hasKids && setExpanded((v) => !v)}
         style={{
-          background: cfg.bg,
-          color: cfg.color,
-          border: `2px solid ${cfg.border}`,
+          width: `${cfg.width}px`,
+          padding: isRoot ? "14px 20px" : "10px 14px",
           borderRadius: "10px",
-          padding:
-            level === 0 ? "14px 28px" : level === 1 ? "11px 20px" : "9px 16px",
+          background: cfg.bg,
+          boxShadow: `0 4px 16px ${cfg.shadow}, 0 2px 4px rgba(0,0,0,0.15)`,
           textAlign: "center",
-          cursor: hasKids ? "pointer" : "default",
-          transition: "all 0.15s",
-          width: level === 0 ? "220px" : level === 1 ? "190px" : "170px",
-          position: "relative",
-          boxShadow:
-            level === 0
-              ? "0 6px 20px rgba(14,61,32,0.2)"
-              : level === 1
-                ? "0 4px 12px rgba(14,61,32,0.12)"
-                : "0 2px 6px rgba(0,0,0,0.06)",
-          userSelect: "none",
-          flexShrink: 0,
+          border: "1px solid rgba(255,255,255,0.2)",
+          cursor: "default",
         }}
       >
         <div
           style={{
-            fontSize:
-              level === 0 ? "13.5px" : level === 1 ? "12.5px" : "11.5px",
+            fontSize: isRoot ? "13px" : d.level === 1 ? "12px" : "11px",
             fontWeight: 700,
+            color: "#fff",
             lineHeight: 1.35,
-            fontFamily: "var(--font-display)",
+            fontFamily: "Poppins, system-ui, sans-serif",
           }}
         >
-          {unit.name}
+          {d.name}
         </div>
-
-        {unit.shortName && level > 0 && (
+        {d.shortName && d.level > 0 && (
           <div
             style={{
               fontSize: "10px",
-              opacity: 0.65,
+              color: "rgba(255,255,255,0.65)",
               marginTop: "3px",
-              fontWeight: 500,
             }}
           >
-            ({unit.shortName})
-          </div>
-        )}
-
-        {/* Toggle button */}
-        {hasKids && (
-          <div
-            style={{
-              position: "absolute",
-              bottom: "-11px",
-              left: "50%",
-              transform: "translateX(-50%)",
-              width: "22px",
-              height: "22px",
-              borderRadius: "50%",
-              background: cfg.border,
-              color: "#fff",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "13px",
-              fontWeight: 700,
-              zIndex: 2,
-              boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-            }}
-          >
-            {expanded ? "−" : "+"}
+            ({d.shortName})
           </div>
         )}
       </div>
 
-      {/* Children */}
-      {hasKids && expanded && (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            marginTop: "0",
-          }}
-        >
-          {/* Garis turun dari node ke horizontal */}
-          <div
-            style={{
-              width: "2px",
-              height: "24px",
-              background: "var(--color-ink-4)",
-              marginTop: "10px",
-            }}
-          />
-
-          {/* Children row */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "flex-start",
-              position: "relative",
-            }}
-          >
-            {children}
-          </div>
-        </div>
-      )}
-    </div>
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        style={{ background: "#94a3b8", border: "none", width: 8, height: 8 }}
+      />
+    </>
   );
 }
 
-// Wrapper node dengan garis horizontal connector
-function NodeWithConnector({
-  unit,
-  children,
-  isFirst,
-  isLast,
-  isOnly,
-  isRoot,
-}: {
-  unit: UnitItem;
-  children?: React.ReactNode;
-  isFirst: boolean;
-  isLast: boolean;
-  isOnly: boolean;
-  isRoot: boolean;
-}) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        position: "relative",
-        padding: "0 12px",
-        flexShrink: 0,
-      }}
-    >
-      {/* Garis horizontal connector — hanya jika bukan satu-satunya child */}
-      {!isOnly && !isRoot && (
-        <div
-          style={{
-            position: "absolute",
-            top: "0",
-            left: isFirst ? "50%" : "0",
-            right: isLast ? "50%" : "0",
-            height: "2px",
-            background: "var(--color-ink-4)",
-            zIndex: 0,
-          }}
-        />
-      )}
+const nodeTypes = { org: OrgNode };
 
-      <OrgNode unit={unit} isRoot={isRoot}>
-        {children}
-      </OrgNode>
-    </div>
-  );
-}
+const EDGE_STYLE = { stroke: "#94a3b8", strokeWidth: 1.5 };
 
-export function OrgChart({ units }: Props) {
-  const getChildren = (parentId: number | null) =>
-    units.filter((u) =>
-      parentId === null ? u.parentId === null : u.parentId === parentId,
-    );
+// ── Layout engine ─────────────────────────────
+function buildGraph(units: UnitItem[]): { nodes: Node[]; edges: Edge[] } {
+  const nodes: Node[] = [];
+  const edges: Edge[] = [];
 
-  const hasData = units.length > 0;
+  // Group by parentId
+  const byParent = new Map<number | null, UnitItem[]>();
+  for (const u of units) {
+    const key = u.parentId ?? null;
+    if (!byParent.has(key)) byParent.set(key, []);
+    byParent.get(key)!.push(u);
+  }
 
-  function renderTree(
-    parentId: number | null,
-    isRoot = false,
-  ): React.ReactNode {
-    const kids = getChildren(parentId);
-    if (kids.length === 0) return null;
+  const X_GAP = 220;
+  const Y_GAP = 130;
+  const posMap = new Map<number, { x: number; y: number }>();
 
-    return kids.map((unit, i) => {
-      const childNodes = renderTree(unit.id, false);
-      const isOnly = kids.length === 1;
+  // BFS layout
+  function layout(parentId: number | null, startX: number, y: number): number {
+    const children = byParent.get(parentId) ?? [];
+    if (children.length === 0) return startX;
 
-      return (
-        <NodeWithConnector
-          key={unit.id}
-          unit={unit}
-          isFirst={i === 0}
-          isLast={i === kids.length - 1}
-          isOnly={isOnly}
-          isRoot={isRoot}
-        >
-          {childNodes ?? undefined}
-        </NodeWithConnector>
-      );
+    let currentX = startX;
+    const childPositions: number[] = [];
+
+    for (const child of children) {
+      const childWidth = X_GAP;
+      const subtreeEnd = layout(child.id, currentX, y + Y_GAP);
+      const centerX = (currentX + subtreeEnd) / 2;
+      childPositions.push(centerX);
+      posMap.set(child.id, {
+        x: centerX - LEVEL_CONFIG[Math.min(child.level ?? 0, 3)].width / 2,
+        y,
+      });
+      currentX = subtreeEnd + X_GAP;
+    }
+
+    return currentX;
+  }
+
+  // Root nodes
+  const roots = byParent.get(null) ?? [];
+  let rx = 0;
+  for (const root of roots) {
+    const end = layout(root.id, rx, Y_GAP);
+    const cx = (rx + end) / 2;
+    posMap.set(root.id, { x: cx - LEVEL_CONFIG[0].width / 2, y: 0 });
+    rx = end + X_GAP;
+  }
+
+  // Build nodes
+  for (const unit of units) {
+    const pos = posMap.get(unit.id) ?? { x: 0, y: 0 };
+    const lvl = unit.level ?? 0;
+    const cfg = LEVEL_CONFIG[Math.min(lvl, 3)];
+
+    nodes.push({
+      id: String(unit.id),
+      type: "org",
+      position: pos,
+      data: {
+        name: unit.name,
+        shortName: unit.shortName ?? null,
+        level: lvl,
+        bg: cfg.bg,
+        shadow: cfg.shadow,
+        width: cfg.width,
+      },
+      draggable: false,
     });
   }
 
-  if (!hasData) {
+  // Build edges
+  for (const unit of units) {
+    if (unit.parentId != null) {
+      edges.push({
+        id: `e-${unit.parentId}-${unit.id}`,
+        source: String(unit.parentId),
+        target: String(unit.id),
+        type: "smoothstep",
+        style: EDGE_STYLE,
+      });
+    }
+  }
+
+  return { nodes, edges };
+}
+
+// ── Legend ────────────────────────────────────
+const LEGEND = [
+  { bg: "linear-gradient(135deg, #0e3d20, #1e7a40)", label: "Pimpinan" },
+  { bg: "linear-gradient(135deg, #1e7a40, #339770)", label: "Sekretariat" },
+  { bg: "linear-gradient(135deg, #60a5fa, #3b82f6)", label: "Bidang / UPT" },
+  { bg: "linear-gradient(135deg, #94a3b8, #64748b)", label: "Sub Bagian" },
+];
+
+// ── Main Component ────────────────────────────
+export function OrgChart({ units }: Props) {
+  const { nodes: initNodes, edges: initEdges } = useMemo(
+    () => buildGraph(units),
+    [units],
+  );
+
+  const [nodes, , onNodesChange] = useNodesState(initNodes);
+  const [edges, , onEdgesChange] = useEdgesState(initEdges);
+
+  if (units.length === 0) {
     return (
       <div
         style={{
@@ -296,7 +254,7 @@ export function OrgChart({ units }: Props) {
         style={{
           display: "flex",
           gap: "16px",
-          marginBottom: "20px",
+          marginBottom: "16px",
           flexWrap: "wrap",
           padding: "10px 16px",
           background: "var(--color-ink-8)",
@@ -305,18 +263,21 @@ export function OrgChart({ units }: Props) {
           alignItems: "center",
         }}
       >
-        {LEVEL_CONFIG.map((cfg) => (
+        {LEGEND.map((l) => (
           <div
-            key={cfg.label}
-            style={{ display: "flex", alignItems: "center", gap: "6px" }}
+            key={l.label}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "7px",
+            }}
           >
             <div
               style={{
-                width: "12px",
-                height: "12px",
-                borderRadius: "3px",
-                background: cfg.bg,
-                border: `2px solid ${cfg.border}`,
+                width: "14px",
+                height: "14px",
+                borderRadius: "4px",
+                background: l.bg,
                 flexShrink: 0,
               }}
             />
@@ -327,7 +288,7 @@ export function OrgChart({ units }: Props) {
                 fontWeight: 500,
               }}
             >
-              {cfg.label}
+              {l.label}
             </span>
           </div>
         ))}
@@ -336,48 +297,51 @@ export function OrgChart({ units }: Props) {
             marginLeft: "auto",
             fontSize: "11px",
             color: "var(--color-ink-5)",
-            display: "flex",
-            alignItems: "center",
-            gap: "4px",
-            flexShrink: 0,
           }}
         >
-          💡 Klik node ± untuk expand/collapse · Geser horizontal untuk melihat
-          seluruh chart
+          💡 Scroll & pinch untuk zoom · Drag untuk geser
         </div>
       </div>
 
-      {/* Scroll container */}
+      {/* Chart */}
       <div
         style={{
           width: "100%",
-          maxWidth: "100%",
-          overflowX: "auto",
-          overflowY: "visible",
+          height: "600px",
           borderRadius: "12px",
           border: "1px solid var(--color-ink-6)",
-          background: "#fff",
-          scrollbarWidth: "thin",
-          scrollbarColor: "var(--color-ink-5) transparent",
-          WebkitOverflowScrolling: "touch" as any,
+          background: "#f8fafc",
+          overflow: "hidden",
         }}
       >
-        {/* Inner — lebar mengikuti konten, scroll jika melebihi */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            padding: "36px 48px 48px",
-            width: "max-content",
-            minWidth: "100%",
-          }}
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          nodeTypes={nodeTypes}
+          fitView
+          fitViewOptions={{ padding: 0.2 }}
+          nodesDraggable={false}
+          nodesConnectable={false}
+          elementsSelectable={false}
+          panOnDrag={true}
+          zoomOnScroll={true}
+          zoomOnPinch={true}
+          minZoom={0.3}
+          maxZoom={1.5}
+          proOptions={{ hideAttribution: true }}
         >
-          {renderTree(null, true)}
-        </div>
+          <Background
+            variant={BackgroundVariant.Dots}
+            gap={20}
+            size={1}
+            color="#cbd5e1"
+          />
+          <Controls showInteractive={false} />
+        </ReactFlow>
       </div>
 
-      {/* Scroll hint */}
       <div
         style={{
           display: "flex",
@@ -398,7 +362,7 @@ export function OrgChart({ units }: Props) {
         >
           <path d="M5 12h14M12 5l7 7-7 7" />
         </svg>
-        Geser ke kanan untuk melihat seluruh struktur organisasi
+        Geser dan zoom untuk melihat seluruh struktur organisasi
       </div>
     </div>
   );

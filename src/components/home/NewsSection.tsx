@@ -87,14 +87,7 @@ export function NewsSection({ featuredPost, posts }: Props) {
         </div>
 
         {/* Grid */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1.1fr 0.9fr",
-            gap: "16px",
-            alignItems: "stretch",
-          }}
-        >
+        <div className="news-section-grid">
           {/* ── Featured — full image dengan overlay ── */}
           <Link
             href={`/berita/${featured.slug}`}

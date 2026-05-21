@@ -139,28 +139,10 @@ export default async function BeritaPage({ searchParams }: Props) {
           {featuredPost && !isFiltered && (
             <Link
               href={`/berita/${featuredPost.slug}`}
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                borderRadius: "16px",
-                overflow: "hidden",
-                background: "#fff",
-                border: "1px solid var(--color-ink-6)",
-                textDecoration: "none",
-                marginBottom: "28px",
-                transition: "transform 0.2s, box-shadow 0.2s",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-              }}
               className="featured-post-card"
             >
               {/* Gambar */}
-              <div
-                style={{
-                  position: "relative",
-                  height: "320px",
-                  overflow: "hidden",
-                }}
-              >
+              <div className="featured-post-img">
                 {featuredPost.featuredImage ? (
                   <img
                     src={featuredPost.featuredImage}
@@ -217,15 +199,7 @@ export default async function BeritaPage({ searchParams }: Props) {
               </div>
 
               {/* Konten */}
-              <div
-                style={{
-                  padding: "32px 36px",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  gap: "12px",
-                }}
-              >
+              <div className="featured-post-content">
                 <div
                   style={{ display: "flex", alignItems: "center", gap: "8px" }}
                 >
@@ -320,12 +294,12 @@ export default async function BeritaPage({ searchParams }: Props) {
 
           {/* ── Filter bar + Search ── */}
           <div
+            className="berita-filter-wrap"
             style={{
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              gap: "16px",
-              flexWrap: "wrap",
+              gap: "12px",
               marginBottom: "16px",
             }}
           >

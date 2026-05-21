@@ -136,13 +136,7 @@ export default async function UnduhanPage({ searchParams }: Props) {
                 <Filter size={15} />
                 Pilih Kategori
               </div>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(4, 1fr)",
-                  gap: "12px",
-                }}
-              >
+              <div className="unduhan-cat-grid">
                 {categories.map((cat) => {
                   const Icon = ICON_MAP[cat.icon ?? ""] ?? FileText;
                   return (
@@ -208,16 +202,30 @@ export default async function UnduhanPage({ searchParams }: Props) {
             </div>
           )}
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "270px 1fr",
-              gap: "24px",
-              alignItems: "start",
-            }}
-          >
+          {/* Filter mobile — pills kategori, hanya tampil jika ada filter aktif atau di mobile */}
+          <div className="unduhan-mobile-filter">
+            <div className="cat-filter-bar">
+              <Link
+                href="/unduhan"
+                className={`cat-filter-pill ${!categorySlug && !search ? "cat-filter-pill-active" : ""}`}
+              >
+                Semua
+              </Link>
+              {categories.map((cat) => (
+                <Link
+                  key={cat.id}
+                  href={`/unduhan?kategori=${cat.slug}`}
+                  className={`cat-filter-pill ${categorySlug === cat.slug ? "cat-filter-pill-active" : ""}`}
+                >
+                  {cat.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div className="unduhan-layout">
             {/* Sidebar filter */}
-            <aside style={{ position: "sticky", top: "88px" }}>
+            <aside className="unduhan-sidebar">
               <Suspense>
                 <DocumentFilter
                   categories={categories}

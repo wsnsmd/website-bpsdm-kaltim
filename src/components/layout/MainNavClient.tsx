@@ -121,10 +121,27 @@ export function MainNavClient({
       <>
         <button
           onClick={() => setMobileMenuOpen(true)}
-          className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-lg border border-ink-6 bg-white text-ink-2 hover:text-forest-700 hover:bg-forest-50 transition-colors"
+          style={{
+            width: "32px",
+            height: "32px",
+            borderRadius: "9px",
+            border: isTransparent
+              ? "1px solid rgba(255,255,255,0.2)"
+              : "1px solid var(--color-ink-6)",
+            background: isTransparent ? "rgba(255,255,255,0.1)" : "#fff",
+            color: isTransparent
+              ? "rgba(255,255,255,0.85)"
+              : "var(--color-ink-2)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            transition: "all 0.2s",
+            flexShrink: 0,
+          }}
           aria-label="Buka menu"
         >
-          <Menu size={18} className="sm:w-5 sm:h-5" />
+          <Menu size={18} />
         </button>
 
         {/* MOBILE MENU OVERLAY - dari KIRI */}
@@ -242,18 +259,6 @@ export function MainNavClient({
                     </div>
                   );
                 })}
-              </div>
-
-              {/* Footer - Tombol Daftar Diklat */}
-              <div className="border-t border-ink-6 p-4 mt-4">
-                <Link
-                  href="/program/daftar"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block w-full text-center btn btn-primary py-3 text-sm"
-                >
-                  <GraduationCap size={14} className="inline mr-2" />
-                  Daftar Diklat
-                </Link>
               </div>
             </div>
           </>

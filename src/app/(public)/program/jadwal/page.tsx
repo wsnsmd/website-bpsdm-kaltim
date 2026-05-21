@@ -147,7 +147,6 @@ export default async function JadwalPage({ searchParams }: Props) {
                   diperbarui setiap 1 jam
                 </span>
               </div>
-
               {/* ── Tanpa filter status — tampilkan per group ── */}
               {!status && (
                 <>
@@ -183,7 +182,6 @@ export default async function JadwalPage({ searchParams }: Props) {
                       </div>
                     </div>
                   )}
-
                   {/* Akan Datang */}
                   {stats.mendatang > 0 && (
                     <div style={{ marginBottom: "28px" }}>
@@ -215,7 +213,6 @@ export default async function JadwalPage({ searchParams }: Props) {
                       </div>
                     </div>
                   )}
-
                   {/* Selesai */}
                   {stats.selesai > 0 && (
                     <div>

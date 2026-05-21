@@ -83,18 +83,7 @@ export default async function ProfilSubPage({ params }: Props) {
 
             {/* Kepala Badan */}
             {leaders.map((s) => (
-              <div
-                key={s.id}
-                style={{
-                  display: "flex",
-                  gap: "28px",
-                  padding: "24px",
-                  background: "var(--color-forest-50)",
-                  borderRadius: "12px",
-                  border: "1px solid var(--color-forest-100)",
-                  marginBottom: "24px",
-                }}
-              >
+              <div key={s.id} className="kepala-badan-card">
                 <div
                   style={{
                     width: "140px",
@@ -188,13 +177,7 @@ export default async function ProfilSubPage({ params }: Props) {
             >
               Sekretaris & Kepala Bidang
             </h2>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                gap: "16px",
-              }}
-            >
+            <div className="staff-grid">
               {[...sekretaris, ...kepalaB].map((s) => (
                 <StaffCard key={s.id} staff={s} />
               ))}
@@ -234,13 +217,7 @@ export default async function ProfilSubPage({ params }: Props) {
               Tenaga pengajar profesional bersertifikat yang melaksanakan
               pengembangan kompetensi ASN di BPSDM Kaltim.
             </p>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                gap: "16px",
-              }}
-            >
+            <div className="staff-grid">
               {wis.map((s) => (
                 <StaffCard key={s.id} staff={s} />
               ))}
@@ -405,13 +382,7 @@ export default async function ProfilSubPage({ params }: Props) {
             >
               Data Pegawai
             </h1>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                gap: "16px",
-              }}
-            >
+            <div className="staff-grid">
               {allStaff.map((s) => (
                 <StaffCard key={s.id} staff={s} />
               ))}

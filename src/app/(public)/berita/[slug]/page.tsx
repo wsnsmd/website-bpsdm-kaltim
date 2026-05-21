@@ -291,10 +291,7 @@ export default async function BeritaDetailPage({ params }: Props) {
                       <ArrowRight size={14} strokeWidth={2} />
                     </Link>
                   </div>
-                  <div
-                    className="berita-grid"
-                    style={{ gridTemplateColumns: "repeat(3,1fr)" }}
-                  >
+                  <div className="berita-grid article-related-grid">
                     {relatedPosts
                       .filter((p) => p.id !== post.id)
                       .slice(0, 3)

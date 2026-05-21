@@ -56,21 +56,29 @@ export function AnnouncementBar({ announcements }: Props) {
   return (
     <>
       <style>{`
-        @keyframes slideUpIn {
-          from { opacity: 0; transform: translateY(8px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes slideDownIn {
-          from { opacity: 0; transform: translateY(-8px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        .ann-item-enter-up {
-          animation: slideUpIn 0.22s ease forwards;
-        }
-        .ann-item-enter-down {
-          animation: slideDownIn 0.22s ease forwards;
-        }
-      `}</style>
+      @keyframes slideUpIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes slideDownIn {
+        from { opacity: 0; transform: translateY(-8px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      .ann-item-enter-up   { animation: slideUpIn   0.22s ease forwards; }
+      .ann-item-enter-down { animation: slideDownIn 0.22s ease forwards; }
+
+      .ann-counter   { display: flex; }
+      .ann-dots      { display: flex; }
+      .ann-nav       { display: flex; }
+      .ann-all-link  { display: flex; }
+
+      @media (max-width: 640px) {
+        .ann-counter  { display: none; }
+        .ann-dots     { display: none; }
+        .ann-nav      { display: none; }
+        .ann-all-link { display: none; }
+      }
+    `}</style>
 
       <div className="ann-bar-root">
         <div
@@ -78,25 +86,25 @@ export function AnnouncementBar({ announcements }: Props) {
           style={{
             display: "flex",
             alignItems: "center",
-            height: "46px",
-            gap: "12px",
+            height: "40px",
+            gap: "10px",
           }}
         >
           {/* Label */}
           <span className="ann-bar-label" style={{ flexShrink: 0 }}>
-            <Bell size={13} />
-            Pengumuman
+            <Bell size={12} />
+            <span className="ann-label-text">Pengumuman</span>
           </span>
 
           <div className="ann-bar-sep" />
 
-          {/* Animasi teks pengumuman */}
+          {/* Teks pengumuman */}
           <div
             style={{
               flex: 1,
               overflow: "hidden",
               minWidth: 0,
-              height: "46px",
+              height: "40px",
               display: "flex",
               alignItems: "center",
             }}
@@ -126,9 +134,10 @@ export function AnnouncementBar({ announcements }: Props) {
             )}
           </div>
 
-          {/* Counter */}
+          {/* Counter — hidden mobile */}
           {items.length > 1 && (
             <span
+              className="ann-counter"
               style={{
                 fontSize: "11px",
                 fontWeight: 600,
@@ -141,11 +150,11 @@ export function AnnouncementBar({ announcements }: Props) {
             </span>
           )}
 
-          {/* Navigasi atas/bawah */}
+          {/* Navigasi — hidden mobile */}
           {items.length > 1 && (
             <div
+              className="ann-nav"
               style={{
-                display: "flex",
                 flexDirection: "column",
                 gap: "1px",
                 flexShrink: 0,
@@ -159,13 +168,13 @@ export function AnnouncementBar({ announcements }: Props) {
                   border: "none",
                   background: "none",
                   cursor: "pointer",
-                  display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   color: "var(--color-ink-4)",
                   padding: 0,
                   borderRadius: "3px",
                   transition: "color 0.12s",
+                  display: "flex",
                 }}
                 aria-label="Sebelumnya"
               >
@@ -179,13 +188,13 @@ export function AnnouncementBar({ announcements }: Props) {
                   border: "none",
                   background: "none",
                   cursor: "pointer",
-                  display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   color: "var(--color-ink-4)",
                   padding: 0,
                   borderRadius: "3px",
                   transition: "color 0.12s",
+                  display: "flex",
                 }}
                 aria-label="Berikutnya"
               >
@@ -194,15 +203,9 @@ export function AnnouncementBar({ announcements }: Props) {
             </div>
           )}
 
-          {/* Dots indicator */}
+          {/* Dots — hidden mobile */}
           {items.length > 1 && items.length <= 8 && (
-            <div
-              style={{
-                display: "flex",
-                gap: "4px",
-                flexShrink: 0,
-              }}
-            >
+            <div className="ann-dots" style={{ gap: "4px", flexShrink: 0 }}>
               {items.map((_, i) => (
                 <button
                   key={i}
@@ -229,10 +232,10 @@ export function AnnouncementBar({ announcements }: Props) {
 
           <div className="ann-bar-sep" />
 
-          {/* Link semua */}
+          {/* Link semua — hidden di mobile sangat kecil */}
           <Link
             href="/pengumuman"
-            className="ann-bar-all"
+            className="ann-bar-all ann-all-link"
             style={{ flexShrink: 0 }}
           >
             Semua

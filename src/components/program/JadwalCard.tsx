@@ -130,16 +130,10 @@ export function JadwalCard({ jadwal }: Props) {
               <Calendar size={13} />
               {formatTanggalJadwal(jadwal.tgl_awal, jadwal.tgl_akhir)}
             </span>
-
-            <span className="jadwal-meta-sep">·</span>
-
             <span className="jadwal-meta-item">
               <Clock size={13} />
               {jadwal.jumHari} hari
             </span>
-
-            <span className="jadwal-meta-sep">·</span>
-
             <span className="jadwal-meta-item">
               <Building2 size={13} />
               {jadwal.kelas}

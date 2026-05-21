@@ -177,17 +177,7 @@ export default async function KontakPage() {
       >
         <div className="container-content">
           {/* ── Peta Full Width ── */}
-          <div
-            style={{
-              height: "400px",
-              borderRadius: "16px",
-              overflow: "hidden",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-              border: "1px solid var(--color-ink-6)",
-              marginBottom: "32px",
-              position: "relative",
-            }}
-          >
+          <div className="kontak-map">
             <MapBoxWrapper
               token={mapboxToken || ""}
               latitude={lat}
@@ -200,14 +190,7 @@ export default async function KontakPage() {
           </div>
 
           {/* ── 3 Kolom Info ── */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
-              gap: "20px",
-              marginBottom: "20px",
-            }}
-          >
+          <div className="kontak-grid">
             {/* Kontak */}
             <div
               style={{

@@ -254,13 +254,7 @@ export default async function PpidPage() {
           </div>
 
           {/* Stats grid */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(5, 1fr)",
-              gap: "0",
-            }}
-          >
+          <div className="ppid-stats-grid">
             {[
               { label: "Total Informasi", value: totalInfo, color: "#fff" },
               {
@@ -321,13 +315,7 @@ export default async function PpidPage() {
       </div>
 
       {/* ── Layanan unggulan ── */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: "12px",
-        }}
-      >
+      <div className="ppid-layanan-grid">
         {LAYANAN_UNGGULAN.map((item) => (
           <div
             key={item.label}
@@ -416,13 +404,7 @@ export default async function PpidPage() {
           <Shield size={15} style={{ color: "var(--color-forest-600)" }} />
           Navigasi PPID
         </div>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: "0",
-          }}
-        >
+        <div className="ppid-nav-grid">
           {MENU_CARDS.map((item, i) => {
             const isLastRow =
               i >= MENU_CARDS.length - (MENU_CARDS.length % 3 || 3);
@@ -485,13 +467,7 @@ export default async function PpidPage() {
       </div>
 
       {/* ── 4 jenis informasi ── */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(2, 1fr)",
-          gap: "12px",
-        }}
-      >
+      <div className="ppid-tipe-grid">
         {(Object.keys(TIPE_CONFIG) as (keyof typeof TIPE_CONFIG)[]).map(
           (tipe) => {
             const cfg = TIPE_CONFIG[tipe];
@@ -603,13 +579,7 @@ export default async function PpidPage() {
           <Scale size={13} style={{ color: "var(--color-forest-600)" }} />
           Landasan Hukum
         </div>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "8px",
-          }}
-        >
+        <div className="ppid-hukum-grid">
           {[
             "UU No. 14 Tahun 2008 tentang Keterbukaan Informasi Publik",
             "PP No. 61 Tahun 2010 tentang Pelaksanaan UU KIP",
@@ -642,13 +612,7 @@ export default async function PpidPage() {
       </div>
 
       {/* ── CTA Permohonan ── */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "12px",
-        }}
-      >
+      <div className="ppid-cta-grid">
         <Link
           href="/ppid/permohonan"
           style={{

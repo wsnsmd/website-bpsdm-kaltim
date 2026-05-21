@@ -85,14 +85,7 @@ export default async function ProfilLayout({
         }}
       >
         <div className="container-content">
-          <div
-            style={{
-              display: "flex",
-              gap: "4px",
-              paddingBlock: "12px",
-              flexWrap: "wrap",
-            }}
-          >
+          <div className="profil-tab-bar">
             {menuItems.slice(0, 8).map((item) => (
               <Link
                 key={item.id}
@@ -125,14 +118,7 @@ export default async function ProfilLayout({
         }}
       >
         <div className="container-content">
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "260px 1fr",
-              gap: "24px",
-              alignItems: "start",
-            }}
-          >
+          <div className="profil-layout">
             <ProfilSidebar menuItems={menuItems} />
             <main style={{ minWidth: 0, overflow: "hidden" }}>{children}</main>
           </div>
