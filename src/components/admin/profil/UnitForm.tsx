@@ -54,92 +54,76 @@ export function UnitForm({ unit, units }: Props) {
 
   return (
     <form onSubmit={handleSubmit}>
-      {error && (
-        <div className="login-error" style={{ marginBottom: "20px" }}>
-          {error}
-        </div>
-      )}
+      {error && <div className="login-error mb-5">{error}</div>}
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 280px",
-          gap: "20px",
-          alignItems: "start",
-        }}
-      >
-        {/* ── Main ── */}
-        <div className="admin-card">
-          <div className="admin-card-head">
-            <div className="admin-card-title">Informasi Unit Kerja</div>
-          </div>
-          <div className="admin-card-body">
-            <div className="admin-form" style={{ gap: "14px" }}>
-              <div className="admin-form-group">
-                <label className="admin-label admin-label-req" htmlFor="name">
-                  Nama Unit
-                </label>
-                <input
-                  id="name"
-                  name="name"
-                  type="text"
-                  className="admin-input"
-                  placeholder="Contoh: Bidang Pengembangan Kompetensi Teknis"
-                  defaultValue={unit?.name ?? ""}
-                  required
-                />
-              </div>
+      {/* Pembungkus Grid Responsif: 1 Kolom di HP, 2 Kolom di Layar Lebar (lg) */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6 items-start">
+        {/* ── Main Column ── */}
+        <div className="flex flex-col gap-5">
+          <div className="admin-card">
+            <div className="admin-card-head">
+              <div className="admin-card-title">Informasi Unit Kerja</div>
+            </div>
+            <div className="admin-card-body">
+              <div className="admin-form gap-4">
+                <div className="admin-form-group">
+                  <label className="admin-label admin-label-req" htmlFor="name">
+                    Nama Unit
+                  </label>
+                  <input
+                    id="name"
+                    name="name"
+                    type="text"
+                    className="admin-input"
+                    placeholder="Contoh: Bidang Pengembangan Kompetensi Teknis"
+                    defaultValue={unit?.name ?? ""}
+                    required
+                  />
+                </div>
 
-              <div className="admin-form-group">
-                <label className="admin-label" htmlFor="shortName">
-                  Nama Singkat
-                </label>
-                <input
-                  id="shortName"
-                  name="shortName"
-                  type="text"
-                  className="admin-input"
-                  placeholder="Contoh: Bid. PKT"
-                  defaultValue={unit?.shortName ?? ""}
-                />
-                <span className="admin-hint">
-                  Ditampilkan di org chart sebagai keterangan.
-                </span>
-              </div>
+                <div className="admin-form-group">
+                  <label className="admin-label" htmlFor="shortName">
+                    Nama Singkat
+                  </label>
+                  <input
+                    id="shortName"
+                    name="shortName"
+                    type="text"
+                    className="admin-input"
+                    placeholder="Contoh: Bid. PKT"
+                    defaultValue={unit?.shortName ?? ""}
+                  />
+                  <span className="admin-hint">
+                    Ditampilkan di org chart sebagai keterangan.
+                  </span>
+                </div>
 
-              <div className="admin-form-group">
-                <label className="admin-label" htmlFor="description">
-                  Deskripsi / Tugas Pokok
-                </label>
-                <textarea
-                  id="description"
-                  name="description"
-                  className="admin-textarea"
-                  placeholder="Tugas pokok dan fungsi unit kerja..."
-                  defaultValue={unit?.description ?? ""}
-                  rows={3}
-                />
+                <div className="admin-form-group">
+                  <label className="admin-label" htmlFor="description">
+                    Deskripsi / Tugas Pokok
+                  </label>
+                  <textarea
+                    id="description"
+                    name="description"
+                    className="admin-textarea"
+                    placeholder="Tugas pokok dan fungsi unit kerja..."
+                    defaultValue={unit?.description ?? ""}
+                    rows={3}
+                  />
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* ── Sidebar ── */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "16px",
-            position: "sticky",
-            top: "80px",
-          }}
-        >
+        {/* ── Sidebar Column (Otomatis naik ke atas di layar HP) ── */}
+        <div className="flex flex-col gap-5 lg:sticky lg:top-20 order-first lg:order-last mb-2 lg:mb-0">
           <div className="admin-card">
             <div className="admin-card-head">
               <div className="admin-card-title">Struktur</div>
             </div>
             <div className="admin-card-body">
-              <div className="admin-form" style={{ gap: "14px" }}>
+              <div className="admin-form gap-4">
                 <div className="admin-form-group">
                   <label
                     className="admin-label admin-label-req"
@@ -180,7 +164,7 @@ export function UnitForm({ unit, units }: Props) {
                       </option>
                     ))}
                   </select>
-                  <span className="admin-hint">
+                  <span className="admin-hint mt-0.5">
                     Tentukan unit induk untuk tampilan org chart.
                   </span>
                 </div>
@@ -199,20 +183,17 @@ export function UnitForm({ unit, units }: Props) {
                   />
                 </div>
 
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
-                >
+                <div className="flex items-center gap-2.5 mt-1 mb-2">
                   <input
                     type="checkbox"
                     id="isActive"
                     checked={isActive}
                     onChange={(e) => setIsActive(e.target.checked)}
-                    style={{ width: "16px", height: "16px", cursor: "pointer" }}
+                    className="w-4 h-4 cursor-pointer accent-[var(--color-forest-700)] shrink-0"
                   />
                   <label
                     htmlFor="isActive"
-                    className="admin-label"
-                    style={{ margin: 0, cursor: "pointer", fontWeight: 500 }}
+                    className="admin-label !m-0 cursor-pointer font-medium"
                   >
                     Unit aktif
                   </label>
@@ -220,9 +201,8 @@ export function UnitForm({ unit, units }: Props) {
 
                 <button
                   type="submit"
-                  className="admin-btn-save"
+                  className="admin-btn-save w-full justify-center"
                   disabled={isPending}
-                  style={{ width: "100%", justifyContent: "center" }}
                 >
                   {isPending
                     ? "Menyimpan..."

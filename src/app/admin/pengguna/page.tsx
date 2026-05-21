@@ -91,8 +91,8 @@ export default async function AdminPenggunaPage() {
       </div>
 
       {/* Info SSO */}
-      <div className="ann-info-box" style={{ marginBottom: "20px" }}>
-        <Info size={16} style={{ flexShrink: 0 }} />
+      <div className="ann-info-box mb-5">
+        <Info size={16} className="shrink-0" />
         <span>
           Pengguna dikelola melalui <strong>SSO Authentik BPSDM Kaltim</strong>.
           Untuk menambah atau menghapus pengguna, lakukan di panel Authentik. Di
@@ -100,15 +100,8 @@ export default async function AdminPenggunaPage() {
         </span>
       </div>
 
-      {/* Stats */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(5, 1fr)",
-          gap: "14px",
-          marginBottom: "24px",
-        }}
-      >
+      {/* ── Stats Grid (2 Kolom HP -> 5 Kolom Desktop) ── */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 mb-6">
         {[
           {
             label: "Total Pengguna",
@@ -146,28 +139,23 @@ export default async function AdminPenggunaPage() {
             bg: "var(--color-forest-50)",
           },
         ].map((s) => (
-          <div
-            key={s.label}
-            className="admin-stat-card"
-            style={{ gap: "10px" }}
-          >
+          <div key={s.label} className="admin-stat-card !gap-2.5">
             <div className="admin-stat-icon" style={{ backgroundColor: s.bg }}>
               <s.icon size={20} style={{ color: s.color }} strokeWidth={1.5} />
             </div>
             <div>
-              <div className="admin-stat-value" style={{ fontSize: "26px" }}>
-                {s.value}
-              </div>
+              <div className="admin-stat-value text-[26px]">{s.value}</div>
               <div className="admin-stat-label">{s.label}</div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Tabel */}
+      {/* ── Tabel Pengguna ── */}
       <div className="admin-card">
+        {/* Wrapper min-w memberikan fitur geser / horizontal scroll di layar kecil */}
         <div className="admin-table-wrap">
-          <table className="admin-table">
+          <table className="admin-table min-w-[900px]">
             <thead>
               <tr>
                 <th>Akses Admin</th>
@@ -184,11 +172,7 @@ export default async function AdminPenggunaPage() {
                 <tr>
                   <td
                     colSpan={7}
-                    style={{
-                      textAlign: "center",
-                      padding: "40px",
-                      color: "var(--color-ink-4)",
-                    }}
+                    className="text-center py-10 text-[var(--color-ink-4)]"
                   >
                     Belum ada pengguna yang login via SSO.
                   </td>
@@ -214,9 +198,9 @@ export default async function AdminPenggunaPage() {
                 return (
                   <tr
                     key={user.id}
-                    style={{
-                      opacity: user.status === "inactive" ? 0.6 : 1,
-                    }}
+                    className={
+                      user.status === "inactive" ? "opacity-60" : "opacity-100"
+                    }
                   >
                     {/* Toggle akses */}
                     <td>
@@ -229,67 +213,28 @@ export default async function AdminPenggunaPage() {
 
                     {/* Info pengguna */}
                     <td>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "10px",
-                        }}
-                      >
+                      <div className="flex items-center gap-2.5">
                         {/* Avatar */}
                         <div
+                          className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0 border-2"
                           style={{
-                            width: "36px",
-                            height: "36px",
-                            borderRadius: "50%",
                             backgroundColor: roleCfg.bg,
-                            border: `2px solid ${roleCfg.color}30`,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: "14px",
-                            fontWeight: 700,
+                            borderColor: `${roleCfg.color}30`,
                             color: roleCfg.color,
-                            flexShrink: 0,
                           }}
                         >
                           {user.name?.charAt(0).toUpperCase() ?? "?"}
                         </div>
                         <div>
-                          <div
-                            style={{
-                              fontWeight: 600,
-                              fontSize: "13.5px",
-                              color: "var(--color-ink)",
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "6px",
-                            }}
-                          >
+                          <div className="font-semibold text-[13.5px] text-[var(--color-ink)] flex items-center gap-1.5">
                             {user.name}
                             {isSelf && (
-                              <span
-                                style={{
-                                  fontSize: "10px",
-                                  fontWeight: 700,
-                                  color: "var(--color-forest-700)",
-                                  background: "var(--color-forest-50)",
-                                  padding: "1px 7px",
-                                  borderRadius: "20px",
-                                  border: "1px solid var(--color-forest-200)",
-                                }}
-                              >
+                              <span className="text-[10px] font-bold text-[var(--color-forest-700)] bg-[var(--color-forest-50)] px-[7px] py-[1px] rounded-[20px] border border-[var(--color-forest-200)]">
                                 Anda
                               </span>
                             )}
                           </div>
-                          <div
-                            style={{
-                              fontSize: "11.5px",
-                              color: "var(--color-ink-4)",
-                              marginTop: "1px",
-                            }}
-                          >
+                          <div className="text-[11.5px] text-[var(--color-ink-4)] mt-[1px]">
                             @{user.username} · {user.email ?? "—"}
                           </div>
                         </div>
@@ -299,16 +244,10 @@ export default async function AdminPenggunaPage() {
                     {/* Role */}
                     <td>
                       <div
+                        className="inline-flex items-center gap-[5px] px-2.5 py-1 rounded-[20px] text-xs font-bold"
                         style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: "5px",
-                          padding: "4px 10px",
-                          borderRadius: "20px",
                           backgroundColor: roleCfg.bg,
                           color: roleCfg.color,
-                          fontSize: "12px",
-                          fontWeight: 700,
                         }}
                       >
                         <RoleIcon size={12} />
@@ -318,35 +257,16 @@ export default async function AdminPenggunaPage() {
 
                     {/* Groups Authentik */}
                     <td>
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "4px",
-                          flexWrap: "wrap",
-                        }}
-                      >
+                      <div className="flex gap-1 flex-wrap">
                         {groups.length === 0 ? (
-                          <span
-                            style={{
-                              fontSize: "12px",
-                              color: "var(--color-ink-5)",
-                            }}
-                          >
+                          <span className="text-xs text-[var(--color-ink-5)]">
                             —
                           </span>
                         ) : (
                           groups.map((g) => (
                             <span
                               key={g}
-                              style={{
-                                fontSize: "10.5px",
-                                fontWeight: 600,
-                                padding: "2px 8px",
-                                borderRadius: "20px",
-                                background: "var(--color-ink-7)",
-                                color: "var(--color-ink-3)",
-                                border: "1px solid var(--color-ink-6)",
-                              }}
+                              className="text-[10.5px] font-semibold px-2 py-0.5 rounded-[20px] bg-[var(--color-ink-7)] text-[var(--color-ink-3)] border border-[var(--color-ink-6)]"
                             >
                               {g}
                             </span>
@@ -363,28 +283,13 @@ export default async function AdminPenggunaPage() {
                     </td>
 
                     {/* Login terakhir */}
-                    <td style={{ whiteSpace: "nowrap" }}>
+                    <td className="whitespace-nowrap">
                       {user.lastLoginAt ? (
                         <div>
-                          <div
-                            style={{
-                              fontSize: "12.5px",
-                              color: "var(--color-ink-2)",
-                              fontWeight: 500,
-                            }}
-                          >
+                          <div className="text-[12.5px] text-[var(--color-ink-2)] font-medium">
                             {timeAgo(user.lastLoginAt)}
                           </div>
-                          <div
-                            style={{
-                              fontSize: "11px",
-                              color: "var(--color-ink-5)",
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "3px",
-                              marginTop: "2px",
-                            }}
-                          >
+                          <div className="text-[11px] text-[var(--color-ink-5)] flex items-center gap-[3px] mt-0.5">
                             <Clock size={10} />
                             {formatDate(user.lastLoginAt, {
                               day: "numeric",
@@ -396,25 +301,14 @@ export default async function AdminPenggunaPage() {
                           </div>
                         </div>
                       ) : (
-                        <span
-                          style={{
-                            fontSize: "12px",
-                            color: "var(--color-ink-5)",
-                          }}
-                        >
+                        <span className="text-xs text-[var(--color-ink-5)]">
                           Belum pernah
                         </span>
                       )}
                     </td>
 
                     {/* Terdaftar */}
-                    <td
-                      style={{
-                        fontSize: "12px",
-                        color: "var(--color-ink-4)",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
+                    <td className="text-xs text-[var(--color-ink-4)] whitespace-nowrap">
                       {formatDate(user.createdAt, {
                         day: "numeric",
                         month: "short",

@@ -160,25 +160,29 @@ export function AdminSidebar({
     (item) => !item.roles || item.roles.includes(role),
   );
 
+  // Hapus kedua useEffect yang ada, ganti dengan satu ini:
   useEffect(() => {
     const checkIsMobile = () => setIsMobile(window.innerWidth < 768);
     checkIsMobile();
     window.addEventListener("resize", checkIsMobile);
-    return () => window.removeEventListener("resize", checkIsMobile);
-  }, []);
 
-  useEffect(() => {
+    // Auto-open menu aktif saat pertama load
     const activeMenu = visibleNav.find((item) =>
-      item.children?.some((child) => pathname === child.href),
+      item.children?.some((child) => pathname.startsWith(child.href)),
     );
-    if (activeMenu && !openMenus.includes(activeMenu.href)) {
-      setOpenMenus((prev) => [...prev, activeMenu.href]);
+    if (activeMenu) {
+      setOpenMenus([activeMenu.href]);
     }
-  }, [pathname]);
+
+    return () => window.removeEventListener("resize", checkIsMobile);
+  }, []); // ← satu useEffect, dependency kosong
 
   const toggleMenu = (href: string) => {
-    setOpenMenus((prev) =>
-      prev.includes(href) ? prev.filter((i) => i !== href) : [...prev, href],
+    setOpenMenus(
+      (prev) =>
+        prev.includes(href)
+          ? [] // tutup jika sudah buka
+          : [href], // buka hanya yang ini, tutup semua yang lain
     );
   };
 
@@ -190,17 +194,6 @@ export function AdminSidebar({
   // ── SidebarContent — UI identik dengan asli ──
   const SidebarContent = () => (
     <>
-      {/* Brand Header */}
-      <div className="admin-sidebar-logo">
-        <div className="admin-sidebar-logo-mark">
-          <GraduationCap size={20} className="text-white" />
-        </div>
-        <div className={cn("admin-sidebar-logo-text", !isOpen && "hidden")}>
-          <div className="admin-sidebar-logo-name">BPSDM KALTIM</div>
-          <div className="admin-sidebar-logo-sub">Administrator</div>
-        </div>
-      </div>
-
       {/* Navigation */}
       <nav
         className="admin-sidebar-nav custom-scrollbar"
@@ -250,7 +243,7 @@ export function AdminSidebar({
                           initial={{ height: 0, opacity: 0 }}
                           animate={{ height: "auto", opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.2 }}
+                          transition={{ duration: 0.3 }}
                           className="admin-nav-sub"
                           style={{ overflow: "hidden" }}
                         >
@@ -324,8 +317,12 @@ export function AdminSidebar({
           <>
             <div className="admin-sidebar-overlay" onClick={onClose} />
             <aside className="admin-sidebar-mobile">
+              {/* Header: logo + tombol X sejajar */}
               <div className="admin-sidebar-mobile-header">
-                <div className="admin-sidebar-logo">
+                <div
+                  className="admin-sidebar-logo"
+                  style={{ padding: 0, border: "none", flex: 1 }}
+                >
                   <div className="admin-sidebar-logo-mark">
                     <GraduationCap size={20} className="text-white" />
                   </div>
@@ -334,14 +331,16 @@ export function AdminSidebar({
                     <div className="admin-sidebar-logo-sub">Administrator</div>
                   </div>
                 </div>
+
                 <button
                   onClick={onClose}
                   className="admin-mobile-close-btn"
                   aria-label="Tutup menu"
                 >
-                  <X size={20} />
+                  <X size={18} />
                 </button>
               </div>
+
               <SidebarContent />
             </aside>
           </>
@@ -353,6 +352,16 @@ export function AdminSidebar({
   // Desktop sidebar
   return (
     <aside className={cn("admin-sidebar-desktop", !isOpen && "collapsed")}>
+      {/* Logo hanya di sini */}
+      <div className="admin-sidebar-logo">
+        <div className="admin-sidebar-logo-mark">
+          <GraduationCap size={20} className="text-white" />
+        </div>
+        <div className={cn("admin-sidebar-logo-text", !isOpen && "hidden")}>
+          <div className="admin-sidebar-logo-name">BPSDM KALTIM</div>
+          <div className="admin-sidebar-logo-sub">Administrator</div>
+        </div>
+      </div>
       <SidebarContent />
     </aside>
   );

@@ -80,28 +80,18 @@ export function ProgramForm({ program }: Props) {
 
   return (
     <form onSubmit={handleSubmit}>
-      {error && (
-        <div className="login-error" style={{ marginBottom: "20px" }}>
-          {error}
-        </div>
-      )}
+      {error && <div className="login-error mb-5">{error}</div>}
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 300px",
-          gap: "24px",
-          alignItems: "start",
-        }}
-      >
-        {/* ── Main ── */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+      {/* Pembungkus Grid Responsif: 1 Kolom di HP, 2 Kolom di Layar Lebar (lg) */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6 items-start">
+        {/* ── Main Column ── */}
+        <div className="flex flex-col gap-5">
           <div className="admin-card">
             <div className="admin-card-head">
               <div className="admin-card-title">Informasi Program</div>
             </div>
             <div className="admin-card-body">
-              <div className="admin-form" style={{ gap: "14px" }}>
+              <div className="admin-form gap-4">
                 <div className="admin-form-group">
                   <label className="admin-label admin-label-req" htmlFor="name">
                     Nama Program
@@ -110,33 +100,20 @@ export function ProgramForm({ program }: Props) {
                     id="name"
                     name="name"
                     type="text"
-                    className="admin-input"
+                    className="admin-input text-[15px] font-semibold py-2.5"
                     placeholder="Contoh: Kompetensi Teknis"
                     value={name}
                     onChange={(e) => handleNameChange(e.target.value)}
                     required
-                    style={{ fontSize: "15px", fontWeight: 600 }}
                   />
                 </div>
 
-                <div className="admin-form-group">
+                <div className="admin-form-group mt-1">
                   <label className="admin-label" htmlFor="slug">
                     Slug URL
                   </label>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: "13px",
-                        color: "var(--color-ink-4)",
-                        flexShrink: 0,
-                      }}
-                    >
+                  <div className="flex items-center gap-2 max-sm:flex-col max-sm:items-start max-sm:gap-1.5">
+                    <span className="text-[13px] text-[var(--color-ink-4)] shrink-0">
                       /program/
                     </span>
                     <input
@@ -154,7 +131,7 @@ export function ProgramForm({ program }: Props) {
                   </div>
                 </div>
 
-                <div className="admin-form-group">
+                <div className="admin-form-group mt-1">
                   <label className="admin-label" htmlFor="description">
                     Deskripsi
                   </label>
@@ -208,6 +185,7 @@ export function ProgramForm({ program }: Props) {
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
+              className="shrink-0"
             >
               <circle cx="12" cy="12" r="10" />
               <line x1="12" y1="8" x2="12" y2="12" />
@@ -221,23 +199,15 @@ export function ProgramForm({ program }: Props) {
           </div>
         </div>
 
-        {/* ── Sidebar ── */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "16px",
-            position: "sticky",
-            top: "80px",
-          }}
-        >
+        {/* ── Sidebar Column (Otomatis naik ke atas di layar HP) ── */}
+        <div className="flex flex-col gap-5 lg:sticky lg:top-20 order-first lg:order-last mb-2 lg:mb-0">
           {/* Jenis & Status */}
           <div className="admin-card">
             <div className="admin-card-head">
               <div className="admin-card-title">Konfigurasi</div>
             </div>
             <div className="admin-card-body">
-              <div className="admin-form" style={{ gap: "14px" }}>
+              <div className="admin-form gap-4">
                 <div className="admin-form-group">
                   <label
                     className="admin-label admin-label-req"
@@ -259,7 +229,7 @@ export function ProgramForm({ program }: Props) {
                       </option>
                     ))}
                   </select>
-                  <span className="admin-hint">
+                  <span className="admin-hint mt-0.5">
                     Harus cocok dengan nilai jenis di API SIMPEL.
                   </span>
                 </div>
@@ -291,26 +261,23 @@ export function ProgramForm({ program }: Props) {
                     className="admin-input"
                     defaultValue={program?.sortOrder ?? 0}
                   />
-                  <span className="admin-hint">
+                  <span className="admin-hint mt-0.5">
                     Angka lebih kecil tampil lebih awal.
                   </span>
                 </div>
 
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
-                >
+                <div className="flex items-center gap-2.5 mt-1 mb-2">
                   <input
                     type="checkbox"
                     id="isHighlight"
                     name="isHighlight"
                     value="true"
                     defaultChecked={program?.isHighlight ?? true}
-                    style={{ width: "16px", height: "16px", cursor: "pointer" }}
+                    className="w-4 h-4 cursor-pointer accent-[var(--color-forest-700)] shrink-0"
                   />
                   <label
                     htmlFor="isHighlight"
-                    className="admin-label"
-                    style={{ margin: 0, cursor: "pointer", fontWeight: 500 }}
+                    className="admin-label !m-0 cursor-pointer font-medium"
                   >
                     Tampilkan di beranda
                   </label>
@@ -318,9 +285,8 @@ export function ProgramForm({ program }: Props) {
 
                 <button
                   type="submit"
-                  className="admin-btn-save"
+                  className="admin-btn-save w-full justify-center"
                   disabled={isPending}
-                  style={{ width: "100%", justifyContent: "center" }}
                 >
                   {isPending
                     ? "Menyimpan..."
@@ -338,7 +304,7 @@ export function ProgramForm({ program }: Props) {
               <div className="admin-card-title">Tampilan</div>
             </div>
             <div className="admin-card-body">
-              <div className="admin-form" style={{ gap: "14px" }}>
+              <div className="admin-form gap-4">
                 <div className="admin-form-group">
                   <label className="admin-label" htmlFor="icon">
                     Icon
@@ -362,26 +328,13 @@ export function ProgramForm({ program }: Props) {
                   <label className="admin-label" htmlFor="color">
                     Warna Aksen
                   </label>
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "8px",
-                      alignItems: "center",
-                    }}
-                  >
+                  <div className="flex gap-2 items-center">
                     <input
                       id="color"
                       name="color"
                       type="color"
                       defaultValue={program?.color ?? "#0e3d20"}
-                      style={{
-                        width: "44px",
-                        height: "34px",
-                        borderRadius: "7px",
-                        border: "1px solid var(--color-ink-6)",
-                        cursor: "pointer",
-                        padding: "2px",
-                      }}
+                      className="w-11 h-[34px] rounded-md border border-[var(--color-ink-6)] cursor-pointer p-0.5 bg-white"
                     />
                     <span className="admin-hint">
                       Warna ikon dan aksen kartu.

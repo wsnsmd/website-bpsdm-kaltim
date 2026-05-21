@@ -154,43 +154,22 @@ export function PpidInformasiForm({
 
   return (
     <form onSubmit={handleSubmit}>
-      {error && (
-        <div
-          style={{
-            padding: "10px 14px",
-            borderRadius: "8px",
-            background: "#fef2f2",
-            border: "1px solid #fecaca",
-            color: "#dc2626",
-            fontSize: "13px",
-            marginBottom: "16px",
-          }}
-        >
-          {error}
-        </div>
-      )}
+      {error && <div className="login-error mb-4">{error}</div>}
 
-      {/* Layout 2 kolom */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 380px",
-          gap: "20px",
-          alignItems: "start",
-        }}
-      >
-        {/* Kolom kiri — informasi utama */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+      {/* Pembungkus Grid Responsif: 1 Kolom di HP, 2 Kolom di Layar Lebar (lg) */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 items-start">
+        {/* ── Kolom Kiri — Informasi Utama ── */}
+        <div className="flex flex-col gap-4">
           {/* Data dokumen */}
           <div className="admin-card">
             <div className="admin-card-head">
-              <div className="admin-card-title">
+              <div className="admin-card-title items-center flex gap-2">
                 <FileText size={15} />
                 {isEdit ? "Edit Informasi Publik" : "Data Dokumen"}
               </div>
             </div>
             <div className="admin-card-body">
-              <div className="admin-form" style={{ gap: "14px" }}>
+              <div className="admin-form gap-4">
                 <div className="admin-form-group">
                   <label
                     className="admin-label admin-label-req"
@@ -202,7 +181,7 @@ export function PpidInformasiForm({
                     id="judul"
                     name="judul"
                     type="text"
-                    className="admin-input"
+                    className="admin-input py-2.5 font-medium"
                     defaultValue={item?.judul ?? ""}
                     required
                     placeholder="Contoh: Laporan Kinerja BPSDM 2024"
@@ -223,13 +202,7 @@ export function PpidInformasiForm({
                   />
                 </div>
 
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: "12px",
-                  }}
-                >
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="admin-form-group">
                     <label
                       className="admin-label admin-label-req"
@@ -268,13 +241,7 @@ export function PpidInformasiForm({
                   </div>
                 </div>
 
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: "12px",
-                  }}
-                >
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="admin-form-group">
                     <label className="admin-label" htmlFor="status">
                       Status
@@ -307,12 +274,11 @@ export function PpidInformasiForm({
             </div>
           </div>
 
-          {/* Tombol submit */}
+          {/* Tombol submit (Disembunyikan di HP karena tombol Sidebar akan pindah ke atas) */}
           <button
             type="submit"
-            className="admin-btn-save"
+            className="admin-btn-save max-lg:hidden self-start px-6 py-2.5"
             disabled={isPending || uploading}
-            style={{ alignSelf: "flex-start", padding: "10px 24px" }}
           >
             {isPending
               ? "Menyimpan..."
@@ -322,436 +288,283 @@ export function PpidInformasiForm({
           </button>
         </div>
 
-        {/* Kolom kanan — sumber file */}
-        <div className="admin-card" style={{ position: "sticky", top: "80px" }}>
-          <div className="admin-card-head">
-            <div className="admin-card-title">Sumber Dokumen</div>
-          </div>
-          <div className="admin-card-body">
-            {/* Toggle mode */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                gap: "6px",
-                marginBottom: "16px",
-              }}
-            >
-              {[
-                {
-                  mode: "existing" as FileMode,
-                  label: "Dari Unduhan",
-                  icon: FileText,
-                },
-                {
-                  mode: "external" as FileMode,
-                  label: "URL Eksternal",
-                  icon: LinkIcon,
-                },
-                {
-                  mode: "upload" as FileMode,
-                  label: "Upload File",
-                  icon: Upload,
-                },
-              ].map(({ mode, label, icon: Icon }) => (
-                <button
-                  key={mode}
-                  type="button"
-                  onClick={() => setFileMode(mode)}
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    gap: "4px",
-                    padding: "10px 8px",
-                    borderRadius: "8px",
-                    border: `1.5px solid ${fileMode === mode ? "var(--color-forest-700)" : "var(--color-ink-5)"}`,
-                    background:
-                      fileMode === mode ? "var(--color-forest-50)" : "#fff",
-                    color:
-                      fileMode === mode
-                        ? "var(--color-forest-700)"
-                        : "var(--color-ink-4)",
-                    fontSize: "11.5px",
-                    fontWeight: fileMode === mode ? 700 : 500,
-                    cursor: "pointer",
-                    transition: "all 0.12s",
-                  }}
-                >
-                  <Icon size={16} />
-                  {label}
-                </button>
-              ))}
+        {/* ── Kolom Kanan — Sumber File (Otomatis naik ke atas di layar HP) ── */}
+        <div className="flex flex-col lg:sticky lg:top-20 order-first lg:order-last mb-2 lg:mb-0">
+          <div className="admin-card">
+            <div className="admin-card-head">
+              <div className="admin-card-title">Sumber Dokumen</div>
             </div>
+            <div className="admin-card-body">
+              {/* Toggle mode */}
+              <div className="grid grid-cols-3 max-sm:grid-cols-1 gap-2 mb-4">
+                {[
+                  {
+                    mode: "existing" as FileMode,
+                    label: "Dari Unduhan",
+                    icon: FileText,
+                  },
+                  {
+                    mode: "external" as FileMode,
+                    label: "URL Eksternal",
+                    icon: LinkIcon,
+                  },
+                  {
+                    mode: "upload" as FileMode,
+                    label: "Upload File",
+                    icon: Upload,
+                  },
+                ].map(({ mode, label, icon: Icon }) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => setFileMode(mode)}
+                    className={`flex flex-col max-sm:flex-row items-center justify-center gap-1.5 max-sm:gap-2.5 px-2 py-2.5 rounded-lg border-2 text-[11.5px] max-sm:text-xs cursor-pointer transition-all duration-150 ${
+                      fileMode === mode
+                        ? "border-[var(--color-forest-700)] bg-[var(--color-forest-50)] text-[var(--color-forest-700)] font-bold"
+                        : "border-[var(--color-ink-6)] bg-white text-[var(--color-ink-4)] hover:border-[var(--color-ink-5)] font-medium"
+                    }`}
+                  >
+                    <Icon size={16} className="shrink-0" />
+                    <span className="max-sm:truncate">{label}</span>
+                  </button>
+                ))}
+              </div>
 
-            {/* Mode: Dari Unduhan */}
-            {fileMode === "existing" && (
-              <div>
-                <div style={{ position: "relative", marginBottom: "10px" }}>
-                  <Search
-                    size={14}
-                    style={{
-                      position: "absolute",
-                      left: "10px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      color: "var(--color-ink-4)",
-                    }}
-                  />
-                  <input
-                    type="text"
-                    value={docSearch}
-                    onChange={(e) => setDocSearch(e.target.value)}
-                    placeholder="Cari dokumen..."
-                    className="admin-input"
-                    style={{ paddingLeft: "32px" }}
-                  />
-                </div>
+              {/* Mode: Dari Unduhan */}
+              {fileMode === "existing" && (
+                <div>
+                  <div className="relative mb-3">
+                    <Search
+                      size={14}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-4)]"
+                    />
+                    <input
+                      type="text"
+                      value={docSearch}
+                      onChange={(e) => setDocSearch(e.target.value)}
+                      placeholder="Cari dokumen..."
+                      className="admin-input pl-9"
+                    />
+                  </div>
 
-                <div
-                  style={{
-                    maxHeight: "320px",
-                    overflowY: "auto",
-                    border: "1px solid var(--color-ink-6)",
-                    borderRadius: "8px",
-                  }}
-                >
-                  {filteredDocs.length === 0 ? (
-                    <div
-                      style={{
-                        padding: "24px",
-                        textAlign: "center",
-                        color: "var(--color-ink-4)",
-                        fontSize: "13px",
-                      }}
-                    >
-                      {existingDocs.length === 0
-                        ? "Belum ada dokumen tersedia"
-                        : "Tidak ada hasil pencarian"}
-                    </div>
-                  ) : (
-                    filteredDocs.map((doc, i) => (
-                      <div
-                        key={doc.id}
-                        onClick={() => selectExistingDoc(doc)}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "10px",
-                          padding: "10px 12px",
-                          borderBottom:
-                            i < filteredDocs.length - 1
-                              ? "1px solid var(--color-ink-7)"
-                              : "none",
-                          background:
-                            selectedDoc?.id === doc.id
-                              ? "var(--color-forest-50)"
-                              : "#fff",
-                          cursor: "pointer",
-                          transition: "background 0.1s",
-                        }}
-                      >
-                        <div
-                          style={{
-                            width: "32px",
-                            height: "32px",
-                            borderRadius: "7px",
-                            background:
-                              selectedDoc?.id === doc.id
-                                ? "var(--color-forest-100)"
-                                : "var(--color-ink-7)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            flexShrink: 0,
-                          }}
-                        >
-                          <FileText
-                            size={15}
-                            style={{
-                              color:
-                                selectedDoc?.id === doc.id
-                                  ? "var(--color-forest-700)"
-                                  : "var(--color-ink-4)",
-                            }}
-                          />
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div
-                            style={{
-                              fontSize: "12.5px",
-                              fontWeight:
-                                selectedDoc?.id === doc.id ? 700 : 500,
-                              color:
-                                selectedDoc?.id === doc.id
-                                  ? "var(--color-forest-800)"
-                                  : "var(--color-ink)",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
-                            }}
-                          >
-                            {doc.title}
-                          </div>
-                          <div
-                            style={{
-                              fontSize: "11px",
-                              color: "var(--color-ink-4)",
-                              marginTop: "2px",
-                            }}
-                          >
-                            {doc.fileType?.toUpperCase() ?? "—"}
-                            {doc.fileSize
-                              ? ` · ${formatFileSize(doc.fileSize)}`
-                              : ""}
-                          </div>
-                        </div>
-                        {selectedDoc?.id === doc.id && (
-                          <div
-                            style={{
-                              width: "8px",
-                              height: "8px",
-                              borderRadius: "50%",
-                              background: "var(--color-forest-600)",
-                              flexShrink: 0,
-                            }}
-                          />
-                        )}
+                  <div className="max-h-[320px] overflow-y-auto border border-[var(--color-ink-6)] rounded-lg">
+                    {filteredDocs.length === 0 ? (
+                      <div className="p-6 text-center text-[13px] text-[var(--color-ink-4)]">
+                        {existingDocs.length === 0
+                          ? "Belum ada dokumen tersedia"
+                          : "Tidak ada hasil pencarian"}
                       </div>
-                    ))
+                    ) : (
+                      filteredDocs.map((doc, i) => (
+                        <div
+                          key={doc.id}
+                          onClick={() => selectExistingDoc(doc)}
+                          className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer transition-colors ${
+                            i < filteredDocs.length - 1
+                              ? "border-b border-[var(--color-ink-7)]"
+                              : ""
+                          } ${
+                            selectedDoc?.id === doc.id
+                              ? "bg-[var(--color-forest-50)]"
+                              : "bg-white hover:bg-[var(--color-ink-8)]"
+                          }`}
+                        >
+                          <div
+                            className={`w-8 h-8 rounded-md flex items-center justify-center shrink-0 ${
+                              selectedDoc?.id === doc.id
+                                ? "bg-[var(--color-forest-100)] text-[var(--color-forest-700)]"
+                                : "bg-[var(--color-ink-7)] text-[var(--color-ink-4)]"
+                            }`}
+                          >
+                            <FileText size={15} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div
+                              className={`text-[12.5px] truncate ${
+                                selectedDoc?.id === doc.id
+                                  ? "font-bold text-[var(--color-forest-800)]"
+                                  : "font-medium text-[var(--color-ink)]"
+                              }`}
+                            >
+                              {doc.title}
+                            </div>
+                            <div className="text-[11px] text-[var(--color-ink-4)] mt-0.5">
+                              {doc.fileType?.toUpperCase() ?? "—"}
+                              {doc.fileSize
+                                ? ` · ${formatFileSize(doc.fileSize)}`
+                                : ""}
+                            </div>
+                          </div>
+                          {selectedDoc?.id === doc.id && (
+                            <div className="w-2 h-2 rounded-full bg-[var(--color-forest-600)] shrink-0" />
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  {selectedDoc && (
+                    <div className="mt-3 px-3 py-2.5 rounded-lg bg-[var(--color-forest-50)] border border-[var(--color-forest-200)] flex items-center gap-2.5">
+                      <FileText
+                        size={14}
+                        className="text-[var(--color-forest-700)] shrink-0"
+                      />
+                      <span className="flex-1 text-[12.5px] font-semibold text-[var(--color-forest-800)] truncate">
+                        {selectedDoc.title}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedDoc(null)}
+                        className="bg-transparent border-none cursor-pointer text-[var(--color-ink-4)] shrink-0 hover:text-red-500"
+                      >
+                        <X size={13} />
+                      </button>
+                    </div>
                   )}
                 </div>
+              )}
 
-                {selectedDoc && (
-                  <div
-                    style={{
-                      marginTop: "10px",
-                      padding: "10px 12px",
-                      borderRadius: "8px",
-                      background: "var(--color-forest-50)",
-                      border: "1px solid var(--color-forest-200)",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                    }}
-                  >
-                    <FileText
-                      size={14}
-                      style={{ color: "var(--color-forest-700)" }}
-                    />
-                    <span
-                      style={{
-                        flex: 1,
-                        fontSize: "12.5px",
-                        fontWeight: 600,
-                        color: "var(--color-forest-800)",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {selectedDoc.title}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedDoc(null)}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        color: "var(--color-ink-4)",
-                        flexShrink: 0,
-                      }}
-                    >
-                      <X size={13} />
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Mode: URL Eksternal */}
-            {fileMode === "external" && (
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "10px",
-                }}
-              >
-                <div className="admin-form-group" style={{ margin: 0 }}>
-                  <label className="admin-label" htmlFor="extUrl">
-                    URL Dokumen
-                  </label>
-                  <input
-                    id="extUrl"
-                    type="url"
-                    className="admin-input"
-                    value={extUrl}
-                    onChange={(e) => setExtUrl(e.target.value)}
-                    placeholder="https://drive.google.com/file/..."
-                  />
-                  <span className="admin-hint">
-                    Google Drive, Dropbox, atau URL langsung ke file.
-                  </span>
-                </div>
-                <div className="admin-form-group" style={{ margin: 0 }}>
-                  <label className="admin-label" htmlFor="extFileType">
-                    Tipe File
-                  </label>
-                  <select
-                    id="extFileType"
-                    className="admin-select"
-                    value={fileType}
-                    onChange={(e) => setFileType(e.target.value)}
-                  >
-                    {["pdf", "docx", "xlsx", "pptx", "zip"].map((t) => (
-                      <option key={t} value={t}>
-                        {t.toUpperCase()}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            )}
-
-            {/* Mode: Upload File */}
-            {fileMode === "upload" && (
-              <div>
-                {fileUrl ? (
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                      padding: "12px 14px",
-                      borderRadius: "8px",
-                      background: "var(--color-forest-50)",
-                      border: "1px solid var(--color-forest-200)",
-                    }}
-                  >
-                    <FileText
-                      size={18}
-                      style={{
-                        color: "var(--color-forest-700)",
-                        flexShrink: 0,
-                      }}
-                    />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div
-                        style={{
-                          fontSize: "13px",
-                          fontWeight: 600,
-                          color: "var(--color-forest-800)",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {fileName || fileUrl.split("/").pop()}
-                      </div>
-                      {fileSize > 0 && (
-                        <div
-                          style={{
-                            fontSize: "11.5px",
-                            color: "var(--color-ink-4)",
-                            marginTop: "2px",
-                          }}
-                        >
-                          {fileType.toUpperCase()} · {formatFileSize(fileSize)}
-                        </div>
-                      )}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setFileUrl("");
-                        setFileName("");
-                        setFileSize(0);
-                      }}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        color: "var(--color-ink-4)",
-                      }}
-                    >
-                      <X size={15} />
-                    </button>
-                  </div>
-                ) : (
-                  <label
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "8px",
-                      padding: "32px 24px",
-                      borderRadius: "10px",
-                      border: "2px dashed var(--color-ink-5)",
-                      background: uploading
-                        ? "var(--color-forest-50)"
-                        : "#fafafa",
-                      cursor: uploading ? "wait" : "pointer",
-                      transition: "all 0.15s",
-                      textAlign: "center",
-                    }}
-                  >
-                    <Upload size={28} style={{ color: "var(--color-ink-4)" }} />
-                    <div>
-                      <div
-                        style={{
-                          fontSize: "13.5px",
-                          fontWeight: 600,
-                          color: "var(--color-ink-2)",
-                        }}
-                      >
-                        {uploading ? "Mengupload..." : "Klik untuk pilih file"}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "11.5px",
-                          color: "var(--color-ink-4)",
-                          marginTop: "4px",
-                        }}
-                      >
-                        PDF, DOCX, XLSX, PPTX, ZIP — maks. 10MB
-                      </div>
-                    </div>
+              {/* Mode: URL Eksternal */}
+              {fileMode === "external" && (
+                <div className="flex flex-col gap-3">
+                  <div className="admin-form-group !m-0">
+                    <label className="admin-label" htmlFor="extUrl">
+                      URL Dokumen
+                    </label>
                     <input
-                      type="file"
-                      accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip"
-                      onChange={handleFileUpload}
-                      disabled={uploading}
-                      style={{ display: "none" }}
+                      id="extUrl"
+                      type="url"
+                      className="admin-input"
+                      value={extUrl}
+                      onChange={(e) => setExtUrl(e.target.value)}
+                      placeholder="https://drive.google.com/file/..."
                     />
-                  </label>
-                )}
-              </div>
-            )}
+                    <span className="admin-hint mt-0.5">
+                      Google Drive, Dropbox, atau URL langsung ke file.
+                    </span>
+                  </div>
+                  <div className="admin-form-group !m-0">
+                    <label className="admin-label" htmlFor="extFileType">
+                      Tipe File
+                    </label>
+                    <select
+                      id="extFileType"
+                      className="admin-select"
+                      value={fileType}
+                      onChange={(e) => setFileType(e.target.value)}
+                    >
+                      {["pdf", "docx", "xlsx", "pptx", "zip"].map((t) => (
+                        <option key={t} value={t}>
+                          {t.toUpperCase()}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
 
-            {/* Hidden fields */}
-            <input
-              type="hidden"
-              name="fileUrl"
-              value={
-                fileMode === "upload" || fileMode === "existing" ? fileUrl : ""
-              }
-            />
-            <input
-              type="hidden"
-              name="externalUrl"
-              value={
-                fileMode === "external"
-                  ? extUrl
-                  : fileMode === "existing" && selectedDoc?.externalUrl
-                    ? selectedDoc.externalUrl
+              {/* Mode: Upload File */}
+              {fileMode === "upload" && (
+                <div>
+                  {fileUrl ? (
+                    <div className="flex items-center gap-3 px-3.5 py-3 rounded-lg bg-[var(--color-forest-50)] border border-[var(--color-forest-200)]">
+                      <FileText
+                        size={18}
+                        className="text-[var(--color-forest-700)] shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[13px] font-semibold text-[var(--color-forest-800)] truncate">
+                          {fileName || fileUrl.split("/").pop()}
+                        </div>
+                        {fileSize > 0 && (
+                          <div className="text-[11.5px] text-[var(--color-ink-4)] mt-0.5">
+                            {fileType.toUpperCase()} ·{" "}
+                            {formatFileSize(fileSize)}
+                          </div>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFileUrl("");
+                          setFileName("");
+                          setFileSize(0);
+                        }}
+                        className="bg-transparent border-none cursor-pointer text-[var(--color-ink-4)] hover:text-red-500"
+                      >
+                        <X size={15} />
+                      </button>
+                    </div>
+                  ) : (
+                    <label
+                      className={`flex flex-col items-center justify-center gap-2 py-8 px-6 rounded-lg border-2 border-dashed transition-all duration-150 text-center ${
+                        uploading
+                          ? "border-[var(--color-forest-400)] bg-[var(--color-forest-50)] cursor-wait"
+                          : "border-[var(--color-ink-5)] bg-[var(--color-ink-8)] cursor-pointer hover:border-[var(--color-forest-700)] hover:bg-[var(--color-forest-50)]"
+                      }`}
+                    >
+                      <Upload size={28} className="text-[var(--color-ink-4)]" />
+                      <div>
+                        <div className="text-[13.5px] font-semibold text-[var(--color-ink-2)]">
+                          {uploading
+                            ? "Mengupload..."
+                            : "Klik untuk pilih file"}
+                        </div>
+                        <div className="text-[11.5px] text-[var(--color-ink-4)] mt-1">
+                          PDF, DOCX, XLSX, PPTX, ZIP — maks. 10MB
+                        </div>
+                      </div>
+                      <input
+                        type="file"
+                        accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip"
+                        onChange={handleFileUpload}
+                        disabled={uploading}
+                        className="hidden"
+                      />
+                    </label>
+                  )}
+                </div>
+              )}
+
+              {/* Hidden fields */}
+              <input
+                type="hidden"
+                name="fileUrl"
+                value={
+                  fileMode === "upload" || fileMode === "existing"
+                    ? fileUrl
                     : ""
-              }
-            />
-            <input type="hidden" name="fileType" value={fileType} />
-            <input type="hidden" name="fileSize" value={fileSize} />
+                }
+              />
+              <input
+                type="hidden"
+                name="externalUrl"
+                value={
+                  fileMode === "external"
+                    ? extUrl
+                    : fileMode === "existing" && selectedDoc?.externalUrl
+                      ? selectedDoc.externalUrl
+                      : ""
+                }
+              />
+              <input type="hidden" name="fileType" value={fileType} />
+              <input type="hidden" name="fileSize" value={fileSize} />
+            </div>
+
+            {/* Tombol Simpan untuk tampilan Mobile (Tampil di dalam kotak konfigurasi di layar kecil) */}
+            <div className="p-4 border-t border-[var(--color-ink-6)] lg:hidden bg-[var(--color-ink-8)] rounded-b-xl">
+              <button
+                type="submit"
+                className="admin-btn-save w-full justify-center"
+                disabled={isPending || uploading}
+              >
+                {isPending
+                  ? "Menyimpan..."
+                  : isEdit
+                    ? "Simpan Perubahan"
+                    : "Tambah Informasi"}
+              </button>
+            </div>
           </div>
         </div>
       </div>

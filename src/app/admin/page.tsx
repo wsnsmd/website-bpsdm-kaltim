@@ -274,6 +274,7 @@ export default async function AdminDashboard() {
 
       {/* ── Visitor Stats Banner ── */}
       <div
+        className="admin-visitor-banner"
         style={{
           background: "var(--color-forest-900)",
           borderRadius: "16px",
@@ -353,13 +354,7 @@ export default async function AdminDashboard() {
           </div>
 
           {/* 4 stat kolom */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(4, 1fr)",
-              gap: "0",
-            }}
-          >
+          <div className="admin-visitor-stats">
             {[
               {
                 label: "Hari Ini",
@@ -434,7 +429,7 @@ export default async function AdminDashboard() {
 
         {/* Mini bar chart 7 hari */}
         {chart7.length > 0 && (
-          <div style={{ flexShrink: 0 }}>
+          <div className="admin-visitor-chart" style={{ flexShrink: 0 }}>
             <div
               style={{
                 fontSize: "9.5px",
@@ -515,14 +510,7 @@ export default async function AdminDashboard() {
       </div>
 
       {/* ── Stat Cards ── */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: "14px",
-          marginBottom: "20px",
-        }}
-      >
+      <div className="admin-dash-stats">
         {STAT_CARDS.map((card) => (
           <Link
             key={card.label}
@@ -645,9 +633,7 @@ export default async function AdminDashboard() {
       </div>
 
       {/* ── Content Grid ── */}
-      <div
-        style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}
-      >
+      <div className="admin-dash-content">
         {/* Berita Terbaru */}
         <div className="admin-card">
           <div className="admin-card-head">

@@ -7,8 +7,7 @@ import {
   createAnnouncement,
   updateAnnouncement,
 } from "@/lib/actions/announcements";
-import { Save, ArrowLeft, Eye } from "lucide-react";
-import Link from "next/link";
+import { Save } from "lucide-react";
 
 type AnnouncementData = {
   id: number;
@@ -90,34 +89,36 @@ export function AnnouncementForm({ announcement }: Props) {
   return (
     <form action={handleSubmit}>
       {/* Error & Success Messages */}
-      {error && (
-        <div className="login-error" style={{ marginBottom: "20px" }}>
-          {error}
-        </div>
-      )}
+      {error && <div className="login-error mb-5">{error}</div>}
       {success && (
-        <div className="login-success" style={{ marginBottom: "20px" }}>
+        <div className="mb-5 p-3 bg-green-50 text-green-700 border border-green-200 rounded-lg text-sm font-medium flex items-center gap-2">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="shrink-0"
+          >
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+            <polyline points="22 4 12 14.01 9 11.01" />
+          </svg>
           {success}
         </div>
       )}
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 300px",
-          gap: "24px",
-          alignItems: "start",
-        }}
-      >
-        {/* Main column */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+      {/* Pembungkus Grid Responsif: 1 Kolom di HP, 2 Kolom di Layar Lebar (lg) */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6 items-start">
+        {/* ── Main Column ── */}
+        <div className="flex flex-col gap-5">
           {/* Judul & URL */}
           <div className="admin-card">
             <div className="admin-card-head">
               <div className="admin-card-title">Informasi Pengumuman</div>
             </div>
             <div className="admin-card-body">
-              <div className="admin-form" style={{ gap: "14px" }}>
+              <div className="admin-form gap-4">
                 <div className="admin-form-group">
                   <label
                     className="admin-label admin-label-req"
@@ -129,7 +130,7 @@ export function AnnouncementForm({ announcement }: Props) {
                     id="title"
                     name="title"
                     type="text"
-                    className="admin-input"
+                    className="admin-input font-medium py-2.5"
                     placeholder="Contoh: Orientasi PPPK Angkatan 603 dibuka"
                     defaultValue={announcement?.title ?? ""}
                     required
@@ -139,9 +140,7 @@ export function AnnouncementForm({ announcement }: Props) {
                 <div className="admin-form-group">
                   <label className="admin-label" htmlFor="content">
                     Deskripsi{" "}
-                    <span
-                      style={{ color: "var(--color-ink-4)", fontWeight: 400 }}
-                    >
+                    <span className="text-[var(--color-ink-4)] font-normal ml-1">
                       (opsional)
                     </span>
                   </label>
@@ -158,16 +157,14 @@ export function AnnouncementForm({ announcement }: Props) {
                 <div className="admin-form-group">
                   <label className="admin-label" htmlFor="url">
                     URL Tautan{" "}
-                    <span
-                      style={{ color: "var(--color-ink-4)", fontWeight: 400 }}
-                    >
+                    <span className="text-[var(--color-ink-4)] font-normal ml-1">
                       (opsional)
                     </span>
                   </label>
                   <input
                     id="url"
                     name="url"
-                    type="text" // Ubah dari "url" menjadi "text"
+                    type="text"
                     className="admin-input"
                     placeholder="/program/tes atau https://example.com"
                     defaultValue={announcement?.url ?? ""}
@@ -211,9 +208,7 @@ export function AnnouncementForm({ announcement }: Props) {
                 <div className="admin-form-group">
                   <label className="admin-label" htmlFor="endDate">
                     Selesai Tayang{" "}
-                    <span
-                      style={{ color: "var(--color-ink-4)", fontWeight: 400 }}
-                    >
+                    <span className="text-[var(--color-ink-4)] font-normal ml-1">
                       (opsional)
                     </span>
                   </label>
@@ -242,13 +237,7 @@ export function AnnouncementForm({ announcement }: Props) {
               <div className="admin-card-title">Lokasi Tampil</div>
             </div>
             <div className="admin-card-body">
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "14px",
-                }}
-              >
+              <div className="flex flex-col gap-4">
                 <div className="ann-location-item">
                   <div className="ann-location-info">
                     <div className="ann-location-title">Ticker Pengumuman</div>
@@ -260,21 +249,19 @@ export function AnnouncementForm({ announcement }: Props) {
                   <button
                     type="button"
                     onClick={() => setShowInTicker((v) => !v)}
-                    className="toggle-btn"
-                    style={{
-                      backgroundColor: showInTicker
-                        ? "var(--color-forest-700)"
-                        : "var(--color-ink-6)",
-                    }}
+                    className={`toggle-btn ${
+                      showInTicker
+                        ? "bg-[var(--color-forest-700)]"
+                        : "bg-[var(--color-ink-6)]"
+                    }`}
                     aria-label="Toggle ticker"
                   >
                     <div
-                      className="toggle-thumb"
-                      style={{
-                        transform: showInTicker
-                          ? "translateX(18px)"
-                          : "translateX(2px)",
-                      }}
+                      className={`toggle-thumb ${
+                        showInTicker
+                          ? "translate-x-[18px]"
+                          : "translate-x-[2px]"
+                      }`}
                     />
                   </button>
                 </div>
@@ -290,21 +277,19 @@ export function AnnouncementForm({ announcement }: Props) {
                   <button
                     type="button"
                     onClick={() => setShowInBanner((v) => !v)}
-                    className="toggle-btn"
-                    style={{
-                      backgroundColor: showInBanner
-                        ? "var(--color-forest-700)"
-                        : "var(--color-ink-6)",
-                    }}
+                    className={`toggle-btn ${
+                      showInBanner
+                        ? "bg-[var(--color-forest-700)]"
+                        : "bg-[var(--color-ink-6)]"
+                    }`}
                     aria-label="Toggle banner"
                   >
                     <div
-                      className="toggle-thumb"
-                      style={{
-                        transform: showInBanner
-                          ? "translateX(18px)"
-                          : "translateX(2px)",
-                      }}
+                      className={`toggle-thumb ${
+                        showInBanner
+                          ? "translate-x-[18px]"
+                          : "translate-x-[2px]"
+                      }`}
                     />
                   </button>
                 </div>
@@ -313,16 +298,8 @@ export function AnnouncementForm({ announcement }: Props) {
           </div>
         </div>
 
-        {/* Sidebar column */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "16px",
-            position: "sticky",
-            top: "80px",
-          }}
-        >
+        {/* ── Sidebar Column (Otomatis naik ke atas di layar HP) ── */}
+        <div className="flex flex-col gap-5 lg:sticky lg:top-20 order-first lg:order-last mb-2 lg:mb-0">
           {/* Status & Publish */}
           <div className="admin-card">
             <div className="admin-card-head">
@@ -330,20 +307,10 @@ export function AnnouncementForm({ announcement }: Props) {
             </div>
             <div className="admin-card-body">
               {/* Toggle aktif */}
-              <div
-                className="ann-location-item"
-                style={{
-                  marginBottom: "16px",
-                  paddingBottom: "16px",
-                  borderBottom: "1px solid var(--color-ink-7)",
-                }}
-              >
+              <div className="ann-location-item mb-4 pb-4 border-b border-[var(--color-ink-7)]">
                 <div>
                   <div className="ann-location-title">Aktif</div>
-                  <div
-                    className="ann-location-desc"
-                    style={{ fontSize: "11.5px" }}
-                  >
+                  <div className="ann-location-desc text-[11.5px]">
                     {isActive
                       ? "Pengumuman ditampilkan"
                       : "Pengumuman disembunyikan"}
@@ -352,86 +319,77 @@ export function AnnouncementForm({ announcement }: Props) {
                 <button
                   type="button"
                   onClick={() => setIsActive((v) => !v)}
-                  className="toggle-btn"
-                  style={{
-                    backgroundColor: isActive
-                      ? "var(--color-forest-700)"
-                      : "var(--color-ink-6)",
-                  }}
+                  className={`toggle-btn ${
+                    isActive
+                      ? "bg-[var(--color-forest-700)]"
+                      : "bg-[var(--color-ink-6)]"
+                  }`}
                   aria-label="Toggle aktif"
                 >
                   <div
-                    className="toggle-thumb"
-                    style={{
-                      transform: isActive
-                        ? "translateX(18px)"
-                        : "translateX(2px)",
-                    }}
+                    className={`toggle-thumb ${
+                      isActive ? "translate-x-[18px]" : "translate-x-[2px]"
+                    }`}
                   />
                 </button>
               </div>
 
-              {/* Tipe */}
-              <div
-                className="admin-form-group"
-                style={{ marginBottom: "16px" }}
-              >
-                <label className="admin-label" htmlFor="type">
-                  Tipe Pengumuman
-                </label>
-                <select
-                  id="type"
-                  name="type"
-                  className="admin-select"
-                  defaultValue={announcement?.type ?? "info"}
+              <div className="admin-form gap-4">
+                {/* Tipe */}
+                <div className="admin-form-group">
+                  <label className="admin-label" htmlFor="type">
+                    Tipe Pengumuman
+                  </label>
+                  <select
+                    id="type"
+                    name="type"
+                    className="admin-select"
+                    defaultValue={announcement?.type ?? "info"}
+                  >
+                    {TYPE_OPTIONS.map((t) => (
+                      <option key={t.value} value={t.value}>
+                        {t.label}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="admin-hint mt-0.5">
+                    Menentukan warna dan ikon pengumuman.
+                  </span>
+                </div>
+
+                {/* Prioritas */}
+                <div className="admin-form-group">
+                  <label className="admin-label" htmlFor="priority">
+                    Prioritas (0–100)
+                  </label>
+                  <input
+                    id="priority"
+                    name="priority"
+                    type="number"
+                    min="0"
+                    max="100"
+                    className="admin-input"
+                    defaultValue={announcement?.priority ?? 0}
+                  />
+                  <span className="admin-hint mt-0.5">
+                    Angka lebih kecil = prioritas lebih tinggi (tampil duluan).
+                  </span>
+                </div>
+
+                {/* Tombol simpan */}
+                <button
+                  type="submit"
+                  className="admin-btn-save w-full justify-center mt-1"
+                  disabled={isPending}
                 >
-                  {TYPE_OPTIONS.map((t) => (
-                    <option key={t.value} value={t.value}>
-                      {t.label}
-                    </option>
-                  ))}
-                </select>
-                <span className="admin-hint">
-                  Menentukan warna dan ikon pengumuman.
-                </span>
+                  <Save size={15} />
+                  {isPending
+                    ? "Menyimpan..."
+                    : isEdit
+                      ? "Simpan Perubahan"
+                      : "Simpan Pengumuman"}
+                </button>
               </div>
-
-              {/* Prioritas */}
-              <div
-                className="admin-form-group"
-                style={{ marginBottom: "16px" }}
-              >
-                <label className="admin-label" htmlFor="priority">
-                  Prioritas (0–100)
-                </label>
-                <input
-                  id="priority"
-                  name="priority"
-                  type="number"
-                  min="0"
-                  max="100"
-                  className="admin-input"
-                  defaultValue={announcement?.priority ?? 0}
-                />
-                <span className="admin-hint">
-                  Angka lebih kecil = prioritas lebih tinggi (tampil duluan).
-                </span>
-              </div>
-
-              {/* Tombol simpan */}
-              <button
-                type="submit"
-                className="admin-btn-save"
-                disabled={isPending}
-                style={{ width: "100%", justifyContent: "center" }}
-              >
-                <Save size={15} />
-                {isPending
-                  ? "Menyimpan..."
-                  : isEdit
-                    ? "Simpan Perubahan"
-                    : "Simpan Pengumuman"}
-              </button>
             </div>
           </div>
 
@@ -441,45 +399,15 @@ export function AnnouncementForm({ announcement }: Props) {
               <div className="admin-card-title">Preview Ticker</div>
             </div>
             <div className="admin-card-body">
-              <div
-                style={{
-                  backgroundColor: "var(--color-gold-50, #fffcee)",
-                  borderTop: "3px solid var(--color-gold-500)",
-                  borderRadius: "8px",
-                  padding: "10px 14px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  fontSize: "12.5px",
-                }}
-              >
-                <span
-                  style={{
-                    backgroundColor: "var(--color-forest-900)",
-                    color: "#fff",
-                    fontSize: "10px",
-                    fontWeight: 700,
-                    padding: "2px 8px",
-                    borderRadius: "4px",
-                    flexShrink: 0,
-                    letterSpacing: "0.5px",
-                    textTransform: "uppercase",
-                  }}
-                >
+              <div className="bg-[var(--color-gold-50)] border-t-[3px] border-[var(--color-gold-500)] rounded-lg py-2.5 px-3.5 flex items-center gap-2.5 text-[12.5px]">
+                <span className="bg-[var(--color-forest-900)] text-white text-[10px] font-bold py-0.5 px-2 rounded shrink-0 tracking-[0.5px] uppercase">
                   Pengumuman
                 </span>
-                <span style={{ color: "var(--color-ink-2)" }}>
+                <span className="text-[var(--color-ink-2)] truncate">
                   Contoh pengumuman akan tampil di sini
                 </span>
               </div>
-              <p
-                style={{
-                  fontSize: "11.5px",
-                  color: "var(--color-ink-4)",
-                  marginTop: "10px",
-                  lineHeight: 1.5,
-                }}
-              >
+              <p className="text-[11.5px] text-[var(--color-ink-4)] mt-2.5 leading-relaxed">
                 Pengumuman aktif akan tampil bergiliran di ticker halaman utama
                 sesuai urutan prioritas.
               </p>

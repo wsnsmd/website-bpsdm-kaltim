@@ -39,94 +39,57 @@ export default async function KelolaAlbumPage({ params }: Props) {
 
   return (
     <>
-      {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: "20px",
-        }}
-      >
+      {/* ── Header ── */}
+      <div className="flex max-sm:flex-col max-sm:items-stretch items-center justify-between gap-4 mb-6">
         <div>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              marginBottom: "4px",
-            }}
-          >
+          <div className="flex items-center gap-2 mb-1.5">
             <Link
               href="/admin/galeri"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "4px",
-                fontSize: "13px",
-                color: "var(--color-ink-4)",
-                textDecoration: "none",
-              }}
+              className="flex items-center gap-1 text-[13px] text-[var(--color-ink-4)] no-underline transition-colors hover:text-[var(--color-forest-700)]"
             >
               <ArrowLeft size={13} /> Galeri
             </Link>
-            <span style={{ color: "var(--color-ink-5)" }}>/</span>
-            <span
-              style={{
-                fontSize: "13px",
-                color: "var(--color-ink-2)",
-                fontWeight: 600,
-              }}
-            >
+            <span className="text-[var(--color-ink-5)] text-xs">/</span>
+            <span className="text-[13px] text-[var(--color-ink-2)] font-semibold line-clamp-1">
               {album.title}
             </span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <h1
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "22px",
-                fontWeight: 700,
-                color: "var(--color-ink)",
-                margin: 0,
-              }}
-            >
+
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <h1 className="font-display text-2xl font-bold text-[var(--color-ink)] m-0">
               {album.title}
             </h1>
             <span
-              style={{
-                padding: "3px 10px",
-                borderRadius: "20px",
-                fontSize: "11.5px",
-                fontWeight: 700,
-                background: isPhoto ? "#eff6ff" : "#fef2f2",
-                color: isPhoto ? "#1d4ed8" : "#dc2626",
-              }}
+              className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide ${
+                isPhoto ? "bg-blue-50 text-blue-700" : "bg-red-50 text-red-600"
+              }`}
             >
               {isPhoto ? `${photos.length} Foto` : `${videos.length} Video`}
             </span>
             <span
-              className={`status-pill ${album.isPublished ? "status-pill-published" : "status-pill-draft"}`}
+              className={`status-pill ${
+                album.isPublished
+                  ? "status-pill-published"
+                  : "status-pill-draft"
+              }`}
             >
               {album.isPublished ? "Terbit" : "Draft"}
             </span>
           </div>
         </div>
-        <Link href={`/admin/galeri/${nid}/edit`} className="admin-btn-cancel">
+
+        <Link
+          href={`/admin/galeri/${nid}/edit`}
+          className="admin-btn-cancel max-sm:w-full max-sm:justify-center shrink-0"
+        >
           Edit Album
         </Link>
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 320px",
-          gap: "20px",
-          alignItems: "start",
-        }}
-      >
-        {/* Kiri — konten album */}
-        <div>
+      {/* ── Pembungkus Grid Responsif ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 items-start">
+        {/* Kolom Kiri — Konten Album (Foto/Video) */}
+        <div className="flex flex-col gap-4">
           {isPhoto ? (
             <PhotoGrid photos={photos} albumId={nid} />
           ) : (
@@ -134,8 +97,8 @@ export default async function KelolaAlbumPage({ params }: Props) {
           )}
         </div>
 
-        {/* Kanan — form tambah */}
-        <div style={{ position: "sticky", top: "80px" }}>
+        {/* Kolom Kanan — Form Tambah (Otomatis naik ke atas di layar HP) */}
+        <div className="flex flex-col gap-5 lg:sticky lg:top-20 order-first lg:order-last mb-2 lg:mb-0">
           {isPhoto ? (
             <AddPhotosForm albumId={nid} />
           ) : (

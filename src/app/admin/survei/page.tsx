@@ -5,7 +5,7 @@ import {
   getSurveyList,
   getSurveyCount,
 } from "@/lib/queries/survey";
-import { Star, MessageSquare, TrendingUp } from "lucide-react";
+import { Star, MessageSquare } from "lucide-react";
 
 export const metadata: Metadata = { title: "Hasil Survei Kepuasan" };
 
@@ -19,7 +19,7 @@ const ASPEK_LABELS = [
 
 function StarDisplay({ value, color }: { value: number; color: string }) {
   return (
-    <div style={{ display: "flex", gap: "2px" }}>
+    <div className="flex gap-0.5">
       {[1, 2, 3, 4, 5].map((s) => (
         <Star
           key={s}
@@ -37,41 +37,19 @@ function StarDisplay({ value, color }: { value: number; color: string }) {
 function RatingBar({ value, color }: { value: number; color: string }) {
   const pct = (value / 5) * 100;
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "10px",
-        flex: 1,
-      }}
-    >
-      <div
-        style={{
-          flex: 1,
-          height: "8px",
-          borderRadius: "4px",
-          background: "var(--color-ink-7)",
-          overflow: "hidden",
-        }}
-      >
+    <div className="flex items-center gap-2.5 flex-1">
+      <div className="flex-1 h-2 rounded-full bg-[var(--color-ink-7)] overflow-hidden">
         <div
+          className="h-full rounded-full transition-all duration-500 ease-out"
           style={{
             width: `${pct}%`,
-            height: "100%",
             background: color,
-            borderRadius: "4px",
-            transition: "width 0.5s ease",
           }}
         />
       </div>
       <span
-        style={{
-          fontSize: "13px",
-          fontWeight: 700,
-          color,
-          width: "30px",
-          textAlign: "right",
-        }}
+        className="text-[13px] font-bold w-[30px] text-right"
+        style={{ color }}
       >
         {value.toFixed(1)}
       </span>
@@ -109,115 +87,54 @@ export default async function AdminSurveiPage() {
         </div>
       </div>
 
-      {/* Overview stats */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "200px 1fr",
-          gap: "20px",
-          marginBottom: "20px",
-        }}
-      >
+      {/* ── Overview Stats Grid (1 Kolom HP, 2 Kolom Desktop) ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-5 mb-5">
         {/* Nilai rata-rata besar */}
-        <div
-          style={{
-            padding: "24px",
-            borderRadius: "14px",
-            background: "var(--color-forest-900)",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "8px",
-            textAlign: "center",
-          }}
-        >
-          <div
-            style={{
-              fontSize: "52px",
-              fontWeight: 900,
-              color: "#fff",
-              lineHeight: 1,
-              letterSpacing: "-2px",
-            }}
-          >
+        <div className="p-6 rounded-[14px] bg-[var(--color-forest-900)] flex flex-col items-center justify-center gap-2 text-center">
+          <div className="text-[52px] font-black text-white leading-none tracking-tight">
             {stats.avgTotal.toFixed(1)}
           </div>
-          <div style={{ display: "flex", gap: "3px" }}>
+          <div className="flex gap-[3px]">
             {[1, 2, 3, 4, 5].map((s) => (
               <Star
                 key={s}
                 size={18}
-                style={{
-                  color:
-                    s <= Math.round(stats.avgTotal)
-                      ? "#fbbf24"
-                      : "rgba(255,255,255,0.2)",
-                  fill:
-                    s <= Math.round(stats.avgTotal) ? "#fbbf24" : "transparent",
-                }}
+                className={
+                  s <= Math.round(stats.avgTotal)
+                    ? "text-amber-400 fill-amber-400"
+                    : "text-white/20 fill-transparent"
+                }
               />
             ))}
           </div>
-          <div
-            style={{ fontSize: "13.5px", fontWeight: 700, color: "#4ade80" }}
-          >
+          <div className="text-[13.5px] font-bold text-green-400">
             {kategoriLabel}
           </div>
-          <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.4)" }}>
+          <div className="text-xs text-white/40">
             dari {stats.total.toLocaleString("id-ID")} responden
           </div>
         </div>
 
         {/* Per aspek */}
-        <div
-          style={{
-            background: "#fff",
-            borderRadius: "14px",
-            border: "1px solid var(--color-ink-6)",
-            padding: "20px 24px",
-            boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
-          }}
-        >
-          <div
-            style={{
-              fontSize: "13px",
-              fontWeight: 700,
-              color: "var(--color-ink-3)",
-              marginBottom: "16px",
-              textTransform: "uppercase",
-              letterSpacing: "0.5px",
-            }}
-          >
+        <div className="bg-white rounded-[14px] border border-[var(--color-ink-6)] p-5 lg:p-6 shadow-sm">
+          <div className="text-[13px] font-bold text-[var(--color-ink-3)] mb-4 uppercase tracking-wide">
             Rata-rata per Aspek
           </div>
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "12px" }}
-          >
+          <div className="flex flex-col gap-3">
             {ASPEK_LABELS.map((a) => {
               const val = stats[a.key as keyof typeof stats] as number;
               return (
                 <div
                   key={a.key}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
-                  }}
+                  className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3"
                 >
-                  <div
-                    style={{
-                      fontSize: "13px",
-                      fontWeight: 600,
-                      color: "var(--color-ink-2)",
-                      width: "160px",
-                      flexShrink: 0,
-                    }}
-                  >
+                  <div className="text-[13px] font-semibold text-[var(--color-ink-2)] sm:w-[160px] shrink-0">
                     {a.label}
                   </div>
-                  <StarDisplay value={val} color={a.color} />
-                  <RatingBar value={val} color={a.color} />
+                  <div className="flex items-center gap-3 flex-1">
+                    <StarDisplay value={val} color={a.color} />
+                    <RatingBar value={val} color={a.color} />
+                  </div>
                 </div>
               );
             })}
@@ -225,15 +142,8 @@ export default async function AdminSurveiPage() {
         </div>
       </div>
 
-      {/* Distribusi kepuasan */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)",
-          gap: "12px",
-          marginBottom: "20px",
-        }}
-      >
+      {/* ── Distribusi Kepuasan (2 Kolom HP, 4 Kolom Desktop) ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
         {[
           {
             label: "Sangat Puas",
@@ -269,36 +179,22 @@ export default async function AdminSurveiPage() {
           return (
             <div
               key={s.label}
-              style={{
-                padding: "16px 18px",
-                borderRadius: "12px",
-                background: "#fff",
-                border: `1px solid ${s.border}`,
-                textAlign: "center",
-              }}
+              className="py-4 px-3 sm:px-4 rounded-xl text-center border bg-white"
+              style={{ borderColor: s.border }}
             >
               <div
-                style={{
-                  fontSize: "28px",
-                  fontWeight: 900,
-                  color: s.color,
-                  lineHeight: 1,
-                  letterSpacing: "-0.5px",
-                }}
+                className="text-3xl font-black leading-none tracking-tight"
+                style={{ color: s.color }}
               >
                 {s.value}
               </div>
               <div
-                style={{
-                  fontSize: "12px",
-                  fontWeight: 600,
-                  color: s.color,
-                  margin: "4px 0 2px",
-                }}
+                className="text-[12px] font-semibold mt-1.5 mb-0.5"
+                style={{ color: s.color }}
               >
                 {s.label}
               </div>
-              <div style={{ fontSize: "11.5px", color: "var(--color-ink-4)" }}>
+              <div className="text-[11px] sm:text-[11.5px] text-[var(--color-ink-4)]">
                 {pct}% dari total
               </div>
             </div>
@@ -306,31 +202,29 @@ export default async function AdminSurveiPage() {
         })}
       </div>
 
-      {/* Tabel respons */}
+      {/* ── Tabel Respons Terbaru ── */}
       <div className="admin-card">
         <div className="admin-card-head">
-          <div className="admin-card-title">
+          <div className="admin-card-title flex items-center gap-2">
             <MessageSquare size={15} /> Respons Terbaru
           </div>
-          <span style={{ fontSize: "12px", color: "var(--color-ink-4)" }}>
+          <span className="text-xs text-[var(--color-ink-4)]">
             {total} total responden
           </span>
         </div>
+
+        {/* Table wrapper memberikan fitur geser horizontal pada layar kecil */}
         <div className="admin-table-wrap">
-          <table className="admin-table">
+          <table className="admin-table min-w-[800px]">
             <thead>
               <tr>
-                <th style={{ width: "140px" }}>Tanggal</th>
-                <th style={{ textAlign: "center", width: "60px" }}>Tampilan</th>
-                <th style={{ textAlign: "center", width: "60px" }}>Navigasi</th>
-                <th style={{ textAlign: "center", width: "60px" }}>Konten</th>
-                <th style={{ textAlign: "center", width: "60px" }}>
-                  Kecepatan
-                </th>
-                <th style={{ textAlign: "center", width: "60px" }}>Layanan</th>
-                <th style={{ textAlign: "center", width: "70px" }}>
-                  Rata-rata
-                </th>
+                <th className="w-[140px]">Tanggal</th>
+                <th className="text-center w-[60px]">Tampilan</th>
+                <th className="text-center w-[60px]">Navigasi</th>
+                <th className="text-center w-[60px]">Konten</th>
+                <th className="text-center w-[60px]">Kecepatan</th>
+                <th className="text-center w-[60px]">Layanan</th>
+                <th className="text-center w-[70px]">Rata-rata</th>
                 <th>Komentar</th>
               </tr>
             </thead>
@@ -339,11 +233,7 @@ export default async function AdminSurveiPage() {
                 <tr>
                   <td
                     colSpan={8}
-                    style={{
-                      textAlign: "center",
-                      padding: "40px",
-                      color: "var(--color-ink-4)",
-                    }}
+                    className="text-center py-10 text-[var(--color-ink-4)]"
                   >
                     Belum ada respons survei.
                   </td>
@@ -362,15 +252,13 @@ export default async function AdminSurveiPage() {
 
                 return (
                   <tr key={r.id}>
-                    <td
-                      style={{ fontSize: "12px", color: "var(--color-ink-4)" }}
-                    >
+                    <td className="text-xs text-[var(--color-ink-4)]">
                       {new Date(r.createdAt).toLocaleDateString("id-ID", {
                         day: "numeric",
                         month: "short",
                         year: "numeric",
                       })}
-                      <div style={{ fontSize: "11px" }}>
+                      <div className="text-[11px] mt-0.5">
                         {new Date(r.createdAt).toLocaleTimeString("id-ID", {
                           hour: "2-digit",
                           minute: "2-digit",
@@ -384,23 +272,16 @@ export default async function AdminSurveiPage() {
                       r.ratingKecepatan,
                       r.ratingLayanan,
                     ].map((val, i) => (
-                      <td key={i} style={{ textAlign: "center" }}>
+                      <td key={i} className="text-center">
                         <div
+                          className="inline-flex items-center justify-center w-7 h-7 rounded-full text-[13px] font-extrabold"
                           style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            width: "28px",
-                            height: "28px",
-                            borderRadius: "50%",
                             background:
                               val >= 4
                                 ? "#f0fdf4"
                                 : val >= 3
                                   ? "#fffbeb"
                                   : "#fef2f2",
-                            fontSize: "13px",
-                            fontWeight: 800,
                             color:
                               val >= 4
                                 ? "#16a34a"
@@ -413,15 +294,12 @@ export default async function AdminSurveiPage() {
                         </div>
                       </td>
                     ))}
-                    <td style={{ textAlign: "center" }}>
+                    <td className="text-center">
                       <span
+                        className="px-2.5 py-1 rounded-full text-[12.5px] font-bold border"
                         style={{
-                          padding: "3px 10px",
-                          borderRadius: "20px",
                           background: `${rataColor}15`,
-                          border: `1px solid ${rataColor}30`,
-                          fontSize: "12.5px",
-                          fontWeight: 700,
+                          borderColor: `${rataColor}30`,
                           color: rataColor,
                         }}
                       >
@@ -430,44 +308,16 @@ export default async function AdminSurveiPage() {
                     </td>
                     <td>
                       {r.komentar ? (
-                        <div
-                          style={{
-                            fontSize: "12.5px",
-                            color: "var(--color-ink-2)",
-                            lineHeight: 1.5,
-                            display: "-webkit-box",
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: "vertical" as const,
-                            overflow: "hidden",
-                            maxWidth: "240px",
-                          }}
-                        >
+                        <div className="text-[12.5px] text-[var(--color-ink-2)] leading-relaxed line-clamp-2 max-w-[240px]">
                           "{r.komentar}"
                         </div>
                       ) : (
-                        <span
-                          style={{
-                            fontSize: "12px",
-                            color: "var(--color-ink-5)",
-                            fontStyle: "italic",
-                          }}
-                        >
+                        <span className="text-xs text-[var(--color-ink-5)] italic">
                           —
                         </span>
                       )}
                       {r.saran && (
-                        <div
-                          style={{
-                            fontSize: "11.5px",
-                            color: "var(--color-ink-4)",
-                            marginTop: "3px",
-                            display: "-webkit-box",
-                            WebkitLineClamp: 1,
-                            WebkitBoxOrient: "vertical" as const,
-                            overflow: "hidden",
-                            maxWidth: "240px",
-                          }}
-                        >
+                        <div className="text-[11.5px] text-[var(--color-ink-4)] mt-1 line-clamp-1 max-w-[240px]">
                           💡 {r.saran}
                         </div>
                       )}

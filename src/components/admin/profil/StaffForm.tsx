@@ -60,28 +60,18 @@ export function StaffForm({ staff, units }: Props) {
 
   return (
     <form onSubmit={handleSubmit}>
-      {error && (
-        <div className="login-error" style={{ marginBottom: "20px" }}>
-          {error}
-        </div>
-      )}
+      {error && <div className="login-error mb-5">{error}</div>}
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 280px",
-          gap: "20px",
-          alignItems: "start",
-        }}
-      >
-        {/* ── Main ── */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+      {/* Pembungkus Grid Responsif: 1 Kolom di HP, 2 Kolom di Desktop (lg) */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6 items-start">
+        {/* ── Main Column ── */}
+        <div className="flex flex-col gap-5">
           <div className="admin-card">
             <div className="admin-card-head">
               <div className="admin-card-title">Informasi Pegawai</div>
             </div>
             <div className="admin-card-body">
-              <div className="admin-form" style={{ gap: "14px" }}>
+              <div className="admin-form gap-4">
                 <div className="admin-form-grid">
                   <div className="admin-form-group">
                     <label
@@ -214,34 +204,22 @@ export function StaffForm({ staff, units }: Props) {
               <div className="admin-card-title">Foto</div>
             </div>
             <div className="admin-card-body">
-              {/* HAPUS prop name karena FeaturedImagePicker tidak menerimanya */}
               <FeaturedImagePicker value={photo} onImageChange={setPhoto} />
-              <span
-                className="admin-hint"
-                style={{ marginTop: "8px", display: "block" }}
-              >
+              <span className="admin-hint mt-2 block">
                 Rekomendasi: foto formal ukuran 3×4, format JPG/PNG.
               </span>
             </div>
           </div>
         </div>
 
-        {/* ── Sidebar ── */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "16px",
-            position: "sticky",
-            top: "80px",
-          }}
-        >
+        {/* ── Sidebar Column (Otomatis naik ke atas di layar HP) ── */}
+        <div className="flex flex-col gap-5 lg:sticky lg:top-20 order-first lg:order-last mb-2 lg:mb-0">
           <div className="admin-card">
             <div className="admin-card-head">
               <div className="admin-card-title">Konfigurasi</div>
             </div>
             <div className="admin-card-body">
-              <div className="admin-form" style={{ gap: "14px" }}>
+              <div className="admin-form gap-4">
                 <div className="admin-form-group">
                   <label className="admin-label admin-label-req" htmlFor="type">
                     Tipe Pegawai
@@ -280,20 +258,17 @@ export function StaffForm({ staff, units }: Props) {
                   </select>
                 </div>
 
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
-                >
+                <div className="flex items-center gap-2.5 mt-1 mb-2">
                   <input
                     type="checkbox"
                     id="isActive"
                     checked={isActive}
                     onChange={(e) => setIsActive(e.target.checked)}
-                    style={{ width: "16px", height: "16px", cursor: "pointer" }}
+                    className="w-4 h-4 cursor-pointer accent-[var(--color-forest-700)] shrink-0"
                   />
                   <label
                     htmlFor="isActive"
-                    className="admin-label"
-                    style={{ margin: 0, cursor: "pointer", fontWeight: 500 }}
+                    className="admin-label !m-0 cursor-pointer font-medium"
                   >
                     Pegawai aktif
                   </label>
@@ -301,9 +276,8 @@ export function StaffForm({ staff, units }: Props) {
 
                 <button
                   type="submit"
-                  className="admin-btn-save"
+                  className="admin-btn-save w-full justify-center"
                   disabled={isPending}
-                  style={{ width: "100%", justifyContent: "center" }}
                 >
                   {isPending
                     ? "Menyimpan..."

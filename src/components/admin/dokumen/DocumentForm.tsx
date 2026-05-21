@@ -85,29 +85,19 @@ export function DocumentForm({ document, categories }: Props) {
 
   return (
     <form onSubmit={handleSubmit}>
-      {error && (
-        <div className="login-error" style={{ marginBottom: "20px" }}>
-          {error}
-        </div>
-      )}
+      {error && <div className="login-error mb-5">{error}</div>}
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 300px",
-          gap: "20px",
-          alignItems: "start",
-        }}
-      >
-        {/* ── Main ── */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+      {/* Pembungkus Grid Responsif: 1 Kolom di HP, 2 Kolom di Desktop (lg) */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6 items-start">
+        {/* ── Main Column ── */}
+        <div className="flex flex-col gap-5">
           {/* Info dokumen */}
           <div className="admin-card">
             <div className="admin-card-head">
               <div className="admin-card-title">Informasi Dokumen</div>
             </div>
             <div className="admin-card-body">
-              <div className="admin-form" style={{ gap: "14px" }}>
+              <div className="admin-form gap-4">
                 <div className="admin-form-group">
                   <label
                     className="admin-label admin-label-req"
@@ -119,11 +109,10 @@ export function DocumentForm({ document, categories }: Props) {
                     id="title"
                     name="title"
                     type="text"
-                    className="admin-input"
+                    className="admin-input py-2.5 font-semibold text-[15px]"
                     placeholder="Contoh: Laporan Kinerja BPSDM Kaltim 2024"
                     defaultValue={document?.title ?? ""}
                     required
-                    style={{ fontSize: "15px", fontWeight: 600 }}
                   />
                 </div>
 
@@ -153,7 +142,9 @@ export function DocumentForm({ document, categories }: Props) {
                     placeholder="laporan, kinerja, 2024 (pisahkan dengan koma)"
                     defaultValue={document?.tags ?? ""}
                   />
-                  <span className="admin-hint">Pisahkan tag dengan koma.</span>
+                  <span className="admin-hint mt-0.5">
+                    Pisahkan tag dengan koma.
+                  </span>
                 </div>
               </div>
             </div>
@@ -166,16 +157,7 @@ export function DocumentForm({ document, categories }: Props) {
             </div>
             <div className="admin-card-body">
               {/* Tab toggle */}
-              <div
-                style={{
-                  display: "flex",
-                  borderRadius: "10px",
-                  border: "1px solid var(--color-ink-6)",
-                  overflow: "hidden",
-                  marginBottom: "16px",
-                  width: "fit-content",
-                }}
-              >
+              <div className="flex rounded-[10px] border border-[var(--color-ink-6)] overflow-hidden mb-4 w-fit max-sm:w-full">
                 {[
                   { key: "upload", label: "Upload File", icon: Upload },
                   { key: "external", label: "Link Eksternal", icon: LinkIcon },
@@ -186,23 +168,11 @@ export function DocumentForm({ document, categories }: Props) {
                     onClick={() =>
                       setSourceTab(tab.key as "upload" | "external")
                     }
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                      padding: "9px 18px",
-                      border: "none",
-                      background:
-                        sourceTab === tab.key
-                          ? "var(--color-forest-700)"
-                          : "#fff",
-                      color:
-                        sourceTab === tab.key ? "#fff" : "var(--color-ink-3)",
-                      fontSize: "13px",
-                      fontWeight: 600,
-                      cursor: "pointer",
-                      transition: "all 0.15s",
-                    }}
+                    className={`flex items-center justify-center gap-1.5 px-4.5 py-2 max-sm:flex-1 border-none text-[13px] font-semibold cursor-pointer transition-all duration-150 ${
+                      sourceTab === tab.key
+                        ? "bg-[var(--color-forest-700)] text-white"
+                        : "bg-white text-[var(--color-ink-3)] hover:bg-[var(--color-ink-8)]"
+                    }`}
                   >
                     <tab.icon size={14} />
                     {tab.label}
@@ -212,7 +182,7 @@ export function DocumentForm({ document, categories }: Props) {
 
               {/* Upload */}
               {sourceTab === "upload" && (
-                <div className="admin-form" style={{ gap: "14px" }}>
+                <div className="admin-form gap-4">
                   <div className="admin-form-group">
                     <label className="admin-label">File Dokumen</label>
                     <DocumentUploader
@@ -234,7 +204,7 @@ export function DocumentForm({ document, categories }: Props) {
 
               {/* External */}
               {sourceTab === "external" && (
-                <div className="admin-form" style={{ gap: "14px" }}>
+                <div className="admin-form gap-4">
                   <div className="admin-form-group">
                     <label
                       className="admin-label admin-label-req"
@@ -250,7 +220,7 @@ export function DocumentForm({ document, categories }: Props) {
                       value={externalUrl}
                       onChange={(e) => setExternalUrl(e.target.value)}
                     />
-                    <span className="admin-hint">
+                    <span className="admin-hint mt-0.5">
                       Google Drive, Dropbox, atau URL file langsung.
                     </span>
                   </div>
@@ -300,7 +270,7 @@ export function DocumentForm({ document, categories }: Props) {
                   </div>
 
                   <div className="ann-info-box">
-                    <Info size={15} style={{ flexShrink: 0 }} />
+                    <Info size={15} className="shrink-0" />
                     <span>
                       Pastikan link dapat diakses publik. Untuk Google Drive,
                       set sharing ke <strong>"Anyone with the link"</strong>.
@@ -312,23 +282,15 @@ export function DocumentForm({ document, categories }: Props) {
           </div>
         </div>
 
-        {/* ── Sidebar ── */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "16px",
-            position: "sticky",
-            top: "80px",
-          }}
-        >
+        {/* ── Sidebar Column (Otomatis naik ke atas di layar HP) ── */}
+        <div className="flex flex-col gap-5 lg:sticky lg:top-20 order-first lg:order-last mb-2 lg:mb-0">
           {/* Publikasi */}
           <div className="admin-card">
             <div className="admin-card-head">
               <div className="admin-card-title">Publikasi</div>
             </div>
             <div className="admin-card-body">
-              <div className="admin-form" style={{ gap: "14px" }}>
+              <div className="admin-form gap-4">
                 <div className="admin-form-group">
                   <label className="admin-label" htmlFor="status">
                     Status
@@ -384,9 +346,8 @@ export function DocumentForm({ document, categories }: Props) {
 
                 <button
                   type="submit"
-                  className="admin-btn-save"
+                  className="admin-btn-save w-full justify-center mt-1"
                   disabled={isPending}
-                  style={{ width: "100%", justifyContent: "center" }}
                 >
                   {isPending
                     ? "Menyimpan..."

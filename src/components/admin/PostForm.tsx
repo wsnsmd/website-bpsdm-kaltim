@@ -67,7 +67,7 @@ export function PostForm({ categories, post }: Props) {
   return (
     <form onSubmit={handleSubmit}>
       {error && (
-        <div className="login-error" style={{ marginBottom: "20px" }}>
+        <div className="login-error mb-5">
           <svg
             width="16"
             height="16"
@@ -75,6 +75,7 @@ export function PostForm({ categories, post }: Props) {
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
+            className="shrink-0"
           >
             <circle cx="12" cy="12" r="10" />
             <line x1="12" y1="8" x2="12" y2="12" />
@@ -84,16 +85,10 @@ export function PostForm({ categories, post }: Props) {
         </div>
       )}
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 300px",
-          gap: "24px",
-          alignItems: "start",
-        }}
-      >
-        {/* ── Main column ── */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+      {/* Pembungkus Grid Responsif: 1 Kolom di HP, 2 Kolom di Layar Lebar (lg) */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6 items-start">
+        {/* ── Kolom Utama (Main Column) ── */}
+        <div className="flex flex-col gap-5">
           {/* Judul & Slug */}
           <div className="admin-card">
             <div className="admin-card-body">
@@ -105,29 +100,20 @@ export function PostForm({ categories, post }: Props) {
                   id="title"
                   name="title"
                   type="text"
-                  className="admin-input"
+                  className="admin-input text-base font-semibold p-3"
                   placeholder="Tulis judul berita yang menarik..."
                   value={title}
                   onChange={(e) => handleTitleChange(e.target.value)}
                   required
-                  style={{ fontSize: "16px", fontWeight: 600, padding: "12px" }}
                 />
               </div>
 
-              <div className="admin-form-group" style={{ marginTop: "12px" }}>
+              <div className="admin-form-group mt-3">
                 <label className="admin-label" htmlFor="slug">
                   Slug URL
                 </label>
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "8px" }}
-                >
-                  <span
-                    style={{
-                      fontSize: "13px",
-                      color: "var(--color-ink-4)",
-                      flexShrink: 0,
-                    }}
-                  >
+                <div className="flex items-center gap-2 max-sm:flex-col max-sm:items-start max-sm:gap-1.5">
+                  <span className="text-[13px] text-[var(--color-ink-4)] shrink-0">
                     /berita/
                   </span>
                   <input
@@ -143,7 +129,7 @@ export function PostForm({ categories, post }: Props) {
                     placeholder="slug-artikel"
                   />
                 </div>
-                <span className="admin-hint">
+                <span className="admin-hint mt-1">
                   Otomatis dibuat dari judul. Edit jika diperlukan.
                 </span>
               </div>
@@ -156,23 +142,12 @@ export function PostForm({ categories, post }: Props) {
               <div className="admin-card-title">Gambar Utama</div>
             </div>
             <div className="admin-card-body">
-              {/* FeaturedImagePicker mengupdate state featuredImage di parent */}
               <FeaturedImagePicker
                 value={featuredImage}
                 onImageChange={setFeaturedImage}
               />
-              {/* Tampilkan URL yang akan disimpan */}
               {featuredImage && (
-                <div
-                  style={{
-                    marginTop: "8px",
-                    fontSize: "11px",
-                    color: "var(--color-ink-4)",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "5px",
-                  }}
-                >
+                <div className="mt-2 text-[11px] text-[var(--color-ink-4)] flex items-center gap-1.5 break-all">
                   <svg
                     width="12"
                     height="12"
@@ -180,7 +155,7 @@ export function PostForm({ categories, post }: Props) {
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2.5"
-                    style={{ color: "var(--color-forest-700)" }}
+                    className="text-[var(--color-forest-700)] shrink-0"
                   >
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
@@ -216,7 +191,7 @@ export function PostForm({ categories, post }: Props) {
             <div className="admin-card-head">
               <div className="admin-card-title">Konten Artikel</div>
             </div>
-            <div className="admin-card-body" style={{ padding: 0 }}>
+            <div className="admin-card-body p-0">
               <RichEditor
                 value={content}
                 onChange={setContent}
@@ -231,7 +206,7 @@ export function PostForm({ categories, post }: Props) {
               <div className="admin-card-title">SEO &amp; Meta</div>
             </div>
             <div className="admin-card-body">
-              <div className="admin-form" style={{ gap: "14px" }}>
+              <div className="admin-form gap-4">
                 <div className="admin-form-group">
                   <label className="admin-label" htmlFor="metaTitle">
                     Meta Title
@@ -267,26 +242,15 @@ export function PostForm({ categories, post }: Props) {
           </div>
         </div>
 
-        {/* ── Sidebar column ── */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "16px",
-            position: "sticky",
-            top: "80px",
-          }}
-        >
+        {/* ── Kolom Sidebar (Akan turun ke bawah secara otomatis di HP) ── */}
+        <div className="flex flex-col gap-5 lg:sticky lg:top-20 order-first lg:order-last mb-6 lg:mb-0">
           {/* Publikasi */}
           <div className="admin-card">
             <div className="admin-card-head">
               <div className="admin-card-title">Publikasi</div>
             </div>
             <div className="admin-card-body">
-              <div
-                className="admin-form-group"
-                style={{ marginBottom: "14px" }}
-              >
+              <div className="admin-form-group mb-4">
                 <label className="admin-label" htmlFor="status">
                   Status
                 </label>
@@ -303,10 +267,7 @@ export function PostForm({ categories, post }: Props) {
                 </select>
               </div>
 
-              <div
-                className="admin-form-group"
-                style={{ marginBottom: "14px" }}
-              >
+              <div className="admin-form-group mb-4">
                 <label className="admin-label" htmlFor="authorName">
                   Penulis
                 </label>
@@ -320,26 +281,18 @@ export function PostForm({ categories, post }: Props) {
                 />
               </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  marginBottom: "16px",
-                }}
-              >
+              <div className="flex items-center gap-2.5 mb-5">
                 <input
                   type="checkbox"
                   id="isFeatured"
                   name="isFeatured"
                   value="true"
                   defaultChecked={post?.isFeatured ?? false}
-                  style={{ width: "16px", height: "16px", cursor: "pointer" }}
+                  className="w-4 h-4 cursor-pointer accent-[var(--color-forest-700)] shrink-0"
                 />
                 <label
                   htmlFor="isFeatured"
-                  className="admin-label"
-                  style={{ margin: 0, cursor: "pointer", fontWeight: 500 }}
+                  className="admin-label !m-0 cursor-pointer font-medium"
                 >
                   Jadikan berita unggulan
                 </label>
@@ -347,9 +300,8 @@ export function PostForm({ categories, post }: Props) {
 
               <button
                 type="submit"
-                className="admin-btn-save"
+                className="admin-btn-save w-full justify-center"
                 disabled={isPending}
-                style={{ width: "100%", justifyContent: "center" }}
               >
                 {isPending ? (
                   "Menyimpan..."

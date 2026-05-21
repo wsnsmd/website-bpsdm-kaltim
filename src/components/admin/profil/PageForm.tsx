@@ -105,69 +105,50 @@ export function PageForm({ page }: Props) {
           duration: 4000,
           style: {
             background: "#fff",
-            color: "#111714",
-            border: "1px solid #d8e8dc",
+            color: "var(--color-ink)",
+            border: "1px solid var(--color-ink-6)",
             borderRadius: "12px",
             padding: "12px 16px",
             fontSize: "13px",
           },
           success: {
-            iconTheme: {
-              primary: "#22c55e",
-              secondary: "#fff",
-            },
-            style: {
-              borderLeft: "4px solid #22c55e",
-            },
+            iconTheme: { primary: "#22c55e", secondary: "#fff" },
+            style: { borderLeft: "4px solid #22c55e" },
           },
           error: {
-            iconTheme: {
-              primary: "#ef4444",
-              secondary: "#fff",
-            },
-            style: {
-              borderLeft: "4px solid #ef4444",
-            },
+            iconTheme: { primary: "#ef4444", secondary: "#fff" },
+            style: { borderLeft: "4px solid #ef4444" },
           },
         }}
       />
 
       <form onSubmit={handleSubmit}>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 280px",
-            gap: "20px",
-            alignItems: "start",
-          }}
-        >
-          {/* ── Main ── */}
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "16px" }}
-          >
+        {/* Pembungkus Grid Responsif: 1 Kolom di HP, 2 Kolom di Layar Lebar (lg) */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6 items-start">
+          {/* ── Main Column ── */}
+          <div className="flex flex-col gap-5">
             {/* Header dengan tombol aksi */}
             <div className="admin-card">
               <div className="admin-card-body">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
                     <Link
                       href="/admin/profil/pages"
-                      className="admin-btn-cancel"
+                      className="admin-btn-cancel px-3 py-1.5"
                     >
                       <ArrowLeft size={16} />
-                      Kembali
                     </Link>
-                    <h1 className="admin-page-title" style={{ margin: 0 }}>
+                    <h1 className="admin-page-title text-xl">
                       {isEdit ? "Edit Halaman" : "Tambah Halaman Baru"}
                     </h1>
                   </div>
                   <button
                     type="submit"
-                    className="admin-btn-save"
+                    className="admin-btn-save w-full sm:w-auto justify-center"
                     disabled={isPending}
                   >
                     <Save size={16} />
-                    {isPending ? "Menyimpan..." : "Simpan"}
+                    {isPending ? "Menyimpan..." : "Simpan Halaman"}
                   </button>
                 </div>
               </div>
@@ -176,7 +157,7 @@ export function PageForm({ page }: Props) {
             {/* Judul & Slug */}
             <div className="admin-card">
               <div className="admin-card-body">
-                <div className="admin-form" style={{ gap: "12px" }}>
+                <div className="admin-form gap-4">
                   <div className="admin-form-group">
                     <label
                       className="admin-label admin-label-req"
@@ -188,24 +169,16 @@ export function PageForm({ page }: Props) {
                       id="title"
                       name="title"
                       type="text"
-                      className="admin-input"
+                      className="admin-input text-[15px] font-semibold py-2.5"
                       placeholder="Contoh: Visi & Misi BPSDM Kaltim"
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       required
-                      style={{ fontSize: "15px", fontWeight: 600 }}
                     />
                   </div>
 
-                  <div className="admin-form-group">
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        marginBottom: "4px",
-                      }}
-                    >
+                  <div className="admin-form-group mt-1">
+                    <div className="flex justify-between items-center mb-1">
                       <label
                         className="admin-label admin-label-req"
                         htmlFor="slug"
@@ -215,42 +188,19 @@ export function PageForm({ page }: Props) {
                       <button
                         type="button"
                         onClick={() => setIsAutoSlug(!isAutoSlug)}
-                        style={{
-                          fontSize: "10px",
-                          padding: "2px 8px",
-                          borderRadius: "12px",
-                          border: "1px solid var(--color-ink-5)",
-                          background: isAutoSlug
-                            ? "var(--color-forest-50)"
-                            : "transparent",
-                          cursor: "pointer",
-                          color: isAutoSlug
-                            ? "var(--color-forest-700)"
-                            : "var(--color-ink-4)",
-                          transition: "all 0.2s",
-                        }}
+                        className={`flex items-center gap-1 text-[10.5px] px-2 py-0.5 rounded-full border transition-all duration-200 font-medium ${
+                          isAutoSlug
+                            ? "bg-[var(--color-forest-50)] border-[var(--color-forest-200)] text-[var(--color-forest-700)]"
+                            : "bg-transparent border-[var(--color-ink-6)] text-[var(--color-ink-4)]"
+                        }`}
                       >
-                        <RefreshCw
-                          size={10}
-                          style={{ display: "inline", marginRight: "4px" }}
-                        />
+                        <RefreshCw size={10} />
                         {isAutoSlug ? "Auto" : "Manual"}
                       </button>
                     </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontSize: "13px",
-                          color: "var(--color-ink-4)",
-                          flexShrink: 0,
-                        }}
-                      >
+
+                    <div className="flex items-center gap-2 max-sm:flex-col max-sm:items-start max-sm:gap-1.5">
+                      <span className="text-[13px] text-[var(--color-ink-4)] shrink-0">
                         /
                       </span>
                       <input
@@ -267,12 +217,12 @@ export function PageForm({ page }: Props) {
                         required
                       />
                     </div>
-                    <span className="admin-hint">
+                    <span className="admin-hint mt-0.5">
                       Gunakan "/" untuk sub-halaman. Contoh: profil/sejarah
                     </span>
                   </div>
 
-                  <div className="admin-form-group">
+                  <div className="admin-form-group mt-2">
                     <label className="admin-label" htmlFor="excerpt">
                       Ringkasan
                     </label>
@@ -294,7 +244,7 @@ export function PageForm({ page }: Props) {
               <div className="admin-card-head">
                 <div className="admin-card-title">Konten Halaman</div>
               </div>
-              <div className="admin-card-body" style={{ padding: 0 }}>
+              <div className="admin-card-body p-0">
                 <RichEditor
                   value={content}
                   onChange={setContent}
@@ -310,7 +260,7 @@ export function PageForm({ page }: Props) {
                 <div className="admin-card-title">SEO</div>
               </div>
               <div className="admin-card-body">
-                <div className="admin-form" style={{ gap: "12px" }}>
+                <div className="admin-form gap-4">
                   <div className="admin-form-group">
                     <label className="admin-label" htmlFor="metaTitle">
                       Meta Title
@@ -344,22 +294,14 @@ export function PageForm({ page }: Props) {
             </div>
           </div>
 
-          {/* ── Sidebar ── */}
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "16px",
-              position: "sticky",
-              top: "80px",
-            }}
-          >
+          {/* ── Sidebar Column (Otomatis naik ke atas di layar HP) ── */}
+          <div className="flex flex-col gap-5 lg:sticky lg:top-20 order-first lg:order-last mb-2 lg:mb-0">
             <div className="admin-card">
               <div className="admin-card-head">
                 <div className="admin-card-title">Publikasi</div>
               </div>
               <div className="admin-card-body">
-                <div className="admin-form" style={{ gap: "14px" }}>
+                <div className="admin-form gap-4">
                   <div className="admin-form-group">
                     <label className="admin-label" htmlFor="status">
                       Status
@@ -396,7 +338,7 @@ export function PageForm({ page }: Props) {
 
                   <div className="admin-form-group">
                     <label className="admin-label" htmlFor="sortOrder">
-                      Urutan
+                      Urutan Menu (Sort Order)
                     </label>
                     <input
                       id="sortOrder"
@@ -408,30 +350,19 @@ export function PageForm({ page }: Props) {
                     />
                   </div>
 
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                    }}
-                  >
+                  <div className="flex items-center gap-2.5 mt-1">
                     <input
                       type="checkbox"
                       id="showInNav"
                       checked={showInNav}
                       onChange={(e) => setShowInNav(e.target.checked)}
-                      style={{
-                        width: "16px",
-                        height: "16px",
-                        cursor: "pointer",
-                      }}
+                      className="w-4 h-4 cursor-pointer accent-[var(--color-forest-700)] shrink-0"
                     />
                     <label
                       htmlFor="showInNav"
-                      className="admin-label"
-                      style={{ margin: 0, cursor: "pointer", fontWeight: 500 }}
+                      className="admin-label !m-0 cursor-pointer font-medium"
                     >
-                      Tampilkan di navigasi
+                      Tampilkan di navigasi menu
                     </label>
                   </div>
                 </div>
@@ -441,14 +372,13 @@ export function PageForm({ page }: Props) {
             {/* Preview Button */}
             {isEdit && slug && (
               <div className="admin-card">
-                <div className="admin-card-body">
+                <div className="admin-card-body p-4">
                   <Link
                     href={`/${slug}`}
                     target="_blank"
-                    className="admin-table-btn admin-table-btn-view w-full justify-center"
-                    style={{ display: "flex", gap: "8px" }}
+                    className="admin-table-btn admin-table-btn-view w-full justify-center flex items-center gap-2 py-2 text-[13px]"
                   >
-                    <Eye size={14} />
+                    <Eye size={15} />
                     Preview Halaman
                   </Link>
                 </div>
