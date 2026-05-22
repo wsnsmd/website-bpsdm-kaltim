@@ -42,3 +42,16 @@ export async function updateSingleSetting(key: string, value: string) {
 
   return { success: true };
 }
+
+export async function updateSetting(key: string, value: string) {
+  const session = await auth();
+  if (!session) throw new Error("Unauthorized");
+
+  await db
+    .insert(settings)
+    .values({ key, value })
+    .onDuplicateKeyUpdate({ set: { value } });
+
+  revalidatePath("/admin/pengaturan");
+  revalidatePath("/api/maintenance-status");
+}

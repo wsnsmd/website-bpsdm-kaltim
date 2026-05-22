@@ -7,6 +7,7 @@ import {
   SurveyWidget,
   VisitorTracker,
 } from "@/components/layout/ClientComponents";
+import { BackToTop } from "@/components/ui/BackToTop";
 
 export default function PublicLayout({
   children,
@@ -22,6 +23,7 @@ export default function PublicLayout({
       <HeaderSpacer />
       <main>{children}</main>
       <Footer />
+      <BackToTop />
       <SurveyWidget />
     </>
   );

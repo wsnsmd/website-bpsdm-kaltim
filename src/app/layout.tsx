@@ -3,7 +3,6 @@ import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { getPublicSettings } from "@/lib/queries/settings";
 import "./globals.css";
-import { BackToTop } from "@/components/ui/BackToTop";
 import { SessionProvider } from "@/components/providers/SessionProvider";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
@@ -156,7 +155,6 @@ export default async function RootLayout({
             </Script>
           </>
         )}
-        <BackToTop />
         <SessionProvider>{children}</SessionProvider>
       </body>
     </html>

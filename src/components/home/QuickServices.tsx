@@ -47,7 +47,7 @@ export async function QuickServices() {
   if (highlights.length === 0) return null;
 
   return (
-    <section className="quick-services">
+    <section className="quick-services" style={{ backgroundColor: "#fff" }}>
       <div className="container-content">
         {/* Header */}
         <div className="quick-services-header">

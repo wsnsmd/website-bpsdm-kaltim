@@ -2,6 +2,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 export function HeaderLogoClient() {
@@ -29,30 +30,24 @@ export function HeaderLogoClient() {
   return (
     <Link
       href="/"
-      className="header-logo"
-      style={{ flexShrink: 0, textDecoration: "none" }}
+      className="header-logo shrink-0 no-underline flex items-center gap-1.5"
     >
-      {/* Logo mark */}
-      <div className="header-logo-mark">
-        <div className="header-logo-accent" />
-        <svg
-          width="18"
-          height="18"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="white"
-          strokeWidth="1.5"
-          style={{ position: "relative", zIndex: 1 }}
-        >
-          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-          <polyline points="9 22 9 12 15 12 15 22" />
-        </svg>
+      {/* Gambar Logo */}
+      <div className="relative w-10 h-11 shrink-0 flex items-center justify-center">
+        <Image
+          src="/pemprov.png"
+          alt="Logo Pemprov Kaltim"
+          width={40}
+          height={44}
+          className="object-contain"
+          priority // Prioritaskan loading gambar ini karena ada di header
+        />
       </div>
 
       {/* Teks logo */}
-      <div className="header-logo-text">
+      <div className="header-logo-text flex flex-col justify-center">
         <div
-          className="header-logo-name"
+          className="header-logo-name text-sm font-bold tracking-tight"
           style={{
             color: isTransparent ? "#fff" : "var(--color-forest-800)",
             transition: "color 0.3s",
@@ -61,11 +56,11 @@ export function HeaderLogoClient() {
           BPSDM Kalimantan Timur
         </div>
         <div
-          className="header-logo-sub"
+          className="header-logo-sub text-[11px] mt-0.5 font-semibold"
           style={{
             color: isTransparent
-              ? "rgba(255,255,255,0.5)"
-              : "var(--color-ink-2)",
+              ? "var(--color-gold-400)"
+              : "var(--color-ink-4)",
             transition: "color 0.3s",
           }}
         >

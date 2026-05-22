@@ -19,7 +19,8 @@
     "db:seed-settings": "bun src/db/seed-settings.ts",
     "db:seed-documents": "bun src/db/seed-documents.ts",
     "db:seed-platforms": "bun src/db/seed-platforms.ts",
-    "db:seed-ppid": "bun src/db/seed-ppid.ts"
+    "db:seed-ppid": "bun src/db/seed-ppid.ts",
+    "migrate:wp": "bun src/scripts/migrate-wp.ts"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.2",

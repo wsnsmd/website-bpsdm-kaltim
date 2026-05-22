@@ -1,5 +1,5 @@
 // src/lib/queries/profil.ts
-import { db, eq, and, asc, isNull } from "@/db";
+import { db, eq, and, asc, isNull, inArray, sql } from "@/db";
 import { pages, units, staff, menuGroups, menuItems } from "@/db/schema";
 
 // ── Pages ─────────────────────────────────────
@@ -120,4 +120,17 @@ export async function getHeaderMenu(): Promise<MenuItemFull[]> {
       .filter((i) => i.parentId === root.id)
       .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)),
   }));
+}
+
+export async function getAllPimpinan() {
+  return db
+    .select()
+    .from(staff)
+    .where(inArray(staff.type, ["kepala_badan", "sekretaris", "kepala_bidang"]))
+    .orderBy(
+      // Urutan: kepala_badan dulu, lalu sekretaris, lalu kepala_bidang
+      sql`FIELD(type, 'kepala_badan', 'sekretaris', 'kepala_bidang')`,
+      asc(staff.sortOrder),
+      asc(staff.name),
+    );
 }

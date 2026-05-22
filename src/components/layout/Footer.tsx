@@ -1,4 +1,6 @@
+// src/components/layout/Footer.tsx
 import Link from "next/link";
+import Image from "next/image";
 import { MapPin, Phone, Mail, ChevronRight, Code2, Users } from "lucide-react";
 import {
   FaFacebook,
@@ -112,27 +114,27 @@ export async function Footer() {
         <div className="footer-grid-layout">
           {/* Kolom 1: Identitas */}
           <div className="footer-brand-col">
-            <div className="footer-logo-wrapper">
-              <div className="footer-logo-mark-new">
-                <svg
-                  width="22"
-                  height="22"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                  <polyline points="9 22 9 12 15 12 15 22" />
-                </svg>
+            {/* ── LOGO PEMPROV DI SINI ── */}
+            <div className="footer-logo-wrapper flex items-center gap-1.5 mb-4">
+              <div className="relative w-10 h-11 shrink-0 flex items-center justify-center">
+                <Image
+                  src="/pemprov.png"
+                  alt="Logo Pemprov Kaltim"
+                  width={40}
+                  height={44}
+                  className="object-contain"
+                />
               </div>
-              <div>
-                <span className="footer-brand-title">BPSDM</span>
+              <div className="flex flex-col justify-center">
+                <span className="footer-brand-title">
+                  BPSDM Kalimantan Timur
+                </span>
                 <span className="footer-brand-subtitle">
-                  Provinsi Kalimantan Timur
+                  Badan Pengembangan Sumber Daya Manusia
                 </span>
               </div>
             </div>
+
             <p className="footer-text-desc">
               {s.footer_description ||
                 "Badan Pengembangan Sumber Daya Manusia Provinsi Kalimantan Timur berkomitmen mewujudkan aparatur sipil negara yang kompeten, profesional, dan berintegritas."}

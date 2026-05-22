@@ -7869,3 +7869,71 @@ main > *:not(.hero-root) {
     gap: 10px !important;
   }
 }
+
+/* ── Pimpinan Section ── */
+@keyframes progressBar {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.pimpinan-nav-btn:hover {
+  background: #fff !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+  transform: scale(1.05);
+}
+
+.pimpinan-next-preview:hover {
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.15) !important;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 1024px) {
+  .pimpinan-grid {
+    grid-template-columns: 1fr !important;
+    padding: 0 40px !important;
+    align-content: center !important;
+  }
+
+  .pimpinan-dots {
+    left: 20px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .pimpinan-grid {
+    padding: 0 24px !important;
+    gap: 20px !important;
+  }
+
+  .pimpinan-dots {
+    display: none !important;
+  }
+}
+
+/* ── Scroll Snap Beranda ── */
+html:has(.pimpinan-section) {
+  scroll-snap-type: y proximity;
+  overflow-y: scroll;
+  scroll-behavior: smooth;
+}
+
+html:has(.pimpinan-section) .hero-simple {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+html:has(.pimpinan-section) .pimpinan-section {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+/* Pastikan header transparan di /web saat load */
+[data-transparent="true"] {
+  background: transparent !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+}

@@ -1,36 +1,42 @@
 // src/components/layout/HeaderClient.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useLayoutEffect } from "react";
 import { usePathname } from "next/navigation";
+
+// Gunakan useLayoutEffect di client, useEffect di server
+const useIsomorphicLayoutEffect =
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 export function HeaderScrollWrapper({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+  const isHome = pathname === "/web" || pathname === "/web/";
 
-  // Hanya transparan di halaman beranda
-  const isHome = pathname === "/";
+  // Inisialisasi langsung transparan jika home
+  const [transparent, setTransparent] = useState(isHome);
 
-  useEffect(() => {
-    if (!isHome) return;
-
-    function handleScroll() {
-      setScrolled(window.scrollY > 60);
+  useIsomorphicLayoutEffect(() => {
+    if (!isHome) {
+      setTransparent(false);
+      return;
     }
 
-    handleScroll(); // cek awal
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [isHome]);
+    function update() {
+      setTransparent(window.scrollY <= 60);
+    }
 
-  const transparent = isHome && !scrolled;
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
+  }, [isHome]);
 
   return (
     <div
+      suppressHydrationWarning
       style={{
         position: "fixed",
         top: 0,
@@ -44,7 +50,7 @@ export function HeaderScrollWrapper({
         boxShadow: transparent ? "none" : "0 1px 8px rgba(0,0,0,0.06)",
         transition: "background 0.3s, border-color 0.3s, box-shadow 0.3s",
       }}
-      data-transparent={transparent}
+      data-transparent={String(transparent)}
     >
       {children}
     </div>

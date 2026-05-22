@@ -5,7 +5,11 @@ import { usePathname } from "next/navigation";
 
 export function HeaderSpacer() {
   const pathname = usePathname();
-  // Beranda tidak perlu spacer karena hero sudah handle padding
-  if (pathname === "/") return null;
+
+  // Tidak perlu spacer di halaman home karena header transparan
+  const isHome = pathname === "/web" || pathname === "/web/";
+
+  if (isHome) return null;
+
   return <div style={{ height: "64px" }} />;
 }
