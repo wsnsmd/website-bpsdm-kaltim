@@ -29,7 +29,7 @@ export function HeaderLogoClient() {
 
   return (
     <Link
-      href="/"
+      href="/web"
       className="header-logo shrink-0 no-underline flex items-center gap-1.5"
     >
       {/* Gambar Logo */}

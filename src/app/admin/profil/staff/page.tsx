@@ -2,9 +2,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Plus, Edit } from "lucide-react";
-import { db, asc } from "@/db";
+import { db, asc, eq, like, and, or } from "@/db";
 import { staff, units } from "@/db/schema";
-import { eq } from "@/db";
 import { DeleteStaffButton } from "@/components/admin/profil/DeleteStaffButton";
 import { SmartImage } from "@/components/ui/SmartImage";
 
@@ -26,7 +25,16 @@ const TYPE_BADGE: Record<string, string> = {
   pegawai: "badge-red",
 };
 
-export default async function AdminStaffPage() {
+type Props = {
+  searchParams: Promise<{ cari?: string; tipe?: string; status?: string }>;
+};
+
+export default async function AdminStaffPage({ searchParams }: Props) {
+  const params = await searchParams;
+  const search = params.cari ?? "";
+  const tipe = params.tipe ?? "";
+  const status = params.status ?? "";
+
   const allStaff = await db
     .select({
       id: staff.id,
@@ -45,23 +53,135 @@ export default async function AdminStaffPage() {
     .leftJoin(units, eq(staff.unitId, units.id))
     .orderBy(asc(staff.sortOrder));
 
+  // Filter di JS
+  const filtered = allStaff.filter((s) => {
+    const matchSearch =
+      !search ||
+      s.name.toLowerCase().includes(search.toLowerCase()) ||
+      (s.nip ?? "").includes(search) ||
+      (s.position ?? "").toLowerCase().includes(search.toLowerCase());
+    const matchTipe = !tipe || s.type === tipe;
+    const matchStatus =
+      !status ||
+      (status === "aktif"
+        ? s.isActive
+        : status === "nonaktif"
+          ? !s.isActive
+          : true);
+    return matchSearch && matchTipe && matchStatus;
+  });
+
   return (
     <>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: "16px",
-        }}
-      >
-        <p style={{ fontSize: "13px", color: "var(--color-ink-4)" }}>
-          {allStaff.length} pegawai terdaftar
-        </p>
+      {/* Header */}
+      <div className="admin-page-header">
+        <div>
+          <h1 className="admin-page-title">Manajemen Pegawai</h1>
+          <p className="admin-page-sub">
+            {filtered.length} dari {allStaff.length} pegawai
+          </p>
+        </div>
         <Link href="/admin/profil/staff/baru" className="admin-btn-save">
           <Plus size={15} />
           Tambah Pegawai
         </Link>
+      </div>
+
+      {/* Filter bar */}
+      <div
+        style={{
+          display: "flex",
+          gap: "10px",
+          marginBottom: "16px",
+          flexWrap: "wrap",
+        }}
+      >
+        {/* Search */}
+        <form
+          method="GET"
+          style={{ display: "flex", gap: "8px", flex: 1, minWidth: "200px" }}
+        >
+          {tipe && <input type="hidden" name="tipe" value={tipe} />}
+          {status && <input type="hidden" name="status" value={status} />}
+          <input
+            name="cari"
+            type="text"
+            className="admin-input"
+            placeholder="Cari nama, NIP, jabatan..."
+            defaultValue={search}
+            style={{ flex: 1, height: "36px", fontSize: "13px" }}
+          />
+          <button
+            type="submit"
+            className="admin-btn-save"
+            style={{ height: "36px", padding: "0 16px" }}
+          >
+            Cari
+          </button>
+          {(search || tipe || status) && (
+            <Link
+              href="/admin/profil/staff"
+              style={{
+                height: "36px",
+                padding: "0 14px",
+                borderRadius: "8px",
+                border: "1px solid var(--color-ink-6)",
+                background: "#fff",
+                display: "flex",
+                alignItems: "center",
+                fontSize: "13px",
+                color: "var(--color-ink-3)",
+                textDecoration: "none",
+              }}
+            >
+              Reset
+            </Link>
+          )}
+        </form>
+
+        {/* Tipe pills */}
+        <div style={{ display: "flex", gap: "5px", flexWrap: "wrap" }}>
+          {[
+            { value: "", label: "Semua" },
+            { value: "kepala_badan", label: "Kepala Badan" },
+            { value: "sekretaris", label: "Sekretaris" },
+            { value: "kepala_bidang", label: "Kepala Bidang" },
+            { value: "widyaiswara", label: "Widyaiswara" },
+            { value: "pegawai", label: "Pegawai" },
+          ].map((t) => (
+            <Link
+              key={t.value}
+              href={`/admin/profil/staff?tipe=${t.value}${search ? `&cari=${search}` : ""}${status ? `&status=${status}` : ""}`}
+              style={{
+                padding: "5px 12px",
+                borderRadius: "20px",
+                fontSize: "12px",
+                fontWeight: 500,
+                textDecoration: "none",
+                border: "1px solid",
+                borderColor:
+                  tipe === t.value
+                    ? "var(--color-forest-700)"
+                    : "var(--color-ink-6)",
+                background:
+                  tipe === t.value ? "var(--color-forest-700)" : "#fff",
+                color: tipe === t.value ? "#fff" : "var(--color-ink-3)",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {t.label}
+              <span
+                style={{
+                  marginLeft: "5px",
+                  fontSize: "11px",
+                  opacity: 0.6,
+                }}
+              >
+                {allStaff.filter((s) => !t.value || s.type === t.value).length}
+              </span>
+            </Link>
+          ))}
+        </div>
       </div>
 
       <div className="admin-card">
@@ -69,8 +189,8 @@ export default async function AdminStaffPage() {
           <table className="admin-table">
             <thead>
               <tr>
-                <th>Foto</th>
-                <th>Nama & Jabatan</th>
+                <th style={{ width: "52px" }}>Foto</th>
+                <th>Nama &amp; Jabatan</th>
                 <th>Tipe</th>
                 <th>Unit Kerja</th>
                 <th>Pendidikan</th>
@@ -79,7 +199,7 @@ export default async function AdminStaffPage() {
               </tr>
             </thead>
             <tbody>
-              {allStaff.length === 0 && (
+              {filtered.length === 0 && (
                 <tr>
                   <td
                     colSpan={7}
@@ -89,11 +209,13 @@ export default async function AdminStaffPage() {
                       color: "var(--color-ink-4)",
                     }}
                   >
-                    Belum ada data pegawai.
+                    {search
+                      ? `Tidak ada pegawai untuk "${search}"`
+                      : "Belum ada data pegawai."}
                   </td>
                 </tr>
               )}
-              {allStaff.map((s) => (
+              {filtered.map((s) => (
                 <tr key={s.id}>
                   {/* Foto */}
                   <td>
@@ -188,7 +310,7 @@ export default async function AdminStaffPage() {
                   {/* Status */}
                   <td>
                     <span
-                      className={`status-pill ${s.isActive ? "status-pill-active" : "status-pill-inactive"}`}
+                      className={`status-pill ${s.isActive ? "status-pill-published" : "status-pill-archived"}`}
                     >
                       {s.isActive ? "Aktif" : "Nonaktif"}
                     </span>
@@ -201,8 +323,7 @@ export default async function AdminStaffPage() {
                         href={`/admin/profil/staff/${s.id}`}
                         className="admin-table-btn admin-table-btn-edit"
                       >
-                        <Edit size={13} />
-                        Edit
+                        <Edit size={13} /> Edit
                       </Link>
                       <DeleteStaffButton id={s.id} />
                     </div>
@@ -212,6 +333,27 @@ export default async function AdminStaffPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Footer summary */}
+        {filtered.length > 0 && (
+          <div
+            style={{
+              padding: "12px 20px",
+              borderTop: "1px solid var(--color-ink-7)",
+              fontSize: "12.5px",
+              color: "var(--color-ink-4)",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <span>
+              {filtered.filter((s) => s.isActive).length} aktif ·{" "}
+              {filtered.filter((s) => !s.isActive).length} nonaktif
+            </span>
+            <span>{filtered.length} pegawai ditampilkan</span>
+          </div>
+        )}
       </div>
     </>
   );

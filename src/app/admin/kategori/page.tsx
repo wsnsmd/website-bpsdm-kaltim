@@ -1,14 +1,32 @@
 // src/app/admin/kategori/page.tsx
 import type { Metadata } from "next";
 import Link from "next/link";
-import { db, asc, count, eq } from "@/db";
+import { db, asc, desc, count, eq, like, or } from "@/db";
 import { categories, posts } from "@/db/schema";
 import { Plus, Edit } from "lucide-react";
 import { DeleteCategoryPostButton } from "@/components/admin/DeleteCategoryPostButton";
 
 export const metadata: Metadata = { title: "Kategori Berita" };
 
-export default async function AdminKategoriPage() {
+type Props = {
+  searchParams: Promise<{ cari?: string; sort?: string }>;
+};
+
+export default async function AdminKategoriPage({ searchParams }: Props) {
+  const params = await searchParams;
+  const search = params.cari ?? "";
+  const sort = params.sort ?? "name";
+
+  const where = search
+    ? or(
+        like(categories.name, `%${search}%`),
+        like(categories.slug, `%${search}%`),
+      )
+    : undefined;
+
+  const orderBy =
+    sort === "total" ? asc(categories.name) : asc(categories.name);
+
   const allCats = await db
     .select({
       id: categories.id,
@@ -17,14 +35,12 @@ export default async function AdminKategoriPage() {
       description: categories.description,
     })
     .from(categories)
-    .orderBy(asc(categories.name));
+    .where(where)
+    .orderBy(orderBy);
 
   // Hitung jumlah berita per kategori
   const counts = await db
-    .select({
-      categoryId: posts.categoryId,
-      total: count(),
-    })
+    .select({ categoryId: posts.categoryId, total: count() })
     .from(posts)
     .groupBy(posts.categoryId);
 
@@ -43,6 +59,56 @@ export default async function AdminKategoriPage() {
           <Plus size={15} />
           Tambah Kategori
         </Link>
+      </div>
+
+      {/* Filter bar */}
+      <div
+        style={{
+          display: "flex",
+          gap: "10px",
+          marginBottom: "16px",
+          flexWrap: "wrap",
+        }}
+      >
+        <form
+          method="GET"
+          style={{ display: "flex", gap: "8px", flex: 1, minWidth: "200px" }}
+        >
+          <input
+            name="cari"
+            type="text"
+            className="admin-input"
+            placeholder="Cari kategori..."
+            defaultValue={search}
+            style={{ flex: 1, height: "36px", fontSize: "13px" }}
+          />
+          <button
+            type="submit"
+            className="admin-btn-save"
+            style={{ height: "36px", padding: "0 16px" }}
+          >
+            Cari
+          </button>
+          {search && (
+            <Link
+              href="/admin/kategori"
+              style={{
+                height: "36px",
+                padding: "0 14px",
+                borderRadius: "8px",
+                border: "1px solid var(--color-ink-6)",
+                background: "#fff",
+                display: "flex",
+                alignItems: "center",
+                fontSize: "13px",
+                color: "var(--color-ink-3)",
+                textDecoration: "none",
+              }}
+            >
+              Reset
+            </Link>
+          )}
+        </form>
       </div>
 
       <div className="admin-card">
@@ -70,7 +136,9 @@ export default async function AdminKategoriPage() {
                       color: "var(--color-ink-4)",
                     }}
                   >
-                    Belum ada kategori. Tambahkan yang pertama!
+                    {search
+                      ? `Tidak ada kategori untuk "${search}"`
+                      : "Belum ada kategori. Tambahkan yang pertama!"}
                   </td>
                 </tr>
               )}
@@ -115,8 +183,17 @@ export default async function AdminKategoriPage() {
                   <td style={{ textAlign: "center" }}>
                     <span
                       style={{
-                        fontSize: "13px",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: "36px",
+                        height: "24px",
+                        borderRadius: "20px",
+                        fontSize: "12.5px",
                         fontWeight: 700,
+                        background: countMap[cat.id]
+                          ? "var(--color-forest-50)"
+                          : "var(--color-ink-7)",
                         color: countMap[cat.id]
                           ? "var(--color-forest-700)"
                           : "var(--color-ink-5)",
@@ -127,6 +204,13 @@ export default async function AdminKategoriPage() {
                   </td>
                   <td>
                     <div className="admin-table-actions">
+                      <Link
+                        href={`/berita?kategori=${cat.slug}`}
+                        target="_blank"
+                        className="admin-table-btn admin-table-btn-view"
+                      >
+                        Lihat
+                      </Link>
                       <Link
                         href={`/admin/kategori/${cat.id}`}
                         className="admin-table-btn admin-table-btn-edit"
@@ -141,6 +225,35 @@ export default async function AdminKategoriPage() {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Summary footer */}
+        <div
+          style={{
+            padding: "12px 20px",
+            borderTop: "1px solid var(--color-ink-7)",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            fontSize: "12.5px",
+            color: "var(--color-ink-4)",
+          }}
+        >
+          <span>
+            Total {allCats.reduce((sum, c) => sum + (countMap[c.id] ?? 0), 0)}{" "}
+            berita dalam {allCats.length} kategori
+          </span>
+          <Link
+            href="/admin/berita/baru"
+            style={{
+              fontSize: "12.5px",
+              color: "var(--color-forest-700)",
+              textDecoration: "none",
+              fontWeight: 600,
+            }}
+          >
+            + Tambah berita baru
+          </Link>
         </div>
       </div>
     </>

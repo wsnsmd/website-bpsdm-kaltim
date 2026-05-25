@@ -1,4 +1,5 @@
-// src/app/(public)/page.tsx
+// src/app/(public)/web/page.tsx
+import type { Metadata } from "next";
 import { HeroSection } from "@/components/home/HeroSection";
 import { AnnouncementBar } from "@/components/home/AnnouncementBar";
 import { QuickServices } from "@/components/home/QuickServices";
@@ -11,8 +12,15 @@ import { fetchJadwalMendatang } from "@/lib/simpel/jadwal";
 // import { PimpinanSection } from "@/components/home/PimpinanSection";
 // import { getAllPimpinan } from "@/lib/queries/profil";
 import { SnapController } from "@/components/home/SnapController";
+import { VideoSection } from "@/components/home/VideoSection";
+import { getVideosByAlbumId } from "@/lib/queries/gallery";
+import { getSetting } from "@/lib/queries/settings";
 
 export const revalidate = 3600;
+
+export const metadata: Metadata = {
+  title: "Website",
+};
 
 export default async function HomePage() {
   const [
@@ -21,12 +29,14 @@ export default async function HomePage() {
     jadwalMendatang,
     announcements,
     // pimpinanStaff,
+    homeVideoAlbumId,
   ] = await Promise.all([
     getFeaturedPost(),
     getLatestPosts({ limit: 6 }),
     fetchJadwalMendatang(4),
     getActiveAnnouncements(5),
     // getAllPimpinan(),
+    getSetting("home_video_album_id"),
   ]);
 
   // const ACCENT_COLORS = [
@@ -48,6 +58,10 @@ export default async function HomePage() {
   //   accentAlt: ACCENT_COLORS[i % ACCENT_COLORS.length].accentAlt,
   // }));
 
+  const homeVideos = homeVideoAlbumId
+    ? await getVideosByAlbumId(Number(homeVideoAlbumId))
+    : [];
+
   return (
     <>
       <SnapController />
@@ -62,6 +76,7 @@ export default async function HomePage() {
       <NewsSection featuredPost={featuredPost} posts={latestPosts} />
       <div style={{ height: "1px", backgroundColor: "var(--color-ink-6)" }} />
       <ProgramsSection />
+      {homeVideos.length > 0 && <VideoSection videos={homeVideos} />}
       <AgendaSection jadwalList={jadwalMendatang} />
     </>
   );

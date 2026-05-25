@@ -4,7 +4,7 @@ import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { PpidPageContent } from "@/components/ppid/PpidPageContent";
 import { Clock, CheckCircle2 } from "lucide-react";
 
-export const metadata: Metadata = { title: "Standar Layanan Informasi" };
+export const metadata: Metadata = { title: "Standar Layanan PPID" };
 
 const SLA_ITEMS = [
   { label: "Konfirmasi tertulis permohonan diterima", durasi: "1 hari kerja" },

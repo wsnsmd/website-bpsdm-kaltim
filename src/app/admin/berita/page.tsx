@@ -1,32 +1,69 @@
 // src/app/admin/berita/page.tsx
 import type { Metadata } from "next";
 import Link from "next/link";
-import { db, desc, eq } from "@/db";
+import { db, desc, eq, like, count, and } from "@/db";
 import { posts, categories } from "@/db/schema";
 import { timeAgo, getCategoryBadge } from "@/lib/utils";
 import { DeletePostButton } from "@/components/admin/DeletePostButton";
+import { Pagination } from "@/components/ui/Pagination";
+import { getPostCategories } from "@/lib/queries/categories";
 
 export const metadata: Metadata = { title: "Manajemen Berita" };
 
-export default async function AdminBeritaPage() {
-  const allPosts = await db
-    .select({
-      id: posts.id,
-      title: posts.title,
-      slug: posts.slug,
-      status: posts.status,
-      publishedAt: posts.publishedAt,
-      viewCount: posts.viewCount,
-      authorName: posts.authorName,
-      category: {
-        name: categories.name,
-        slug: categories.slug,
-      },
-    })
-    .from(posts)
-    .leftJoin(categories, eq(posts.categoryId, categories.id))
-    .orderBy(desc(posts.createdAt))
-    .limit(50);
+const PER_PAGE = 20;
+
+type Props = {
+  searchParams: Promise<{
+    halaman?: string;
+    status?: string;
+    cari?: string;
+    kategori?: string;
+  }>;
+};
+
+export default async function AdminBeritaPage({ searchParams }: Props) {
+  const params = await searchParams;
+  const page = Math.max(1, Number(params.halaman ?? 1));
+  const status = params.status ?? "";
+  const search = params.cari ?? "";
+  const kategori = params.kategori ?? "";
+  const offset = (page - 1) * PER_PAGE;
+
+  // Build where conditions
+  const conditions = [];
+  if (status) conditions.push(eq(posts.status, status as any));
+  if (search) conditions.push(like(posts.title, `%${search}%`));
+  if (kategori) conditions.push(eq(posts.categoryId, Number(kategori)));
+  const where = conditions.length > 0 ? and(...conditions) : undefined;
+
+  const [allPosts, totalResult, allCategories] = await Promise.all([
+    db
+      .select({
+        id: posts.id,
+        title: posts.title,
+        slug: posts.slug,
+        status: posts.status,
+        publishedAt: posts.publishedAt,
+        viewCount: posts.viewCount,
+        authorName: posts.authorName,
+        category: {
+          name: categories.name,
+          slug: categories.slug,
+        },
+      })
+      .from(posts)
+      .leftJoin(categories, eq(posts.categoryId, categories.id))
+      .where(where)
+      .orderBy(desc(posts.publishedAt), desc(posts.createdAt))
+      .limit(PER_PAGE)
+      .offset(offset),
+
+    db.select({ total: count() }).from(posts).where(where),
+    getPostCategories(),
+  ]);
+
+  const total = totalResult[0]?.total ?? 0;
+  const totalPages = Math.ceil(total / PER_PAGE);
 
   const statusMap: Record<string, string> = {
     published: "status-pill-published",
@@ -42,12 +79,43 @@ export default async function AdminBeritaPage() {
     archived: "Arsip",
   };
 
+  const paginationParams: Record<string, string> = {};
+  if (status) paginationParams.status = status;
+  if (search) paginationParams.cari = search;
+  if (kategori) paginationParams.kategori = kategori;
+
+  const pillStyle = (active: boolean) => ({
+    padding: "6px 14px",
+    borderRadius: "20px",
+    fontSize: "12.5px",
+    fontWeight: 500,
+    textDecoration: "none" as const,
+    border: "1px solid",
+    borderColor: active ? "var(--color-forest-700)" : "var(--color-ink-6)",
+    background: active ? "var(--color-forest-700)" : "#fff",
+    color: active ? "#fff" : "var(--color-ink-3)",
+    whiteSpace: "nowrap" as const,
+    display: "inline-block",
+  });
+
   return (
     <>
+      {/* Header */}
       <div className="admin-page-header">
         <div>
           <h1 className="admin-page-title">Berita &amp; Artikel</h1>
-          <p className="admin-page-sub">{allPosts.length} artikel ditemukan</p>
+          <p className="admin-page-sub">
+            {total} artikel ditemukan
+            {kategori && (
+              <>
+                {" "}
+                · Kategori:{" "}
+                <strong>
+                  {allCategories.find((c) => String(c.id) === kategori)?.name}
+                </strong>
+              </>
+            )}
+          </p>
         </div>
         <Link href="/admin/berita/baru" className="admin-btn-save">
           <svg
@@ -65,6 +133,129 @@ export default async function AdminBeritaPage() {
         </Link>
       </div>
 
+      {/* Filter bar */}
+      <div
+        style={{
+          display: "flex",
+          gap: "10px",
+          marginBottom: "16px",
+          flexWrap: "wrap",
+          alignItems: "flex-start",
+        }}
+      >
+        {/* Search */}
+        <form
+          method="GET"
+          style={{ display: "flex", gap: "8px", flex: 1, minWidth: "220px" }}
+        >
+          {status && <input type="hidden" name="status" value={status} />}
+          {kategori && <input type="hidden" name="kategori" value={kategori} />}
+          <input
+            name="cari"
+            type="text"
+            className="admin-input"
+            placeholder="Cari judul berita..."
+            defaultValue={search}
+            style={{ flex: 1, height: "36px", fontSize: "13px" }}
+          />
+          <button
+            type="submit"
+            className="admin-btn-save"
+            style={{ height: "36px", padding: "0 16px" }}
+          >
+            Cari
+          </button>
+          {(search || status || kategori) && (
+            <Link
+              href="/admin/berita"
+              style={{
+                height: "36px",
+                padding: "0 14px",
+                borderRadius: "8px",
+                border: "1px solid var(--color-ink-6)",
+                background: "#fff",
+                display: "flex",
+                alignItems: "center",
+                fontSize: "13px",
+                color: "var(--color-ink-3)",
+                textDecoration: "none",
+              }}
+            >
+              Reset
+            </Link>
+          )}
+        </form>
+
+        {/* Pills container */}
+        <div
+          style={{
+            display: "flex",
+            gap: "8px",
+            flexWrap: "wrap",
+            alignItems: "center",
+          }}
+        >
+          {/* Status pills */}
+          <div style={{ display: "flex", gap: "5px", flexWrap: "wrap" }}>
+            {[
+              { value: "", label: "Semua" },
+              { value: "published", label: "Terbit" },
+              { value: "draft", label: "Draft" },
+              { value: "review", label: "Review" },
+              { value: "archived", label: "Arsip" },
+            ].map((s) => (
+              <Link
+                key={s.value}
+                href={`/admin/berita?status=${s.value}${search ? `&cari=${search}` : ""}${kategori ? `&kategori=${kategori}` : ""}`}
+                style={pillStyle(status === s.value)}
+              >
+                {s.label}
+              </Link>
+            ))}
+          </div>
+
+          {/* Divider */}
+          <div
+            style={{
+              width: "1px",
+              height: "28px",
+              background: "var(--color-ink-6)",
+            }}
+          />
+
+          {/* Kategori pills */}
+          <div style={{ display: "flex", gap: "5px", flexWrap: "wrap" }}>
+            <Link
+              href={`/admin/berita?${status ? `status=${status}&` : ""}${search ? `cari=${search}` : ""}`}
+              style={pillStyle(!kategori)}
+            >
+              Semua Kategori
+            </Link>
+            {allCategories.map((cat) => (
+              <Link
+                key={cat.id}
+                href={`/admin/berita?kategori=${cat.id}${status ? `&status=${status}` : ""}${search ? `&cari=${search}` : ""}`}
+                style={pillStyle(kategori === String(cat.id))}
+              >
+                {cat.name}
+                {(cat.count ?? 0) > 0 && (
+                  <span
+                    style={{
+                      marginLeft: "5px",
+                      opacity: 0.55,
+                      fontSize: "11px",
+                    }}
+                  >
+                    {cat.count}
+                  </span>
+                )}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Table */}
       <div className="admin-card">
         <div className="admin-table-wrap">
           <table className="admin-table">
@@ -90,7 +281,9 @@ export default async function AdminBeritaPage() {
                       color: "var(--color-ink-4)",
                     }}
                   >
-                    Belum ada artikel. Tambahkan yang pertama!
+                    {search
+                      ? `Tidak ada hasil untuk "${search}"`
+                      : "Belum ada artikel."}
                   </td>
                 </tr>
               )}
@@ -187,6 +380,42 @@ export default async function AdminBeritaPage() {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div
+            style={{
+              padding: "16px 20px",
+              borderTop: "1px solid var(--color-ink-7)",
+            }}
+          >
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              basePath="/admin/berita"
+              searchParams={paginationParams}
+            />
+          </div>
+        )}
+
+        {/* Footer */}
+        <div
+          style={{
+            padding: "12px 20px",
+            borderTop:
+              totalPages <= 1 ? "1px solid var(--color-ink-7)" : "none",
+            fontSize: "12.5px",
+            color: "var(--color-ink-4)",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <span>
+            Halaman {page} dari {totalPages || 1} · {total} total artikel
+          </span>
+          <span>{PER_PAGE} per halaman</span>
         </div>
       </div>
     </>

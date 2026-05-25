@@ -26,32 +26,141 @@ const LEVEL_LABELS: Record<
   3: { label: "Sub Bagian", color: "#7e22ce", bg: "#fdf4ff" },
 };
 
-export default async function AdminUnitsPage() {
+type Props = {
+  searchParams: Promise<{ cari?: string; level?: string }>;
+};
+
+export default async function AdminUnitsPage({ searchParams }: Props) {
+  const params = await searchParams;
+  const search = params.cari ?? "";
+  const level = params.level ?? "";
+
   const allUnits = await db
     .select()
     .from(units)
     .orderBy(asc(units.level), asc(units.sortOrder));
 
-  // Build map untuk nama parent
   const unitMap = new Map(allUnits.map((u) => [u.id, u.name]));
+
+  // Filter di JS
+  const filtered = allUnits.filter((u) => {
+    const matchSearch =
+      !search ||
+      u.name.toLowerCase().includes(search.toLowerCase()) ||
+      (u.shortName ?? "").toLowerCase().includes(search.toLowerCase());
+    const matchLevel = !level || String(u.level ?? 0) === level;
+    return matchSearch && matchLevel;
+  });
 
   return (
     <>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: "16px",
-        }}
-      >
-        <p style={{ fontSize: "13px", color: "var(--color-ink-4)" }}>
-          {allUnits.length} unit terdaftar
-        </p>
+      {/* Header */}
+      <div className="admin-page-header">
+        <div>
+          <h1 className="admin-page-title">Unit Kerja</h1>
+          <p className="admin-page-sub">
+            {filtered.length} dari {allUnits.length} unit terdaftar
+          </p>
+        </div>
         <Link href="/admin/profil/units/baru" className="admin-btn-save">
           <Plus size={15} />
           Tambah Unit
         </Link>
+      </div>
+
+      {/* Filter bar */}
+      <div
+        style={{
+          display: "flex",
+          gap: "10px",
+          marginBottom: "16px",
+          flexWrap: "wrap",
+        }}
+      >
+        {/* Search */}
+        <form
+          method="GET"
+          style={{ display: "flex", gap: "8px", flex: 1, minWidth: "200px" }}
+        >
+          {level && <input type="hidden" name="level" value={level} />}
+          <input
+            name="cari"
+            type="text"
+            className="admin-input"
+            placeholder="Cari nama unit..."
+            defaultValue={search}
+            style={{ flex: 1, height: "36px", fontSize: "13px" }}
+          />
+          <button
+            type="submit"
+            className="admin-btn-save"
+            style={{ height: "36px", padding: "0 16px" }}
+          >
+            Cari
+          </button>
+          {(search || level) && (
+            <Link
+              href="/admin/profil/units"
+              style={{
+                height: "36px",
+                padding: "0 14px",
+                borderRadius: "8px",
+                border: "1px solid var(--color-ink-6)",
+                background: "#fff",
+                display: "flex",
+                alignItems: "center",
+                fontSize: "13px",
+                color: "var(--color-ink-3)",
+                textDecoration: "none",
+              }}
+            >
+              Reset
+            </Link>
+          )}
+        </form>
+
+        {/* Level pills */}
+        <div style={{ display: "flex", gap: "5px", flexWrap: "wrap" }}>
+          {[
+            { value: "", label: "Semua" },
+            { value: "0", label: "Pimpinan" },
+            { value: "1", label: "Sekretariat" },
+            { value: "2", label: "Bidang / UPT" },
+            { value: "3", label: "Sub Bagian" },
+          ].map((l) => (
+            <Link
+              key={l.value}
+              href={`/admin/profil/units?level=${l.value}${search ? `&cari=${search}` : ""}`}
+              style={{
+                padding: "5px 12px",
+                borderRadius: "20px",
+                fontSize: "12px",
+                fontWeight: 500,
+                textDecoration: "none",
+                border: "1px solid",
+                borderColor:
+                  level === l.value
+                    ? "var(--color-forest-700)"
+                    : "var(--color-ink-6)",
+                background:
+                  level === l.value ? "var(--color-forest-700)" : "#fff",
+                color: level === l.value ? "#fff" : "var(--color-ink-3)",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {l.label}
+              <span
+                style={{ marginLeft: "5px", fontSize: "11px", opacity: 0.6 }}
+              >
+                {
+                  allUnits.filter(
+                    (u) => !l.value || String(u.level ?? 0) === l.value,
+                  ).length
+                }
+              </span>
+            </Link>
+          ))}
+        </div>
       </div>
 
       <div className="admin-card">
@@ -59,16 +168,16 @@ export default async function AdminUnitsPage() {
           <table className="admin-table">
             <thead>
               <tr>
-                <th>Urutan</th>
+                <th style={{ width: "60px" }}>Urutan</th>
                 <th>Nama Unit</th>
                 <th>Level</th>
                 <th>Parent</th>
-                <th style={{ textAlign: "center" }}>Aktif</th>
+                <th style={{ textAlign: "center", width: "70px" }}>Aktif</th>
                 <th>Aksi</th>
               </tr>
             </thead>
             <tbody>
-              {allUnits.length === 0 && (
+              {filtered.length === 0 && (
                 <tr>
                   <td
                     colSpan={6}
@@ -78,11 +187,13 @@ export default async function AdminUnitsPage() {
                       color: "var(--color-ink-4)",
                     }}
                   >
-                    Belum ada unit kerja.
+                    {search
+                      ? `Tidak ada unit untuk "${search}"`
+                      : "Belum ada unit kerja."}
                   </td>
                 </tr>
               )}
-              {allUnits.map((unit) => {
+              {filtered.map((unit) => {
                 const levelInfo =
                   LEVEL_LABELS[unit.level ?? 0] ?? LEVEL_LABELS[3];
                 const parentName = unit.parentId
@@ -106,15 +217,13 @@ export default async function AdminUnitsPage() {
                           color: "var(--color-ink-4)",
                         }}
                       >
-                        {unit.sortOrder}
+                        {unit.sortOrder ?? "—"}
                       </span>
                     </td>
 
                     <td>
                       <div
-                        style={{
-                          paddingLeft: `${(unit.level ?? 0) * 16}px`,
-                        }}
+                        style={{ paddingLeft: `${(unit.level ?? 0) * 16}px` }}
                       >
                         <div
                           style={{
@@ -134,6 +243,21 @@ export default async function AdminUnitsPage() {
                             }}
                           >
                             ({unit.shortName})
+                          </div>
+                        )}
+                        {unit.description && (
+                          <div
+                            style={{
+                              fontSize: "11.5px",
+                              color: "var(--color-ink-5)",
+                              marginTop: "2px",
+                              maxWidth: "300px",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {unit.description}
                           </div>
                         )}
                       </div>
@@ -162,32 +286,23 @@ export default async function AdminUnitsPage() {
                       }}
                     >
                       {parentName ?? (
-                        <span style={{ color: "var(--color-ink-5)" }}>
-                          — (Root)
+                        <span
+                          style={{
+                            color: "var(--color-ink-5)",
+                            fontSize: "12px",
+                          }}
+                        >
+                          — Root
                         </span>
                       )}
                     </td>
 
                     <td style={{ textAlign: "center" }}>
-                      {unit.isActive ? (
-                        <span
-                          style={{
-                            color: "var(--color-forest-700)",
-                            fontSize: "18px",
-                          }}
-                        >
-                          ✓
-                        </span>
-                      ) : (
-                        <span
-                          style={{
-                            color: "var(--color-ink-5)",
-                            fontSize: "18px",
-                          }}
-                        >
-                          —
-                        </span>
-                      )}
+                      <span
+                        className={`status-pill ${unit.isActive ? "status-pill-published" : "status-pill-archived"}`}
+                      >
+                        {unit.isActive ? "Aktif" : "Nonaktif"}
+                      </span>
                     </td>
 
                     <td>
@@ -196,8 +311,7 @@ export default async function AdminUnitsPage() {
                           href={`/admin/profil/units/${unit.id}`}
                           className="admin-table-btn admin-table-btn-edit"
                         >
-                          <Edit size={13} />
-                          Edit
+                          <Edit size={13} /> Edit
                         </Link>
                         <DeleteUnitButton id={unit.id} />
                       </div>
@@ -208,6 +322,27 @@ export default async function AdminUnitsPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Footer */}
+        {filtered.length > 0 && (
+          <div
+            style={{
+              padding: "12px 20px",
+              borderTop: "1px solid var(--color-ink-7)",
+              fontSize: "12.5px",
+              color: "var(--color-ink-4)",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <span>
+              {filtered.filter((u) => u.isActive).length} aktif ·{" "}
+              {filtered.filter((u) => !u.isActive).length} nonaktif
+            </span>
+            <span>{filtered.length} unit ditampilkan</span>
+          </div>
+        )}
       </div>
     </>
   );

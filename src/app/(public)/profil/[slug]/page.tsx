@@ -13,10 +13,36 @@ import { SmartImage } from "@/components/ui/SmartImage";
 
 type Props = { params: Promise<{ slug: string }> };
 
+// Mapping title untuk setiap halaman khusus
+const PAGE_TITLES: Record<string, string> = {
+  "struktur-organisasi": "Struktur Organisasi",
+  "kepala-badan": "Pimpinan",
+  bidang: "Bidang",
+  widyaiswara: "Widyaiswara",
+  pegawai: "Data Pegawai",
+};
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
+
+  // Cek apakah halaman khusus
+  if (PAGE_TITLES[slug]) {
+    return {
+      title: `${PAGE_TITLES[slug]}`,
+    };
+  }
+
+  // Cek dari database pages
   const page = await getPageBySlug(`profil/${slug}`);
-  return { title: page?.title ?? slug };
+  if (!page) {
+    return {
+      title: "Halaman Tidak Ditemukan",
+    };
+  }
+
+  return {
+    title: `${page.title}`,
+  };
 }
 
 export default async function ProfilSubPage({ params }: Props) {
@@ -83,7 +109,19 @@ export default async function ProfilSubPage({ params }: Props) {
 
             {/* Kepala Badan */}
             {leaders.map((s) => (
-              <div key={s.id} className="kepala-badan-card">
+              <div
+                key={s.id}
+                style={{
+                  display: "flex",
+                  gap: "28px",
+                  padding: "24px",
+                  background: "var(--color-forest-50)",
+                  borderRadius: "12px",
+                  border: "1px solid var(--color-forest-100)",
+                  marginBottom: "24px",
+                  flexWrap: "wrap",
+                }}
+              >
                 <div
                   style={{
                     width: "140px",
@@ -114,7 +152,7 @@ export default async function ProfilSubPage({ params }: Props) {
                     </svg>
                   )}
                 </div>
-                <div>
+                <div style={{ flex: 1, minWidth: "200px" }}>
                   <div
                     style={{
                       fontSize: "11px",
@@ -177,7 +215,13 @@ export default async function ProfilSubPage({ params }: Props) {
             >
               Sekretaris & Kepala Bidang
             </h2>
-            <div className="staff-grid">
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, 1fr)",
+                gap: "16px",
+              }}
+            >
               {[...sekretaris, ...kepalaB].map((s) => (
                 <StaffCard key={s.id} staff={s} />
               ))}
@@ -217,7 +261,13 @@ export default async function ProfilSubPage({ params }: Props) {
               Tenaga pengajar profesional bersertifikat yang melaksanakan
               pengembangan kompetensi ASN di BPSDM Kaltim.
             </p>
-            <div className="staff-grid">
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, 1fr)",
+                gap: "16px",
+              }}
+            >
               {wis.map((s) => (
                 <StaffCard key={s.id} staff={s} />
               ))}
@@ -272,6 +322,8 @@ export default async function ProfilSubPage({ params }: Props) {
                           display: "flex",
                           justifyContent: "space-between",
                           alignItems: "flex-start",
+                          flexWrap: "wrap",
+                          gap: "16px",
                         }}
                       >
                         <div>
@@ -382,7 +434,13 @@ export default async function ProfilSubPage({ params }: Props) {
             >
               Data Pegawai
             </h1>
-            <div className="staff-grid">
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, 1fr)",
+                gap: "16px",
+              }}
+            >
               {allStaff.map((s) => (
                 <StaffCard key={s.id} staff={s} />
               ))}

@@ -69,11 +69,11 @@ export async function ProgramsSection() {
           }}
         >
           <div>
-            <p className="sec-label">Program Unggulan</p>
-            <h2 className="sec-title">Pelatihan Kompetensi BPSDM</h2>
+            <p className="sec-label">Program</p>
+            <h2 className="sec-title">Pengembangan Kompetensi</h2>
           </div>
           <Link href="/program" className="qs-all-link">
-            Semua program
+            Lihat
             <ArrowRight size={15} />
           </Link>
         </div>

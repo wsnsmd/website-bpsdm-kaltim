@@ -21,7 +21,7 @@ import { getPrograms } from "@/lib/queries/programs";
 import { fetchJadwal } from "@/lib/simpel/jadwal";
 
 export const metadata: Metadata = {
-  title: "Katalog Program Diklat",
+  title: "Kompetensi",
   description: "Program pengembangan kompetensi ASN Kalimantan Timur.",
 };
 
@@ -68,8 +68,8 @@ export default async function ProgramPage() {
       {/* Hero */}
       <div className="page-hero">
         <div className="container-content">
-          <p className="page-hero-eyebrow">Pengembangan Kompetensi ASN</p>
-          <h1 className="page-hero-title">Katalog Program Diklat</h1>
+          <p className="page-hero-eyebrow">Program</p>
+          <h1 className="page-hero-title">Pengembangan Kompetensi</h1>
           <p className="page-hero-desc">
             Program pengembangan kompetensi ASN Kalimantan Timur yang dikelola
             BPSDM Provinsi Kalimantan Timur.

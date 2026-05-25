@@ -5,7 +5,9 @@ import { SettingsForm } from "@/components/admin/SettingsForm";
 import { MaintenanceToggle } from "@/components/admin/MaintenanceToggle";
 import { MaintenanceMessageForm } from "@/components/admin/MaintenanceMessageForm";
 import { DisabledRoutesForm } from "@/components/admin/DisabledRoutesForm";
-import { Shield, AlertTriangle } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
+import { VideoAlbumPicker } from "@/components/admin/VideoAlbumPicker";
+import { getGalleryAlbumsWithCount } from "@/lib/queries/gallery";
 
 export const metadata: Metadata = { title: "Pengaturan Situs" };
 
@@ -51,13 +53,21 @@ const GROUP_CONFIG: Record<
 };
 
 export default async function PengaturanPage() {
-  const [grouped, maintenanceMode, maintenanceMessage, maintenanceEnd] =
-    await Promise.all([
-      getSettingsByGroup(),
-      getSetting("maintenance_mode"),
-      getSetting("maintenance_message"),
-      getSetting("maintenance_end"),
-    ]);
+  const [
+    grouped,
+    maintenanceMode,
+    maintenanceMessage,
+    maintenanceEnd,
+    albums,
+    homeVideoAlbumId,
+  ] = await Promise.all([
+    getSettingsByGroup(),
+    getSetting("maintenance_mode"),
+    getSetting("maintenance_message"),
+    getSetting("maintenance_end"),
+    getGalleryAlbumsWithCount(),
+    getSetting("home_video_album_id"),
+  ]);
 
   const isMaintenanceOn = maintenanceMode === "true";
 
@@ -204,6 +214,11 @@ export default async function PengaturanPage() {
         {/* ── Disabled Routes Card ── */}
         <DisabledRoutesForm
           currentValue={(await getSetting("disabled_routes")) ?? ""}
+        />
+
+        <VideoAlbumPicker
+          albums={albums}
+          currentValue={homeVideoAlbumId ?? ""}
         />
 
         {/* ── Group settings lainnya ── */}

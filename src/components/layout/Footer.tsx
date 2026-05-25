@@ -16,7 +16,7 @@ const FOOTER_NAV = [
   {
     title: "Navigasi",
     links: [
-      { href: "/", label: "Beranda" },
+      { href: "/web", label: "Beranda" },
       { href: "/profil", label: "Profil BPSDM" },
       { href: "/program", label: "Program Diklat" },
       { href: "/berita", label: "Berita & Artikel" },

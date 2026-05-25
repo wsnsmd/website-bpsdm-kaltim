@@ -1,5 +1,5 @@
 // src/lib/queries/announcements.ts
-import { db, eq, and, sql } from "@/db";
+import { db, eq, and, sql, lte, or, isNull, gte, asc, desc } from "@/db";
 import { announcements } from "@/db/schema";
 
 export type AnnouncementItem = {
@@ -34,4 +34,19 @@ export async function getActiveAnnouncements(
     .limit(limit);
 
   return result as AnnouncementItem[];
+}
+
+export async function getAllActiveAnnouncements() {
+  const now = new Date();
+  return db
+    .select()
+    .from(announcements)
+    .where(
+      and(
+        eq(announcements.isActive, true),
+        lte(announcements.startDate, now),
+        or(isNull(announcements.endDate), gte(announcements.endDate, now)),
+      ),
+    )
+    .orderBy(asc(announcements.priority), desc(announcements.startDate));
 }

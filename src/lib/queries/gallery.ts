@@ -142,3 +142,30 @@ export async function getGalleryStats() {
     albums: albumCount[0]?.total ?? 0,
   };
 }
+
+export async function getVideosByAlbumId(albumId: number) {
+  return db
+    .select()
+    .from(galleryVideos)
+    .where(eq(galleryVideos.albumId, albumId))
+    .orderBy(asc(galleryVideos.sortOrder), desc(galleryVideos.createdAt))
+    .limit(12);
+}
+
+export async function getGalleryAlbumsWithCount() {
+  const rows = await db.execute(sql`
+    SELECT 
+      a.*,
+      COUNT(v.id) as video_count
+    FROM gallery_albums a
+    LEFT JOIN gallery_videos v ON v.album_id = a.id
+    GROUP BY a.id
+    ORDER BY a.sort_order ASC, a.created_at DESC
+  `);
+  const data = Array.isArray(rows[0]) ? rows[0] : rows;
+  return (data as any[]).map((r) => ({
+    id: Number(r.id),
+    title: String(r.title),
+    videoCount: Number(r.video_count ?? 0),
+  }));
+}

@@ -22,7 +22,7 @@ import Link from "next/link";
 import { MapBoxWrapper } from "@/components/ui/MapBoxWrapper";
 
 export const metadata: Metadata = {
-  title: "Kontak BPSDM Kaltim",
+  title: "Kontak",
   description: "Informasi kontak dan lokasi BPSDM Provinsi Kalimantan Timur.",
 };
 

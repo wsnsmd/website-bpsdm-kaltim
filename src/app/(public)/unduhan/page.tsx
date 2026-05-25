@@ -29,7 +29,7 @@ import {
 } from "@/lib/queries/documents";
 
 export const metadata: Metadata = {
-  title: "Unduhan Dokumen",
+  title: "Unduhan",
   description: "Pusat unduhan dokumen resmi BPSDM Provinsi Kalimantan Timur.",
 };
 

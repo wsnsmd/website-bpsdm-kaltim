@@ -20,9 +20,9 @@ import { fetchJadwal, fetchJenisJadwal } from "@/lib/simpel/jadwal";
 import type { StatusJadwal } from "@/lib/simpel/types";
 
 export const metadata: Metadata = {
-  title: "Jadwal Pelatihan",
+  title: "Jadwal",
   description:
-    "Seluruh jadwal kegiatan pelatihan dan diklat BPSDM Provinsi Kalimantan Timur.",
+    "Seluruh jadwal kegiatan pengembangan kompetensi BPSDM Provinsi Kalimantan Timur.",
 };
 
 export const revalidate = 3600;
@@ -67,11 +67,11 @@ export default async function JadwalPage({ searchParams }: Props) {
         <div className="container-content">
           <p className="page-hero-eyebrow">Data realtime dari SIMPEL Kaltim</p>
           <h1 className="page-hero-title" style={{ fontSize: "34px" }}>
-            Jadwal Pelatihan &amp; Diklat
+            Pengembangan Kompetensi
           </h1>
           <p className="page-hero-desc">
-            Seluruh jadwal kegiatan pelatihan BPSDM Kaltim yang dikelola melalui
-            Sistem Informasi Manajemen Pelatihan (SIMPEL) Kalimantan Timur.
+            Seluruh jadwal kegiatan BPSDM Kaltim yang dikelola melalui Sistem
+            Informasi Manajemen Pelatihan (SIMPel) Kalimantan Timur.
           </p>
 
           {/* Stats */}
