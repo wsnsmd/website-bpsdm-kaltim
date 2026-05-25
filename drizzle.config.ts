@@ -1,31 +1,13 @@
 // drizzle.config.ts
 import type { Config } from "drizzle-kit";
 import * as dotenv from "dotenv";
-import * as fs from "fs";
-import path from "path";
 
-// Fungsi untuk menentukan file env yang akan digunakan
-function getEnvFile() {
-  // Prioritas: NODE_ENV menentukan environment
-  const nodeEnv = process.env.NODE_ENV || "development";
+// Tentukan path .env secara dinamis berdasarkan environment saat ini
+const envPath =
+  process.env.NODE_ENV === "production" ? ".env.production" : ".env.local";
 
-  if (nodeEnv === "production") {
-    return ".env.production";
-  }
-
-  // Development: coba .env.local dulu, fallback ke .env
-  if (fs.existsSync(path.resolve(process.cwd(), ".env.local"))) {
-    return ".env.local";
-  }
-
-  return ".env";
-}
-
-// Load env file yang sesuai
-const envFile = getEnvFile();
-dotenv.config({ path: envFile });
-
-console.log(`📦 Using environment file: ${envFile}`);
+// Muat variabel lingkungan dari file yang terpilih
+dotenv.config({ path: envPath });
 
 export default {
   schema: "./src/db/schema/index.ts",
