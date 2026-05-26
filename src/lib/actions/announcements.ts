@@ -154,6 +154,6 @@ export async function toggleAnnouncementActive(id: number, isActive: boolean) {
     .set({ isActive })
     .where(eq(announcements.id, id));
 
-  revalidatePath("/");
+  revalidatePath("/web");
   revalidatePath("/admin/pengumuman");
 }

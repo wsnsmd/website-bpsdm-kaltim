@@ -83,21 +83,21 @@ export async function HeroSection({ featuredPost, recentPosts }: Props) {
 
             <p className="hero-simple-desc">
               {s.site_description
-                ? s.site_description.slice(0, 140)
+                ? s.site_description.slice(0, 200)
                 : "Pusat pengembangan kompetensi ASN Kalimantan Timur — mendorong profesionalisme, integritas, dan inovasi pelayanan publik."}
             </p>
 
             <div className="hero-simple-buttons">
               <Link href="/program" className="hero-simple-btn-primary">
                 <GraduationCap size={16} />
-                Daftar Program
+                Jelajahi Program
               </Link>
               <Link
                 href="/program/jadwal"
                 className="hero-simple-btn-secondary"
               >
                 <CalendarDays size={16} />
-                Jadwal Diklat
+                Lihat Jadwal
               </Link>
               <Link href="/layanan" className="hero-simple-btn-icon">
                 <ArrowRight size={16} />

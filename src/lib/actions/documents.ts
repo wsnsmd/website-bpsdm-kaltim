@@ -77,6 +77,7 @@ export async function createDocument(formData: FormData) {
     return { error: "Gagal menyimpan dokumen." };
   }
 
+  revalidatePath("/web");
   revalidatePath("/unduhan");
   revalidatePath("/admin/dokumen");
   redirect("/admin/dokumen");
@@ -128,6 +129,7 @@ export async function updateDocument(id: number, formData: FormData) {
     return { error: "Gagal menyimpan perubahan." };
   }
 
+  revalidatePath("/web");
   revalidatePath("/unduhan");
   revalidatePath("/admin/dokumen");
   redirect("/admin/dokumen");
@@ -137,6 +139,7 @@ export async function deleteDocument(id: number) {
   const session = await auth();
   if (!session) throw new Error("Unauthorized");
   await db.delete(documents).where(eq(documents.id, id));
+  revalidatePath("/web");
   revalidatePath("/unduhan");
   revalidatePath("/admin/dokumen");
 }

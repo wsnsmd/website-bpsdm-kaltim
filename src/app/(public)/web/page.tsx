@@ -16,7 +16,7 @@ import { VideoSection } from "@/components/home/VideoSection";
 import { getVideosByAlbumId } from "@/lib/queries/gallery";
 import { getSetting } from "@/lib/queries/settings";
 
-export const revalidate = 3600;
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Website",

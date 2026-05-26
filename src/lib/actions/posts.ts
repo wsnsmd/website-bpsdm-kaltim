@@ -81,6 +81,7 @@ export async function createPost(formData: FormData) {
       })
       .$returningId();
 
+    revalidatePath("/web");
     revalidatePath("/berita");
     revalidatePath("/admin/berita");
   } catch (err: any) {
@@ -155,6 +156,7 @@ export async function updatePost(id: number, formData: FormData) {
     return { error: "Gagal menyimpan perubahan." };
   }
 
+  revalidatePath("/web");
   revalidatePath("/berita");
   revalidatePath(`/berita/${data.slug}`);
   revalidatePath("/admin/berita");
@@ -208,6 +210,7 @@ export async function createCategory(formData: FormData) {
     return { error: "Gagal menyimpan kategori." };
   }
 
+  revalidatePath("/web");
   revalidatePath("/berita");
   revalidatePath("/admin/kategori");
   redirect("/admin/kategori");
