@@ -23,6 +23,7 @@ const PostSchema = z.object({
   featuredImage: z.string().optional(),
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
+  publishedAt: z.string().optional(),
 });
 
 // ── Create post ───────────────────────────────
@@ -58,7 +59,15 @@ export async function createPost(formData: FormData) {
   const slug = data.slug ? createSlug(data.slug) : createSlug(data.title);
 
   const readingTime = estimateReadingTime(data.content);
-  const publishedAt = data.status === "published" ? new Date() : undefined;
+  const publishedAtRaw = formData.get("publishedAt") as string;
+  const publishedAt =
+    data.status === "published"
+      ? publishedAtRaw
+        ? new Date(publishedAtRaw)
+        : new Date()
+      : null;
+
+  console.log(session.user);
 
   try {
     const [result] = await db
@@ -71,7 +80,7 @@ export async function createPost(formData: FormData) {
         categoryId: data.categoryId ?? null,
         status: data.status,
         isFeatured: data.isFeatured ?? false,
-        authorId: session.user.id,
+        authorId: null,
         authorName: data.authorName ?? session.user.name ?? "Admin",
         featuredImage: data.featuredImage || null,
         readingTime,
@@ -84,11 +93,24 @@ export async function createPost(formData: FormData) {
     revalidatePath("/web");
     revalidatePath("/berita");
     revalidatePath("/admin/berita");
+    // Ganti catch di createPost:
   } catch (err: any) {
+    console.error("createPost DB error:", {
+      code: err?.code,
+      message: err?.message,
+      sql: err?.sql,
+    });
+
     if (err?.code === "ER_DUP_ENTRY") {
-      return { error: "Slug sudah digunakan. Gunakan judul yang berbeda." };
+      return { error: "Slug sudah digunakan." };
     }
-    return { error: "Gagal menyimpan artikel." };
+    if (err?.code === "ER_DATA_TOO_LONG") {
+      return { error: `Data terlalu panjang: ${err?.message}` };
+    }
+    if (err?.code === "ER_NO_DEFAULT_FOR_FIELD") {
+      return { error: `Field wajib kosong: ${err?.message}` };
+    }
+    return { error: `Gagal menyimpan: ${err?.message ?? "Unknown error"}` };
   }
 
   redirect("/admin/berita");
@@ -128,10 +150,13 @@ export async function updatePost(id: number, formData: FormData) {
     .where(eq(posts.id, id))
     .limit(1);
 
-  const wasPublished = existing[0]?.status === "published";
+  const publishedAtRaw = formData.get("publishedAt") as string;
   const isPublishing = data.status === "published";
-  const publishedAt =
-    isPublishing && !wasPublished ? new Date() : existing[0]?.publishedAt;
+  const publishedAt = isPublishing
+    ? publishedAtRaw
+      ? new Date(publishedAtRaw)
+      : (existing[0]?.publishedAt ?? new Date())
+    : (existing[0]?.publishedAt ?? null);
 
   try {
     await db

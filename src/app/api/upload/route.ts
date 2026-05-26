@@ -1,6 +1,6 @@
 // src/app/api/upload/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
+import { writeFile, mkdir, readdir, stat } from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
 import sharp from "sharp";
@@ -119,6 +119,102 @@ export async function POST(req: NextRequest) {
     console.error("Upload error:", err);
     return NextResponse.json(
       { error: "Gagal menyimpan file." },
+      { status: 500 },
+    );
+  }
+}
+
+export async function GET(req: NextRequest) {
+  const session = await auth();
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    // Pastikan folder ada
+    await mkdir(IMAGE_DIR, { recursive: true });
+    await mkdir(THUMB_DIR, { recursive: true });
+
+    // Baca semua file di IMAGE_DIR
+    const files = await readdir(IMAGE_DIR);
+
+    // Filter hanya file gambar, exclude thumbnail
+    const imageFiles = files.filter(
+      (f) =>
+        f.endsWith(".webp") ||
+        f.endsWith(".jpg") ||
+        f.endsWith(".jpeg") ||
+        f.endsWith(".png"),
+    );
+
+    // Sort terbaru dulu
+    const images = await Promise.all(
+      imageFiles.map(async (fileName) => {
+        const filePath = path.join(IMAGE_DIR, fileName);
+        const fileStats = await stat(filePath);
+
+        // Cek apakah thumbnail ada
+        const thumbName = fileName.replace(".webp", "-thumb.webp");
+        const thumbPath = path.join(THUMB_DIR, thumbName);
+        const thumbExists = existsSync(thumbPath);
+
+        return {
+          fileName,
+          url: `/uploads/images/${fileName}`,
+          thumbUrl: thumbExists
+            ? `/uploads/thumbnails/${thumbName}`
+            : `/uploads/images/${fileName}`,
+          size: fileStats.size,
+          createdAt: fileStats.birthtimeMs,
+        };
+      }),
+    );
+
+    // Sort terbaru di atas
+    images.sort((a, b) => b.createdAt - a.createdAt);
+
+    return NextResponse.json({ images });
+  } catch (err) {
+    console.error("List images error:", err);
+    return NextResponse.json({ images: [] });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  const session = await auth();
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const { fileName } = await req.json();
+    if (!fileName || typeof fileName !== "string") {
+      return NextResponse.json({ error: "fileName required" }, { status: 400 });
+    }
+
+    // Sanitasi — pastikan tidak ada path traversal
+    const safeName = path.basename(fileName);
+
+    const { unlink } = await import("fs/promises");
+
+    // Hapus file utama
+    const filePath = path.join(IMAGE_DIR, safeName);
+    if (existsSync(filePath)) {
+      await unlink(filePath);
+    }
+
+    // Hapus thumbnail jika ada
+    const thumbName = safeName.replace(".webp", "-thumb.webp");
+    const thumbPath = path.join(THUMB_DIR, thumbName);
+    if (existsSync(thumbPath)) {
+      await unlink(thumbPath);
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("Delete error:", err);
+    return NextResponse.json(
+      { error: "Gagal menghapus file" },
       { status: 500 },
     );
   }

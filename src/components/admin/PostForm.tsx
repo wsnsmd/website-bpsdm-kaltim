@@ -10,6 +10,7 @@ import { RichEditor } from "./editor/RichEditor";
 
 type Props = {
   categories: CategoryItem[];
+  authorName?: string; // ← dari session
   post?: {
     id: number;
     title: string;
@@ -23,22 +24,28 @@ type Props = {
     featuredImage: string | null;
     metaTitle: string | null;
     metaDescription: string | null;
+    publishedAt: Date | null;
   };
 };
 
-export function PostForm({ categories, post }: Props) {
+// Format datetime-local value
+function toDatetimeLocal(date?: Date | null): string {
+  if (!date) return "";
+  const d = new Date(date);
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  return d.toISOString().slice(0, 16);
+}
+
+export function PostForm({ categories, authorName, post }: Props) {
   const isEdit = !!post;
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-
-  // State untuk slug
   const [title, setTitle] = useState(post?.title ?? "");
   const [slug, setSlug] = useState(post?.slug ?? "");
   const [slugEdited, setSlugEdited] = useState(isEdit);
-
-  // State untuk gambar — dikelola di sini, bukan di hidden input
   const [featuredImage, setFeaturedImage] = useState(post?.featuredImage ?? "");
   const [content, setContent] = useState(post?.content ?? "");
+  const [status, setStatus] = useState(post?.status ?? "draft");
 
   function handleTitleChange(val: string) {
     setTitle(val);
@@ -48,10 +55,8 @@ export function PostForm({ categories, post }: Props) {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
-
     const form = e.currentTarget;
     const formData = new FormData(form);
-
     formData.set("featuredImage", featuredImage);
     formData.set("content", content);
 
@@ -59,7 +64,6 @@ export function PostForm({ categories, post }: Props) {
       const result = isEdit
         ? await updatePost(post.id, formData)
         : await createPost(formData);
-
       if (result?.error) setError(result.error);
     });
   }
@@ -85,9 +89,8 @@ export function PostForm({ categories, post }: Props) {
         </div>
       )}
 
-      {/* Pembungkus Grid Responsif: 1 Kolom di HP, 2 Kolom di Layar Lebar (lg) */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6 items-start">
-        {/* ── Kolom Utama (Main Column) ── */}
+        {/* ── Kolom Utama ── */}
         <div className="flex flex-col gap-5">
           {/* Judul & Slug */}
           <div className="admin-card">
@@ -112,7 +115,7 @@ export function PostForm({ categories, post }: Props) {
                 <label className="admin-label" htmlFor="slug">
                   Slug URL
                 </label>
-                <div className="flex items-center gap-2 max-sm:flex-col max-sm:items-start max-sm:gap-1.5">
+                <div className="flex items-center gap-2 max-sm:flex-col max-sm:items-start">
                   <span className="text-[13px] text-[var(--color-ink-4)] shrink-0">
                     /berita/
                   </span>
@@ -175,7 +178,7 @@ export function PostForm({ categories, post }: Props) {
                 <textarea
                   name="excerpt"
                   className="admin-textarea"
-                  placeholder="Tulis ringkasan singkat artikel (1-2 kalimat)..."
+                  placeholder="Tulis ringkasan singkat (1-2 kalimat)..."
                   defaultValue={post?.excerpt ?? ""}
                   rows={3}
                 />
@@ -189,7 +192,7 @@ export function PostForm({ categories, post }: Props) {
           {/* Konten */}
           <div className="admin-card">
             <div className="admin-card-head">
-              <div className="admin-card-title">Konten Artikel</div>
+              <div className="admin-card-title">Konten</div>
             </div>
             <div className="admin-card-body p-0">
               <RichEditor
@@ -216,7 +219,7 @@ export function PostForm({ categories, post }: Props) {
                     name="metaTitle"
                     type="text"
                     className="admin-input"
-                    placeholder="Judul untuk mesin pencari (kosongkan = gunakan judul artikel)"
+                    placeholder="Kosongkan = gunakan judul artikel"
                     defaultValue={post?.metaTitle ?? ""}
                     maxLength={60}
                   />
@@ -242,7 +245,7 @@ export function PostForm({ categories, post }: Props) {
           </div>
         </div>
 
-        {/* ── Kolom Sidebar (Akan turun ke bawah secara otomatis di HP) ── */}
+        {/* ── Kolom Sidebar ── */}
         <div className="flex flex-col gap-5 lg:sticky lg:top-20 order-first lg:order-last mb-6 lg:mb-0">
           {/* Publikasi */}
           <div className="admin-card">
@@ -250,6 +253,7 @@ export function PostForm({ categories, post }: Props) {
               <div className="admin-card-title">Publikasi</div>
             </div>
             <div className="admin-card-body">
+              {/* Status */}
               <div className="admin-form-group mb-4">
                 <label className="admin-label" htmlFor="status">
                   Status
@@ -258,7 +262,8 @@ export function PostForm({ categories, post }: Props) {
                   id="status"
                   name="status"
                   className="admin-select"
-                  defaultValue={post?.status ?? "draft"}
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
                 >
                   <option value="draft">Draft</option>
                   <option value="review">Menunggu Review</option>
@@ -267,6 +272,30 @@ export function PostForm({ categories, post }: Props) {
                 </select>
               </div>
 
+              {/* Tanggal & Jam Publish — tampil jika published */}
+              {status === "published" && (
+                <div className="admin-form-group mb-4">
+                  <label className="admin-label" htmlFor="publishedAt">
+                    Tanggal &amp; Jam Tayang
+                  </label>
+                  <input
+                    id="publishedAt"
+                    name="publishedAt"
+                    type="datetime-local"
+                    className="admin-input"
+                    defaultValue={
+                      post?.publishedAt
+                        ? toDatetimeLocal(post.publishedAt)
+                        : toDatetimeLocal(new Date())
+                    }
+                  />
+                  <span className="admin-hint">
+                    Kosongkan untuk menggunakan waktu sekarang.
+                  </span>
+                </div>
+              )}
+
+              {/* Penulis — otomatis dari session */}
               <div className="admin-form-group mb-4">
                 <label className="admin-label" htmlFor="authorName">
                   Penulis
@@ -277,10 +306,16 @@ export function PostForm({ categories, post }: Props) {
                   type="text"
                   className="admin-input"
                   placeholder="Nama penulis"
-                  defaultValue={post?.authorName ?? "Humas BPSDM Kaltim"}
+                  defaultValue={
+                    post?.authorName ?? authorName ?? "Humas BPSDM Kaltim"
+                  }
                 />
+                <span className="admin-hint">
+                  Otomatis diisi dari akun yang login.
+                </span>
               </div>
 
+              {/* Featured */}
               <div className="flex items-center gap-2.5 mb-5">
                 <input
                   type="checkbox"
@@ -319,7 +354,7 @@ export function PostForm({ categories, post }: Props) {
                       <polyline points="17 21 17 13 7 13 7 21" />
                       <polyline points="7 3 7 8 15 8" />
                     </svg>
-                    {isEdit ? "Simpan Perubahan" : "Simpan Artikel"}
+                    {isEdit ? "Simpan Perubahan" : "Simpan"}
                   </>
                 )}
               </button>

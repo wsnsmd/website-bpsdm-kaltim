@@ -6,6 +6,7 @@ import { db, eq } from "@/db";
 import { posts } from "@/db/schema";
 import { getPostCategories } from "@/lib/queries/categories";
 import { PostForm } from "@/components/admin/PostForm";
+import { auth } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Edit Berita" };
 
@@ -17,7 +18,7 @@ export default async function EditBeritaPage({ params }: Props) {
 
   if (isNaN(postId)) notFound();
 
-  const [post, categories] = await Promise.all([
+  const [post, categories, session] = await Promise.all([
     db
       .select({
         id: posts.id,
@@ -32,11 +33,13 @@ export default async function EditBeritaPage({ params }: Props) {
         featuredImage: posts.featuredImage,
         metaTitle: posts.metaTitle,
         metaDescription: posts.metaDescription,
+        publishedAt: posts.publishedAt,
       })
       .from(posts)
       .where(eq(posts.id, postId))
       .limit(1),
     getPostCategories(),
+    auth(),
   ]);
 
   if (!post[0]) notFound();
@@ -72,7 +75,11 @@ export default async function EditBeritaPage({ params }: Props) {
         </div>
       </div>
 
-      <PostForm categories={categories} post={post[0]} />
+      <PostForm
+        categories={categories}
+        post={post[0]}
+        authorName={session?.user?.name ?? "Humas BPSDM Kaltim"}
+      />
     </>
   );
 }

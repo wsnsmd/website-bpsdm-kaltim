@@ -3,11 +3,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getPostCategories } from "@/lib/queries/categories";
 import { PostForm } from "@/components/admin/PostForm";
+import { auth } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Tambah Berita" };
 
 export default async function TambahBeritaPage() {
-  const categories = await getPostCategories();
+  const [categories, session] = await Promise.all([
+    getPostCategories(),
+    auth(),
+  ]);
 
   return (
     <>
@@ -21,7 +25,10 @@ export default async function TambahBeritaPage() {
         </Link>
       </div>
 
-      <PostForm categories={categories} />
+      <PostForm
+        categories={categories}
+        authorName={session?.user?.name ?? "Humas BPSDM Kaltim"}
+      />
     </>
   );
 }

@@ -7937,3 +7937,18 @@ html:has(.pimpinan-section) .pimpinan-section {
   border-bottom: none !important;
   box-shadow: none !important;
 }
+
+.news-card-h-thumb {
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--color-forest-50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.news-card-h-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
