@@ -196,3 +196,34 @@ export async function deleteVideo(id: number) {
   await db.delete(galleryVideos).where(eq(galleryVideos.id, id));
   revalidatePath("/galeri");
 }
+
+export async function updateVideo(
+  id: number,
+  data: {
+    title: string;
+    sourceUrl: string;
+    description: string;
+    duration: string;
+  },
+) {
+  "use server";
+  const session = await auth();
+  if (!session) throw new Error("Unauthorized");
+
+  // Extract videoId dari URL baru
+  const videoId = extractYoutubeId(data.sourceUrl) ?? null;
+
+  await db
+    .update(galleryVideos)
+    .set({
+      title: data.title,
+      sourceUrl: data.sourceUrl,
+      videoId,
+      description: data.description || null,
+      duration: data.duration || null,
+    })
+    .where(eq(galleryVideos.id, id));
+
+  revalidatePath("/admin/galeri");
+  revalidatePath("/galeri");
+}
