@@ -133,6 +133,12 @@ const NAV: NavItem[] = [
     roles: ["superadmin"], // ← hanya superadmin
   },
   {
+    href: "/admin/analytics",
+    label: "Analytics",
+    icon: BarChart2,
+    roles: ["superadmin"],
+  },
+  {
     href: "/admin/pengaturan",
     label: "Pengaturan",
     icon: Settings,

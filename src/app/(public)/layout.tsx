@@ -8,12 +8,18 @@ import {
   VisitorTracker,
 } from "@/components/layout/ClientComponents";
 import { BackToTop } from "@/components/ui/BackToTop";
+import { redirect } from "next/navigation";
+import { getSetting } from "@/lib/queries/settings";
 
-export default function PublicLayout({
+export default async function PublicLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const maintenance = await getSetting("maintenance_mode");
+  if (maintenance === "true") {
+    redirect("/maintenance");
+  }
   return (
     <>
       <OrganizationJsonLd />

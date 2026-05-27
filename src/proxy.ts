@@ -1,96 +1,108 @@
 // src/proxy.ts
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
+import { canAccessAdmin, requireRole } from "@/lib/auth-helpers";
+
+const ROLE_RESTRICTED: { path: string; roles: string[] }[] = [
+  { path: "/admin/analytics", roles: ["superadmin"] },
+  { path: "/admin/pengguna", roles: ["superadmin"] },
+  { path: "/admin/pengaturan", roles: ["superadmin"] },
+  { path: "/admin/menu", roles: ["superadmin", "admin"] },
+  { path: "/admin/platform", roles: ["superadmin", "admin"] },
+  { path: "/admin/ppid", roles: ["superadmin", "admin"] },
+  { path: "/admin/profil", roles: ["superadmin", "admin"] },
+  { path: "/admin/program", roles: ["superadmin", "admin"] },
+  { path: "/admin/survei", roles: ["superadmin", "admin"] },
+  { path: "/admin/kategori", roles: ["superadmin", "admin"] },
+];
+
+// ── Path yang di-bypass SEPENUHNYA ────────────
+const BYPASS_PREFIXES = [
+  "/_next/",
+  "/api/auth",
+  "/api/maintenance-status",
+  "/api/disabled-routes",
+  "/api/track",
+  "/api/ppid",
+  "/api/search",
+  "/api/unduhan",
+  "/api/upload",
+  "/login",
+  "/forbidden",
+  "/maintenance",
+  "/favicon.ico",
+  "/favicon",
+  "/apple",
+  "/robots.txt",
+  "/sitemap.xml",
+  "/uploads/",
+];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // ── Bypass paths ──────────────────────────
-  const bypass = [
-    "/api/auth",
-    "/api/maintenance-status",
-    "/api/disabled-routes",
-    "/login",
-    "/forbidden",
-    "/maintenance",
-    "/_next",
-    "/favicon.ico",
-    "/uploads",
-  ];
-
-  if (bypass.some((p) => pathname.startsWith(p))) {
+  // ── 1. Bypass paths — tidak perlu cek apapun ─
+  if (BYPASS_PREFIXES.some((p) => pathname.startsWith(p))) {
     return NextResponse.next();
   }
 
-  // ── Cek disabled routes (hanya publik) ────
-  if (!pathname.startsWith("/admin")) {
+  // ── 2. Non-admin: cek maintenance dari DB langsung ─
+  // JANGAN fetch ke API — baca dari cookie atau header yang di-set
+  // Maintenance check dilakukan di page level, bukan middleware
+  // agar tidak ada recursive fetch
+
+  // ── 3. Admin routes: cek auth ────────────────
+  if (pathname.startsWith("/admin")) {
+    let token = null;
+
     try {
-      const url = new URL("/api/disabled-routes", request.url);
-      const res = await fetch(url, {
-        headers: { "x-internal": process.env.INTERNAL_SECRET ?? "secret" },
-        cache: "no-store",
+      token = await getToken({
+        req: request,
+        secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET ?? "",
       });
-
-      if (res.ok) {
-        const { routes } = (await res.json()) as { routes: string[] };
-        const isDisabled = routes.some(
-          (r) => pathname === r || pathname.startsWith(r + "/"),
-        );
-        if (isDisabled) {
-          return NextResponse.rewrite(new URL("/not-found", request.url), {
-            status: 404,
-          });
-        }
-      }
     } catch {
-      /* fail open */
+      // Jika gagal ambil token, redirect ke login
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("callbackUrl", pathname);
+      return NextResponse.redirect(loginUrl);
     }
-  }
 
-  // ── Cek maintenance ────────────────────────
-  if (!pathname.startsWith("/admin")) {
-    try {
-      const url = new URL("/api/maintenance-status", request.url);
-      const res = await fetch(url, {
-        headers: { "x-internal": process.env.INTERNAL_SECRET ?? "secret" },
-        cache: "no-store",
-      });
-      if (res.ok) {
-        const { maintenance } = await res.json();
-        if (maintenance === "true") {
-          const sessionToken =
-            request.cookies.get("authjs.session-token")?.value ??
-            request.cookies.get("__Secure-authjs.session-token")?.value;
-          if (!sessionToken) {
-            return NextResponse.redirect(new URL("/maintenance", request.url));
-          }
+    // Belum login
+    if (!token) {
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("callbackUrl", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    const role = (token.role as string) ?? "viewer";
+
+    // Role tidak diizinkan akses admin
+    if (!canAccessAdmin(role)) {
+      return NextResponse.redirect(new URL("/forbidden", request.url));
+    }
+
+    // Cek restriction per route
+    for (const restriction of ROLE_RESTRICTED) {
+      if (pathname.startsWith(restriction.path)) {
+        if (!requireRole(role, restriction.roles)) {
+          return NextResponse.redirect(new URL("/forbidden", request.url));
         }
+        break;
       }
-    } catch {
-      /* fail open */
     }
-  }
 
-  // ── Cek admin auth ─────────────────────────
-  if (!pathname.startsWith("/admin")) {
     return NextResponse.next();
   }
 
-  const sessionToken =
-    request.cookies.get("authjs.session-token")?.value ??
-    request.cookies.get("__Secure-authjs.session-token")?.value;
-
-  if (!sessionToken) {
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("callbackUrl", pathname);
-    return NextResponse.redirect(loginUrl);
-  }
-
+  // ── 4. Semua request lain — lanjutkan ────────
   return NextResponse.next();
 }
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    // Hanya match admin routes + halaman publik tertentu
+    // Exclude semua static files
+    "/((?!_next/static|_next/image|favicon|apple-touch|robots|sitemap|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|woff2?)$).*)",
   ],
 };
