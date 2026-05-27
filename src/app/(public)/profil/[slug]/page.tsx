@@ -6,6 +6,7 @@ import {
   getStaffByType,
   getAllUnits,
   getAllStaff,
+  getAllUnitsWithStaff,
 } from "@/lib/queries/profil";
 import { OrgChart } from "@/components/profil/OrgChart";
 import { StaffCard } from "@/components/profil/StaffCard";
@@ -50,7 +51,8 @@ export default async function ProfilSubPage({ params }: Props) {
 
   // Halaman khusus yang tidak dari DB pages
   if (slug === "struktur-organisasi") {
-    const units = await getAllUnits();
+    // const units = await getAllUnits();
+    const units = await getAllUnitsWithStaff();
     return (
       <>
         <div className="admin-card" style={{ overflow: "visible" }}>

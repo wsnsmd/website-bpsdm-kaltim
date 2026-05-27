@@ -134,3 +134,53 @@ export async function getAllPimpinan() {
       asc(staff.name),
     );
 }
+
+// Tambahkan di src/lib/queries/profil.ts
+export type UnitWithStaff = UnitItem & {
+  headStaff: StaffItem | null;
+  staffCount: number;
+};
+
+// src/lib/queries/profil.ts — ganti getAllUnitsWithStaff
+export async function getAllUnitsWithStaff(): Promise<UnitWithStaff[]> {
+  const allUnits = await getAllUnits();
+  const allStaff = await getAllStaff();
+
+  // Bangun map unit → children
+  const childrenMap = new Map<number, number[]>();
+  for (const u of allUnits) {
+    if (u.parentId != null) {
+      if (!childrenMap.has(u.parentId)) childrenMap.set(u.parentId, []);
+      childrenMap.get(u.parentId)!.push(u.id);
+    }
+  }
+
+  // Hitung semua descendant unit ids secara rekursif
+  function getAllDescendantIds(unitId: number): number[] {
+    const children = childrenMap.get(unitId) ?? [];
+    return [unitId, ...children.flatMap((cid) => getAllDescendantIds(cid))];
+  }
+
+  return allUnits.map((unit) => {
+    // Semua unit ids termasuk diri sendiri dan semua turunannya
+    const allIds = getAllDescendantIds(unit.id);
+    const unitStaff = allStaff.filter(
+      (s) => s.unitId != null && allIds.includes(s.unitId),
+    );
+
+    // Kepala unit — staf langsung di unit ini saja
+    const directStaff = allStaff.filter((s) => s.unitId === unit.id);
+    const headStaff =
+      directStaff.find((s) =>
+        ["kepala_badan", "sekretaris", "kepala_bidang"].includes(s.type),
+      ) ??
+      directStaff[0] ??
+      null;
+
+    return {
+      ...unit,
+      headStaff,
+      staffCount: unitStaff.length, // total termasuk bawahan
+    };
+  });
+}
