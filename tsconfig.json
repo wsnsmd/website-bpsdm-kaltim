@@ -13,7 +13,7 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
-    "removeComments": true,
+    // "removeComments": true,
     "plugins": [
       {
         "name": "next"
