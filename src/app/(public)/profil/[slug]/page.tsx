@@ -11,6 +11,7 @@ import {
 import { OrgChart } from "@/components/profil/OrgChart";
 import { StaffCard } from "@/components/profil/StaffCard";
 import { SmartImage } from "@/components/ui/SmartImage";
+import { BidangSection } from "@/components/profil/BidangSection";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -281,139 +282,58 @@ export default async function ProfilSubPage({ params }: Props) {
   }
 
   if (slug === "bidang") {
-    const units = await getAllUnits();
-    const kepalaB = await getStaffByType("kepala_bidang");
+    const allUnits = await getAllUnitsWithStaff();
+    const allStaff = await getAllStaff();
+
+    // Hanya level 1
+    const bidangUnits = allUnits
+      .filter(
+        (u) =>
+          (u.level ?? 0) === 1 &&
+          !u.name.toUpperCase().includes("KELOMPOK JABATAN FUNGSIONAL"),
+      )
+      .map((unit) => {
+        // Kumpulkan semua IDs unit ini + sub-unitnya
+        function getDescIds(uid: number): number[] {
+          const children = allUnits.filter((u) => u.parentId === uid);
+          return [uid, ...children.flatMap((c) => getDescIds(c.id))];
+        }
+        const allIds = getDescIds(unit.id);
+        const members = allStaff.filter(
+          (s) => s.unitId != null && allIds.includes(s.unitId),
+        );
+        const kepala =
+          members.find((s) =>
+            ["sekretaris", "kepala_bidang"].includes(s.type),
+          ) ?? null;
+
+        return {
+          ...unit,
+          members,
+          kepala,
+          staffCount: members.length,
+        };
+      });
 
     return (
-      <>
-        <div className="admin-card">
-          <div style={{ padding: "28px 32px" }}>
-            <h1
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "28px",
-                fontWeight: 700,
-                color: "var(--color-ink)",
-                paddingBottom: "16px",
-                borderBottom: "2px solid var(--color-forest-700)",
-                marginBottom: "28px",
-              }}
-            >
-              Unit Kerja & Bidang
-            </h1>
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "16px" }}
-            >
-              {units
-                .filter((u) => (u.level ?? 0) >= 1)
-                .map((unit) => {
-                  const kepala = kepalaB.find((k) => k.unitId === unit.id);
-                  return (
-                    <div
-                      key={unit.id}
-                      style={{
-                        padding: "20px 24px",
-                        background: "#fff",
-                        border: "1px solid var(--color-ink-6)",
-                        borderRadius: "12px",
-                        borderLeft: `4px solid var(--color-forest-${(unit.level ?? 0) === 1 ? "900" : "600"})`,
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "flex-start",
-                          flexWrap: "wrap",
-                          gap: "16px",
-                        }}
-                      >
-                        <div>
-                          <div
-                            style={{
-                              fontSize: "11px",
-                              fontWeight: 700,
-                              textTransform: "uppercase",
-                              letterSpacing: "0.5px",
-                              color: "var(--color-ink-4)",
-                              marginBottom: "4px",
-                            }}
-                          >
-                            {(unit.level ?? 0) === 1
-                              ? "Sekretariat"
-                              : (unit.level ?? 0) === 2
-                                ? "Bidang / UPT"
-                                : "Sub Bagian"}
-                          </div>
-                          <h3
-                            style={{
-                              fontFamily: "var(--font-display)",
-                              fontSize: "16px",
-                              fontWeight: 700,
-                              color: "var(--color-ink)",
-                            }}
-                          >
-                            {unit.name}
-                          </h3>
-                          {unit.shortName && (
-                            <span
-                              style={{
-                                fontSize: "12px",
-                                color: "var(--color-ink-4)",
-                                marginTop: "2px",
-                                display: "block",
-                              }}
-                            >
-                              ({unit.shortName})
-                            </span>
-                          )}
-                          {unit.description && (
-                            <p
-                              style={{
-                                fontSize: "13px",
-                                color: "var(--color-ink-3)",
-                                marginTop: "8px",
-                              }}
-                            >
-                              {unit.description}
-                            </p>
-                          )}
-                        </div>
-                        {kepala && (
-                          <div
-                            style={{
-                              textAlign: "right",
-                              flexShrink: 0,
-                              marginLeft: "16px",
-                            }}
-                          >
-                            <div
-                              style={{
-                                fontSize: "11px",
-                                color: "var(--color-ink-4)",
-                              }}
-                            >
-                              Kepala
-                            </div>
-                            <div
-                              style={{
-                                fontSize: "13px",
-                                fontWeight: 600,
-                                color: "var(--color-ink)",
-                              }}
-                            >
-                              {kepala.name}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-            </div>
-          </div>
+      <div className="admin-card">
+        <div style={{ padding: "28px 32px" }}>
+          <h1
+            style={{
+              fontFamily: "var(--font-display)",
+              fontSize: "28px",
+              fontWeight: 700,
+              color: "var(--color-ink)",
+              paddingBottom: "16px",
+              borderBottom: "2px solid var(--color-forest-700)",
+              marginBottom: "28px",
+            }}
+          >
+            Unit Kerja &amp; Bidang
+          </h1>
+          <BidangSection units={bidangUnits} />
         </div>
-      </>
+      </div>
     );
   }
 
