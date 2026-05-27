@@ -8,6 +8,9 @@ import { DisabledRoutesForm } from "@/components/admin/DisabledRoutesForm";
 import { AlertTriangle } from "lucide-react";
 import { VideoAlbumPicker } from "@/components/admin/VideoAlbumPicker";
 import { getGalleryAlbumsWithCount } from "@/lib/queries/gallery";
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { canAccessAdmin } from "@/lib/auth-helpers";
 
 export const metadata: Metadata = { title: "Pengaturan Situs" };
 
@@ -53,6 +56,13 @@ const GROUP_CONFIG: Record<
 };
 
 export default async function PengaturanPage() {
+  const session = await auth();
+  const role = (session?.user as any)?.role ?? "viewer";
+
+  if (role !== "superadmin") {
+    redirect("/forbidden");
+  }
+
   const [
     grouped,
     maintenanceMode,
