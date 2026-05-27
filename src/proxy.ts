@@ -1,25 +1,6 @@
 // src/proxy.ts
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
-import { canAccessAdmin, requireRole } from "@/lib/auth-helpers";
-
-// Route yang butuh role tertentu
-const ROLE_RESTRICTED: { path: string; roles: string[] }[] = [
-  { path: "/admin/pengguna", roles: ["superadmin"] },
-  { path: "/admin/pengaturan", roles: ["superadmin"] },
-  { path: "/admin/menu", roles: ["superadmin", "admin"] },
-  { path: "/admin/platform", roles: ["superadmin", "admin"] },
-  { path: "/admin/ppid", roles: ["superadmin", "admin"] },
-  { path: "/admin/profil", roles: ["superadmin", "admin"] },
-  { path: "/admin/program", roles: ["superadmin", "admin"] },
-  { path: "/admin/survei", roles: ["superadmin", "admin"] },
-  { path: "/admin/kategori", roles: ["superadmin", "admin"] },
-  { path: "/admin/galeri/baru", roles: ["superadmin", "admin", "editor"] },
-  { path: "/admin/dokumen/baru", roles: ["superadmin", "admin", "editor"] },
-  { path: "/admin/berita/baru", roles: ["superadmin", "admin", "editor"] },
-  { path: "/admin/pengumuman/baru", roles: ["superadmin", "admin", "editor"] },
-];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -41,7 +22,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // ── Cek disabled routes ───────────────────
+  // ── Cek disabled routes (hanya publik) ────
   if (!pathname.startsWith("/admin")) {
     try {
       const url = new URL("/api/disabled-routes", request.url);
@@ -49,6 +30,7 @@ export async function proxy(request: NextRequest) {
         headers: { "x-internal": process.env.INTERNAL_SECRET ?? "secret" },
         cache: "no-store",
       });
+
       if (res.ok) {
         const { routes } = (await res.json()) as { routes: string[] };
         const isDisabled = routes.some(
@@ -65,7 +47,7 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // ── Cek maintenance ───────────────────────
+  // ── Cek maintenance ────────────────────────
   if (!pathname.startsWith("/admin")) {
     try {
       const url = new URL("/api/maintenance-status", request.url);
@@ -89,37 +71,19 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // ── Cek admin auth + role ─────────────────
-  if (pathname.startsWith("/admin")) {
-    // Ambil token JWT
-    const token = await getToken({
-      req: request,
-      secret: process.env.AUTH_SECRET,
-    });
+  // ── Cek admin auth ─────────────────────────
+  if (!pathname.startsWith("/admin")) {
+    return NextResponse.next();
+  }
 
-    // Belum login
-    if (!token) {
-      const loginUrl = new URL("/login", request.url);
-      loginUrl.searchParams.set("callbackUrl", pathname);
-      return NextResponse.redirect(loginUrl);
-    }
+  const sessionToken =
+    request.cookies.get("authjs.session-token")?.value ??
+    request.cookies.get("__Secure-authjs.session-token")?.value;
 
-    const role = (token.role as string) ?? "viewer";
-
-    // Role tidak boleh akses admin sama sekali
-    if (!canAccessAdmin(role)) {
-      return NextResponse.redirect(new URL("/forbidden", request.url));
-    }
-
-    // Cek role restriction per route
-    for (const restriction of ROLE_RESTRICTED) {
-      if (pathname.startsWith(restriction.path)) {
-        if (!requireRole(role, restriction.roles)) {
-          return NextResponse.redirect(new URL("/forbidden", request.url));
-        }
-        break;
-      }
-    }
+  if (!sessionToken) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("callbackUrl", pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
   return NextResponse.next();
