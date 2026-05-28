@@ -1,7 +1,5 @@
 // src/app/(public)/ppid/layout.tsx
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { PpidSidebar } from "@/components/ppid/PpidSidebar";
-import { Shield } from "lucide-react";
+import { PpidHeader } from "@/components/ppid/PpidHeader";
 
 export default function PpidLayout({
   children,
@@ -10,74 +8,18 @@ export default function PpidLayout({
 }) {
   return (
     <>
-      <Breadcrumb
-        items={[{ label: "Beranda", href: "/" }, { label: "PPID" }]}
-      />
-
-      {/* Hero — seragam dengan profil & berita */}
-      <div className="page-hero">
-        <div className="container-content" style={{ position: "relative" }}>
-          <p
-            style={{
-              fontSize: "11px",
-              fontWeight: 700,
-              letterSpacing: "1px",
-              textTransform: "uppercase",
-              color: "rgba(255,255,255,0.55)",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              marginBottom: "10px",
-            }}
-          >
-            <span
-              style={{
-                display: "inline-block",
-                width: "20px",
-                height: "2px",
-                backgroundColor: "var(--color-gold-500)",
-              }}
-            />
-            Pemerintah Provinsi Kalimantan Timur
-          </p>
-          <h1
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "38px",
-              fontWeight: 700,
-              color: "#fff",
-              marginBottom: "10px",
-              lineHeight: 1.15,
-            }}
-          >
-            PPID BPSDM Kaltim
-          </h1>
-          <p
-            style={{
-              fontSize: "15px",
-              color: "rgba(255,255,255,0.6)",
-              maxWidth: "520px",
-            }}
-          >
-            Pejabat Pengelola Informasi dan Dokumentasi BPSDM Provinsi
-            Kalimantan Timur — mewujudkan transparansi dan akuntabilitas
-            penyelenggaraan negara.
-          </p>
-        </div>
-      </div>
-
-      {/* Content area — seragam dengan profil */}
+      {/* Header PPID menggantikan header utama */}
+      <PpidHeader />
+      {/* Content */}
       <div
         style={{
           backgroundColor: "var(--color-ink-8)",
-          paddingBlock: "3.5rem",
+          paddingBlock: "3rem",
+          minHeight: "60vh",
         }}
       >
         <div className="container-content">
-          <div className="ppid-layout">
-            <PpidSidebar />
-            <main style={{ minWidth: 0, overflow: "hidden" }}>{children}</main>
-          </div>
+          <main>{children}</main>
         </div>
       </div>
     </>

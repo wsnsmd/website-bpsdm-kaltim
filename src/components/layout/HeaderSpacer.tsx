@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 export function HeaderSpacer() {
   const pathname = usePathname();
-
+  if (pathname.startsWith("/ppid")) return null;
   // Tidak perlu spacer di halaman home karena header transparan
   const isHome = pathname === "/web" || pathname === "/web/";
 

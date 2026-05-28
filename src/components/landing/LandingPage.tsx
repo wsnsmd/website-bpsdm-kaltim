@@ -301,8 +301,8 @@ const APPS = [
     id: "ppid",
     title: "PPID",
     desc: "Keterbukaan Informasi",
-    href: "https://ppid.bpsdm.kaltimprov.go.id",
-    external: true,
+    href: "/ppid",
+    external: false,
   },
   {
     id: "statistik",

@@ -14,6 +14,8 @@ export function HeaderScrollWrapper({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  if (pathname.startsWith("/ppid")) return null;
+
   const isHome = pathname === "/web" || pathname === "/web/";
 
   // Inisialisasi langsung transparan jika home
