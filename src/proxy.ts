@@ -54,20 +54,18 @@ export async function proxy(request: NextRequest) {
 
   // ── 3. Admin routes: cek auth ────────────────
   if (pathname.startsWith("/admin")) {
-    let token = null;
+    const isProduction = process.env.NODE_ENV === "production";
+    const token = await getToken({
+      req: request,
+      secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET ?? "",
+    });
 
-    try {
-      const isProduction = process.env.NODE_ENV === "production";
-      token = await getToken({
-        req: request,
-        secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET ?? "",
-      });
-    } catch {
-      // Jika gagal ambil token, redirect ke login
-      const loginUrl = new URL("/login", request.url);
-      loginUrl.searchParams.set("callbackUrl", pathname);
-      return NextResponse.redirect(loginUrl);
-    }
+    console.log("[proxy] pathname:", pathname);
+    console.log("[proxy] token:", token ? `role=${token.role}` : "NULL");
+    console.log(
+      "[proxy] cookies:",
+      request.cookies.getAll().map((c) => c.name),
+    );
 
     // Belum login
     if (!token) {
