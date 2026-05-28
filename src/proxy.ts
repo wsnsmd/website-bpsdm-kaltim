@@ -57,6 +57,7 @@ export async function proxy(request: NextRequest) {
     let token = null;
 
     try {
+      const isProduction = process.env.NODE_ENV === "production";
       token = await getToken({
         req: request,
         secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET ?? "",
