@@ -24,6 +24,9 @@ import { MapBoxWrapper } from "@/components/ui/MapBoxWrapper";
 export const metadata: Metadata = {
   title: "Kontak",
   description: "Informasi kontak dan lokasi BPSDM Provinsi Kalimantan Timur.",
+  alternates: {
+    canonical: "/kontak",
+  },
 };
 
 export default async function KontakPage() {

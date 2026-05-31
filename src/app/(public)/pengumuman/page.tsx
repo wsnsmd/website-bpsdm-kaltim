@@ -19,6 +19,9 @@ export const metadata: Metadata = {
   title: "Pengumuman — BPSDM Kaltim",
   description:
     "Pengumuman resmi dan informasi terkini BPSDM Provinsi Kalimantan Timur.",
+  alternates: {
+    canonical: "/pengumuman",
+  },
 };
 
 export const revalidate = 300; // 5 menit

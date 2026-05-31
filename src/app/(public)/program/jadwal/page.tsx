@@ -23,6 +23,9 @@ export const metadata: Metadata = {
   title: "Jadwal",
   description:
     "Seluruh jadwal kegiatan pengembangan kompetensi BPSDM Provinsi Kalimantan Timur.",
+  alternates: {
+    canonical: "/program/jadwal",
+  },
 };
 
 export const revalidate = 3600;

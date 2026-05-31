@@ -4,7 +4,12 @@ import Link from "next/link";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { ArrowDown, ArrowRight, FileText } from "lucide-react";
 
-export const metadata: Metadata = { title: "Alur Permohonan Informasi" };
+export const metadata: Metadata = {
+  title: "Alur Permohonan Informasi",
+  alternates: {
+    canonical: "/ppid/alur-permohonan",
+  },
+};
 
 const ALUR_STEPS = [
   {

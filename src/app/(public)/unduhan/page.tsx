@@ -31,6 +31,9 @@ import {
 export const metadata: Metadata = {
   title: "Unduhan",
   description: "Pusat unduhan dokumen resmi BPSDM Provinsi Kalimantan Timur.",
+  alternates: {
+    canonical: "/unduhan",
+  },
 };
 
 const ICON_MAP: Record<string, LucideIcon> = {

@@ -23,6 +23,9 @@ import { fetchJadwal } from "@/lib/simpel/jadwal";
 export const metadata: Metadata = {
   title: "Kompetensi",
   description: "Program pengembangan kompetensi ASN Kalimantan Timur.",
+  alternates: {
+    canonical: "/program",
+  },
 };
 
 export const revalidate = 3600;

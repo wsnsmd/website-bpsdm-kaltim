@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   title: "Struktur Organisasi PPID",
   description:
     "Struktur organisasi Pejabat Pengelola Informasi dan Dokumentasi BPSDM Kaltim.",
+  alternates: {
+    canonical: "/ppid/struktur",
+  },
 };
 
 export default function PpidStrukturPage() {

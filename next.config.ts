@@ -17,8 +17,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "storage.bpsdm.kaltimprov.go.id",
-        pathname: "/bpsdm-media/**",
+        hostname: "bpsdm.kaltimprov.go.id",
+        // pathname: "/bpsdm-media/**",
       },
       {
         protocol: "https",

@@ -1,4 +1,5 @@
 // src/app/(public)/layout.tsx
+import { Metadata } from "next";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { HeaderSpacer } from "@/components/layout/HeaderSpacer";
@@ -10,6 +11,12 @@ import {
 import { BackToTop } from "@/components/ui/BackToTop";
 import { redirect } from "next/navigation";
 import { getSetting } from "@/lib/queries/settings";
+
+export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+  ),
+};
 
 export default async function PublicLayout({
   children,

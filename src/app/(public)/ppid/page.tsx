@@ -27,6 +27,9 @@ export const metadata: Metadata = {
   title: "PPID — Keterbukaan Informasi Publik",
   description:
     "Pejabat Pengelola Informasi dan Dokumentasi BPSDM Provinsi Kalimantan Timur.",
+  alternates: {
+    canonical: "/ppid",
+  },
 };
 
 export const revalidate = 3600;

@@ -13,7 +13,7 @@ type Props = {
 const FALLBACK = [
   {
     id: 1,
-    title: "Selamat datang di portal BPSDM Kaltim",
+    title: "Selamat datang di Website BPSDM Kaltim",
     url: "/",
     type: "info",
   },

@@ -20,6 +20,9 @@ export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Website",
+  alternates: {
+    canonical: "/web",
+  },
 };
 
 export default async function HomePage() {
@@ -33,7 +36,7 @@ export default async function HomePage() {
   ] = await Promise.all([
     getFeaturedPost(),
     getLatestPosts({ limit: 6 }),
-    fetchJadwalMendatang(4),
+    fetchJadwalMendatang(5),
     getActiveAnnouncements(5),
     // getAllPimpinan(),
     getSetting("home_video_album_id"),

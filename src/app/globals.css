@@ -892,7 +892,7 @@
     padding: 8px 0;
   }
   .agenda-item {
-    padding: 14px 22px;
+    padding: 11px 22px;
     border-bottom: 1px solid var(--color-ink-7);
     display: flex;
     gap: 14px;

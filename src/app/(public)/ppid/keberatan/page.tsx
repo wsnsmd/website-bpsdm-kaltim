@@ -5,7 +5,12 @@ import { PpidPageContent } from "@/components/ppid/PpidPageContent";
 import { AlertTriangle, Scale, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
-export const metadata: Metadata = { title: "Keberatan & Sengketa Informasi" };
+export const metadata: Metadata = {
+  title: "Keberatan & Sengketa Informasi",
+  alternates: {
+    canonical: "/ppid/keberatan",
+  },
+};
 
 const DASAR_KEBERATAN = [
   "Penolakan atas permohonan informasi publik",

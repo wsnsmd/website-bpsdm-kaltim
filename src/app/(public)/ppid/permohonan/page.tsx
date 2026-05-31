@@ -4,7 +4,12 @@ import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { PpidFormClient } from "@/components/ppid/PpidFormClient";
 import { PpidTrackClient } from "@/components/ppid/PpidTrackClient";
 
-export const metadata: Metadata = { title: "Permohonan Informasi Publik" };
+export const metadata: Metadata = {
+  title: "Permohonan Informasi Publik",
+  alternates: {
+    canonical: "/ppid/permohonan",
+  },
+};
 
 export default function PermohonanPage() {
   return (

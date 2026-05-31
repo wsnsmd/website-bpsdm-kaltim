@@ -3,7 +3,12 @@ import type { Metadata } from "next";
 import { getPageBySlug } from "@/lib/queries/profil";
 import { notFound } from "next/navigation";
 
-export const metadata: Metadata = { title: "Profil" };
+export const metadata: Metadata = {
+  title: "Profil",
+  alternates: {
+    canonical: "/profil",
+  },
+};
 
 export default async function ProfilPage() {
   const page = await getPageBySlug("profil");

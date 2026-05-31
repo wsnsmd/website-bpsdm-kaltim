@@ -116,7 +116,7 @@ export function PostForm({ categories, authorName, post }: Props) {
                   Slug URL
                 </label>
                 <div className="flex items-center gap-2 max-sm:flex-col max-sm:items-start">
-                  <span className="text-[13px] text-[var(--color-ink-4)] shrink-0">
+                  <span className="text-[13px] text-ink-4 shrink-0">
                     /berita/
                   </span>
                   <input
@@ -150,7 +150,7 @@ export function PostForm({ categories, authorName, post }: Props) {
                 onImageChange={setFeaturedImage}
               />
               {featuredImage && (
-                <div className="mt-2 text-[11px] text-[var(--color-ink-4)] flex items-center gap-1.5 break-all">
+                <div className="mt-2 text-[11px] text-ink-4 flex items-center gap-1.5 break-all">
                   <svg
                     width="12"
                     height="12"
@@ -158,7 +158,7 @@ export function PostForm({ categories, authorName, post }: Props) {
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2.5"
-                    className="text-[var(--color-forest-700)] shrink-0"
+                    className="text-forest-700 shrink-0"
                   >
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
@@ -323,11 +323,11 @@ export function PostForm({ categories, authorName, post }: Props) {
                   name="isFeatured"
                   value="true"
                   defaultChecked={post?.isFeatured ?? false}
-                  className="w-4 h-4 cursor-pointer accent-[var(--color-forest-700)] shrink-0"
+                  className="w-4 h-4 cursor-pointer accent-forest-700 shrink-0"
                 />
                 <label
                   htmlFor="isFeatured"
-                  className="admin-label !m-0 cursor-pointer font-medium"
+                  className="admin-label m-0! cursor-pointer font-medium"
                 >
                   Jadikan berita unggulan
                 </label>

@@ -4,7 +4,12 @@ import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Scale, ExternalLink } from "lucide-react";
 import Link from "next/link";
 
-export const metadata: Metadata = { title: "Regulasi PPID" };
+export const metadata: Metadata = {
+  title: "Regulasi PPID",
+  alternates: {
+    canonical: "/ppid/regulasi",
+  },
+};
 
 const REGULASI = [
   {

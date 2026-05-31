@@ -1,6 +1,7 @@
 // src/app/(public)/berita/page.tsx
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { Suspense } from "react";
 import { ArrowRight, ImageIcon, Clock, Eye } from "lucide-react";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
@@ -19,6 +20,9 @@ export const metadata: Metadata = {
   title: "Berita & Artikel",
   description:
     "Informasi terkini seputar kegiatan, program, dan pengumuman BPSDM Provinsi Kalimantan Timur.",
+  alternates: {
+    canonical: "/berita",
+  },
 };
 
 const PER_PAGE = 9;
@@ -144,16 +148,24 @@ export default async function BeritaPage({ searchParams }: Props) {
               {/* Gambar */}
               <div className="featured-post-img">
                 {featuredPost.featuredImage ? (
-                  <img
-                    src={featuredPost.featuredImage}
-                    alt={featuredPost.title}
+                  <div
                     style={{
+                      position: "relative",
                       width: "100%",
                       height: "100%",
-                      objectFit: "cover",
-                      transition: "transform 0.3s",
                     }}
-                  />
+                  >
+                    <Image
+                      src={featuredPost.featuredImage}
+                      alt={featuredPost.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      style={{
+                        objectFit: "cover",
+                        transition: "transform 0.3s",
+                      }}
+                    />
+                  </div>
                 ) : (
                   <div
                     style={{

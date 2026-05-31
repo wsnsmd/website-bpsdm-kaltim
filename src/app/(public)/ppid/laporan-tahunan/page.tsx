@@ -6,7 +6,12 @@ import { getPpidInformasi } from "@/lib/queries/ppid";
 import { Download, ExternalLink, FileText, BarChart2 } from "lucide-react";
 import { formatFileSize } from "@/components/ui/FileIcon";
 
-export const metadata: Metadata = { title: "Laporan Tahunan PPID" };
+export const metadata: Metadata = {
+  title: "Laporan Tahunan PPID",
+  alternates: {
+    canonical: "/ppid/laporan-tahunan",
+  },
+};
 
 export default async function LaporanTahunanPage() {
   // Ambil informasi berkala sebagai laporan tahunan

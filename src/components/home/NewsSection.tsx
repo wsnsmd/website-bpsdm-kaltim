@@ -1,5 +1,6 @@
 // src/components/home/NewsSection.tsx
 import Link from "next/link";
+import Image from "next/image";
 import { Clock, Eye, ArrowRight, CalendarDays, ImageIcon } from "lucide-react";
 import type { PostListItem } from "@/lib/queries/posts";
 import { timeAgo, formatDate } from "@/lib/utils";
@@ -31,13 +32,19 @@ function Thumb({
 }) {
   if (src) {
     return (
-      <img
-        src={src}
-        alt={alt}
-        style={{ width: "100%", height: "100%", objectFit: "cover" }}
-      />
+      <div style={{ position: "relative", width: "100%", height: "100%" }}>
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          style={{ objectFit: "cover" }}
+          className="rounded-lg"
+        />
+      </div>
     );
   }
+
   return (
     <div
       style={{

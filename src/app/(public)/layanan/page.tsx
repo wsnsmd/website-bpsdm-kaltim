@@ -29,6 +29,9 @@ export const metadata: Metadata = {
   title: "Platform & Layanan Digital | BPSDM Kaltim",
   description:
     "Seluruh platform dan layanan digital BPSDM Provinsi Kalimantan Timur untuk mendukung pengembangan SDM.",
+  alternates: {
+    canonical: "/layanan",
+  },
 };
 
 const ICON_MAP: Record<string, LucideIcon> = {

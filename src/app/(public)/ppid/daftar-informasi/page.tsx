@@ -4,7 +4,12 @@ import { Suspense } from "react";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { DipContent } from "@/components/ppid/DipContent";
 
-export const metadata: Metadata = { title: "Daftar Informasi Publik (DIP)" };
+export const metadata: Metadata = {
+  title: "Daftar Informasi Publik (DIP)",
+  alternates: {
+    canonical: "/ppid/daftar-informasi",
+  },
+};
 
 type Props = {
   searchParams: Promise<{

@@ -1,5 +1,6 @@
 // src/components/home/HeroSection.tsx
 import Link from "next/link";
+import Image from "next/image";
 import {
   GraduationCap,
   CalendarDays,
@@ -119,7 +120,14 @@ export async function HeroSection({ featuredPost, recentPosts }: Props) {
               >
                 <div className="hero-simple-featured-image">
                   {featured.featuredImage ? (
-                    <img src={featured.featuredImage} alt={featured.title} />
+                    <Image
+                      src={featured.featuredImage}
+                      alt={featured.title}
+                      fill
+                      priority
+                      sizes="336px"
+                      style={{ objectFit: "cover" }}
+                    />
                   ) : (
                     <div className="hero-simple-featured-placeholder" />
                   )}

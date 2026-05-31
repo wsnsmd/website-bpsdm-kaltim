@@ -27,10 +27,16 @@ const PAGE_TITLES: Record<string, string> = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
 
+  const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const canonicalUrl = `${BASE_URL}/profil/${slug}`;
+
   // Cek apakah halaman khusus
   if (PAGE_TITLES[slug]) {
     return {
       title: `${PAGE_TITLES[slug]}`,
+      alternates: {
+        canonical: canonicalUrl,
+      },
     };
   }
 
@@ -44,6 +50,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: `${page.title}`,
+    alternates: {
+      canonical: canonicalUrl,
+    },
   };
 }
 

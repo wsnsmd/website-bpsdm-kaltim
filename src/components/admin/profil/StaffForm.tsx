@@ -264,11 +264,11 @@ export function StaffForm({ staff, units }: Props) {
                     id="isActive"
                     checked={isActive}
                     onChange={(e) => setIsActive(e.target.checked)}
-                    className="w-4 h-4 cursor-pointer accent-[var(--color-forest-700)] shrink-0"
+                    className="w-4 h-4 cursor-pointer accent-forest-700 shrink-0"
                   />
                   <label
                     htmlFor="isActive"
-                    className="admin-label !m-0 cursor-pointer font-medium"
+                    className="admin-label m-0! cursor-pointer font-medium"
                   >
                     Pegawai aktif
                   </label>

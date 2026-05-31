@@ -45,18 +45,18 @@ export default async function KelolaAlbumPage({ params }: Props) {
           <div className="flex items-center gap-2 mb-1.5">
             <Link
               href="/admin/galeri"
-              className="flex items-center gap-1 text-[13px] text-[var(--color-ink-4)] no-underline transition-colors hover:text-[var(--color-forest-700)]"
+              className="flex items-center gap-1 text-[13px] text-ink-4 no-underline transition-colors hover:text-forest-700"
             >
               <ArrowLeft size={13} /> Galeri
             </Link>
-            <span className="text-[var(--color-ink-5)] text-xs">/</span>
-            <span className="text-[13px] text-[var(--color-ink-2)] font-semibold line-clamp-1">
+            <span className="text-ink-5 text-xs">/</span>
+            <span className="text-[13px] text-ink-2 font-semibold line-clamp-1">
               {album.title}
             </span>
           </div>
 
           <div className="flex items-center gap-2.5 flex-wrap">
-            <h1 className="font-display text-2xl font-bold text-[var(--color-ink)] m-0">
+            <h1 className="font-display text-2xl font-bold text-ink m-0">
               {album.title}
             </h1>
             <span
