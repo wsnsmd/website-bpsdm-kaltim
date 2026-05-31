@@ -1,11 +1,22 @@
 // src/app/layout.tsx
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
-import { getPublicSettings } from "@/lib/queries/settings";
-import "./globals.css";
+import { Suspense } from "react";
 import { SessionProvider } from "@/components/providers/SessionProvider";
+import { getPublicSettings } from "@/lib/queries/settings";
+import { NavigationProgress } from "@/components/ui/NavigationProgress";
+
+import "./globals.css";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
+function ProgressBar() {
+  return (
+    <Suspense fallback={null}>
+      <NavigationProgress />
+    </Suspense>
+  );
+}
 
 export async function generateMetadata(): Promise<Metadata> {
   const s = await getPublicSettings();
@@ -154,6 +165,7 @@ export default async function RootLayout({
             </Script>
           </>
         )}
+        <ProgressBar />
         <SessionProvider>{children}</SessionProvider>
       </body>
     </html>
