@@ -9,10 +9,15 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/admin/", "/api/", "/_next/", "/auth/"],
+        disallow: [
+          "/admin/",
+          "/api/",
+          "/_next/",
+          "/auth/",
+          "/proxy", // ← tambahan
+        ],
       },
       {
-        // Blokir AI scrapers
         userAgent: [
           "GPTBot",
           "ChatGPT-User",

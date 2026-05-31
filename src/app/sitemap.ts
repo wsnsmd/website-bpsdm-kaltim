@@ -5,34 +5,37 @@ import { posts, programs } from "@/db/schema";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
-// Halaman statis
+// Tanggal deploy / build — lebih stabil dari new Date() setiap request
+const BUILD_TIME = new Date();
+
 const STATIC_PAGES = [
-  { path: "/", priority: 1.0, changeFreq: "daily" },
-  { path: "/profil", priority: 0.8, changeFreq: "monthly" },
+  { path: "/web", priority: 1.0, changeFreq: "daily" },
+  { path: "/berita", priority: 0.9, changeFreq: "daily" },
   { path: "/program", priority: 0.9, changeFreq: "weekly" },
   { path: "/program/jadwal", priority: 0.9, changeFreq: "daily" },
-  { path: "/berita", priority: 0.8, changeFreq: "daily" },
-  { path: "/unduhan", priority: 0.7, changeFreq: "weekly" },
-  { path: "/layanan", priority: 0.7, changeFreq: "monthly" },
+  { path: "/profil", priority: 0.8, changeFreq: "monthly" },
+  { path: "/profil/sejarah", priority: 0.6, changeFreq: "monthly" },
+  { path: "/profil/visi-misi", priority: 0.6, changeFreq: "monthly" },
+  { path: "/profil/struktur-organisasi", priority: 0.6, changeFreq: "monthly" },
   { path: "/ppid", priority: 0.7, changeFreq: "monthly" },
-  { path: "/pengaduan", priority: 0.6, changeFreq: "monthly" },
+  { path: "/pengumuman", priority: 0.7, changeFreq: "daily" },
+  { path: "/layanan", priority: 0.7, changeFreq: "monthly" },
+  { path: "/unduhan", priority: 0.7, changeFreq: "weekly" },
   { path: "/kontak", priority: 0.6, changeFreq: "monthly" },
+  { path: "/pengaduan", priority: 0.6, changeFreq: "monthly" },
   { path: "/maklumat-pelayanan", priority: 0.5, changeFreq: "monthly" },
   { path: "/survei", priority: 0.5, changeFreq: "monthly" },
 ] as const;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const now = new Date();
-
-  // Static pages
   const staticEntries: MetadataRoute.Sitemap = STATIC_PAGES.map((p) => ({
     url: `${SITE_URL}${p.path}`,
-    lastModified: now,
+    lastModified: BUILD_TIME,
     changeFrequency: p.changeFreq,
     priority: p.priority,
   }));
 
-  // Berita dinamis
+  // ─── Berita ───────────────────────────────────────────────────────────────
   let postEntries: MetadataRoute.Sitemap = [];
   try {
     const allPosts = await db
@@ -48,15 +51,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     postEntries = allPosts.map((p) => ({
       url: `${SITE_URL}/berita/${p.slug}`,
-      lastModified: p.updatedAt ?? p.publishedAt ?? now,
+      lastModified: p.updatedAt ?? p.publishedAt ?? BUILD_TIME,
       changeFrequency: "weekly" as const,
       priority: 0.7,
     }));
   } catch {
-    /* skip jika error */
+    /* skip */
   }
 
-  // Program dinamis
+  // ─── Program ──────────────────────────────────────────────────────────────
   let programEntries: MetadataRoute.Sitemap = [];
   try {
     const allPrograms = await db
@@ -65,17 +68,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         updatedAt: programs.updatedAt,
       })
       .from(programs)
-      .where(eq(programs.status, "active"))
+      .where(eq(programs.status, "active")) // sesuai schema Anda
       .limit(200);
 
     programEntries = allPrograms.map((p) => ({
       url: `${SITE_URL}/program/${p.slug}`,
-      lastModified: p.updatedAt ?? now,
+      lastModified: p.updatedAt ?? BUILD_TIME,
       changeFrequency: "monthly" as const,
       priority: 0.7,
     }));
   } catch {
-    /* skip jika error */
+    /* skip */
   }
 
   return [...staticEntries, ...postEntries, ...programEntries];
