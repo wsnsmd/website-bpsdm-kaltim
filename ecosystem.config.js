@@ -6,7 +6,7 @@ module.exports = {
       script: "node_modules/.bin/next",
       args: "start",
       cwd: "/var/www/bpsdm",
-      instances: 2,
+      instances: 1,
       exec_mode: "cluster",
       watch: false,
       max_memory_restart: "500M",
