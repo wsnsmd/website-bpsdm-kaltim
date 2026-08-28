@@ -80,6 +80,7 @@ export async function createDocument(formData: FormData) {
   revalidatePath("/web");
   revalidatePath("/unduhan");
   revalidatePath("/admin/dokumen");
+  revalidatePath("/admin/ppid", "layout");
   redirect("/admin/dokumen");
 }
 
@@ -132,6 +133,7 @@ export async function updateDocument(id: number, formData: FormData) {
   revalidatePath("/web");
   revalidatePath("/unduhan");
   revalidatePath("/admin/dokumen");
+  revalidatePath("/admin/ppid", "layout");
   redirect("/admin/dokumen");
 }
 
@@ -142,6 +144,7 @@ export async function deleteDocument(id: number) {
   revalidatePath("/web");
   revalidatePath("/unduhan");
   revalidatePath("/admin/dokumen");
+  revalidatePath("/admin/ppid", "layout");
 }
 
 export async function toggleDocumentStatus(
@@ -153,6 +156,7 @@ export async function toggleDocumentStatus(
   await db.update(documents).set({ status }).where(eq(documents.id, id));
   revalidatePath("/unduhan");
   revalidatePath("/admin/dokumen");
+  revalidatePath("/admin/ppid", "layout");
 }
 
 // ── Kategori ──────────────────────────────────
