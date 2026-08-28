@@ -6,6 +6,7 @@ import { db, eq, asc } from "@/db";
 import { documents, documentCategories } from "@/db/schema";
 import { DocumentForm } from "@/components/admin/dokumen/DocumentForm";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Edit Dokumen" };
 
 type Props = { params: Promise<{ id: string }> };

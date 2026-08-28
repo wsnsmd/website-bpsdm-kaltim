@@ -213,6 +213,7 @@ export async function createDocumentCategory(formData: FormData) {
 
   revalidatePath("/unduhan");
   revalidatePath("/admin/dokumen/kategori");
+  revalidatePath("/admin/dokumen", "layout");
   redirect("/admin/dokumen/kategori");
 }
 
@@ -254,6 +255,7 @@ export async function updateDocumentCategory(id: number, formData: FormData) {
 
   revalidatePath("/unduhan");
   revalidatePath("/admin/dokumen/kategori");
+  revalidatePath("/admin/dokumen", "layout");
   redirect("/admin/dokumen/kategori");
 }
 
@@ -263,4 +265,5 @@ export async function deleteDocumentCategory(id: number) {
   await db.delete(documentCategories).where(eq(documentCategories.id, id));
   revalidatePath("/unduhan");
   revalidatePath("/admin/dokumen/kategori");
+  revalidatePath("/admin/dokumen", "layout");
 }

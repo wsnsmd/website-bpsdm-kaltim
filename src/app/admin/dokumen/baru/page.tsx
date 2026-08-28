@@ -5,6 +5,7 @@ import { db, asc } from "@/db";
 import { documentCategories } from "@/db/schema";
 import { DocumentForm } from "@/components/admin/dokumen/DocumentForm";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Tambah Dokumen" };
 
 export default async function TambahDokumenPage() {
