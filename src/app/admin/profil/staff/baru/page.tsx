@@ -6,7 +6,9 @@ import { units } from "@/db/schema";
 import { StaffForm } from "@/components/admin/profil/StaffForm";
 
 export const metadata: Metadata = { title: "Tambah Pegawai" };
-
+// PM2 cluster mode (2+ instance) -> Full Route Cache tidak sinkron antar-proses.
+// force-dynamic memastikan halaman ini selalu query fresh dari DB.
+export const dynamic = "force-dynamic";
 export default async function TambahStaffPage() {
   const allUnits = await db
     .select({ id: units.id, name: units.name })

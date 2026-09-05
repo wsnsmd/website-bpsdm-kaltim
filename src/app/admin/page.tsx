@@ -38,7 +38,9 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = { title: "Dashboard | Admin BPSDM" };
-
+// PM2 cluster mode (2+ instance) -> Full Route Cache tidak sinkron antar-proses.
+// force-dynamic memastikan halaman ini selalu query fresh dari DB.
+export const dynamic = "force-dynamic";
 async function getDashboardStats() {
   const todayStr = new Date().toISOString().slice(0, 10);
   const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);

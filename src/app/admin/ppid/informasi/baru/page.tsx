@@ -5,8 +5,9 @@ import { db, eq, desc } from "@/db";
 import { documents } from "@/db/schema";
 import { PpidInformasiForm } from "@/components/admin/ppid/PpidInformasiForm";
 
-export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Tambah Informasi PPID" };
+// Daftar dokumen sumber harus selalu fresh — jangan ikut Full Route Cache.
+export const dynamic = "force-dynamic";
 
 export default async function TambahInformasiPage() {
   const docs = await db

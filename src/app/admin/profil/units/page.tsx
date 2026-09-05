@@ -7,7 +7,9 @@ import { units } from "@/db/schema";
 import { DeleteUnitButton } from "@/components/admin/profil/DeleteUnitButton";
 
 export const metadata: Metadata = { title: "Manajemen Unit Kerja" };
-
+// PM2 cluster mode (2+ instance) -> Full Route Cache tidak sinkron antar-proses.
+// force-dynamic memastikan halaman ini selalu query fresh dari DB.
+export const dynamic = "force-dynamic";
 const LEVEL_LABELS: Record<
   number,
   { label: string; color: string; bg: string }

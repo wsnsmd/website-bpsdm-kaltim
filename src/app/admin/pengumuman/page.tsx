@@ -9,7 +9,9 @@ import { ToggleActiveButton } from "@/components/admin/ToggleActiveButton";
 import { Plus } from "lucide-react";
 
 export const metadata: Metadata = { title: "Manajemen Pengumuman" };
-
+// PM2 cluster mode (2+ instance) -> Full Route Cache tidak sinkron antar-proses.
+// force-dynamic memastikan halaman ini selalu query fresh dari DB.
+export const dynamic = "force-dynamic";
 const TYPE_STYLE: Record<string, { label: string; cls: string }> = {
   info: { label: "Info", cls: "status-pill-review" },
   warning: { label: "Warning", cls: "status-pill-draft" },

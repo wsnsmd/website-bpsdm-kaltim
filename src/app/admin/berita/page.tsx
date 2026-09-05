@@ -9,7 +9,9 @@ import { Pagination } from "@/components/ui/Pagination";
 import { getPostCategories } from "@/lib/queries/categories";
 
 export const metadata: Metadata = { title: "Manajemen Berita" };
-
+// PM2 cluster mode (2+ instance) -> Full Route Cache tidak sinkron antar-proses.
+// force-dynamic memastikan halaman ini selalu query fresh dari DB.
+export const dynamic = "force-dynamic";
 const PER_PAGE = 20;
 
 type Props = {

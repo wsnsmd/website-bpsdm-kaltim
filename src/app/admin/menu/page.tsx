@@ -7,7 +7,9 @@ import { Plus, GripVertical } from "lucide-react";
 import SortableMenuTable from "@/components/admin/menu/SortableMenuTable";
 
 export const metadata: Metadata = { title: "Manajemen Menu" };
-
+// PM2 cluster mode (2+ instance) -> Full Route Cache tidak sinkron antar-proses.
+// force-dynamic memastikan halaman ini selalu query fresh dari DB.
+export const dynamic = "force-dynamic";
 export default async function AdminMenuPage() {
   const groups = await db.select().from(menuGroups).orderBy(asc(menuGroups.id));
   const allItems = await db

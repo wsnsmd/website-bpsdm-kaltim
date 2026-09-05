@@ -6,8 +6,9 @@ import { db, eq, asc } from "@/db";
 import { documents, documentCategories } from "@/db/schema";
 import { DocumentForm } from "@/components/admin/dokumen/DocumentForm";
 
-export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Edit Dokumen" };
+// Sama seperti halaman tambah dokumen: kategori harus selalu fresh.
+export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ id: string }> };
 

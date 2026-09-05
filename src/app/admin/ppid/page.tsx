@@ -6,7 +6,9 @@ import { ppidPermohonan } from "@/db/schema";
 import { Plus, Eye, FileText, Clock } from "lucide-react";
 
 export const metadata: Metadata = { title: "Permohonan PPID" };
-
+// PM2 cluster mode (2+ instance) -> Full Route Cache tidak sinkron antar-proses.
+// force-dynamic memastikan halaman ini selalu query fresh dari DB.
+export const dynamic = "force-dynamic";
 const STATUS_CONFIG: Record<
   string,
   { label: string; cls: string; color: string; bg: string }

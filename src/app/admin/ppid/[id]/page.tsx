@@ -8,7 +8,9 @@ import { ArrowLeft } from "lucide-react";
 import { UpdatePermohonanForm } from "@/components/admin/ppid/UpdatePermohonanForm";
 
 export const metadata: Metadata = { title: "Detail Permohonan PPID" };
-
+// PM2 cluster mode (2+ instance) -> Full Route Cache tidak sinkron antar-proses.
+// force-dynamic memastikan halaman ini selalu query fresh dari DB.
+export const dynamic = "force-dynamic";
 type Props = { params: Promise<{ id: string }> };
 
 const STATUS_COLOR: Record<string, string> = {

@@ -8,7 +8,9 @@ import { Plus, Edit } from "lucide-react";
 import { DeleteCategoryButton } from "@/components/admin/dokumen/DeleteCategoryButton";
 
 export const metadata: Metadata = { title: "Kategori Dokumen" };
-
+// PM2 cluster mode (2+ instance) -> Full Route Cache tidak sinkron antar-proses.
+// force-dynamic memastikan halaman ini selalu query fresh dari DB.
+export const dynamic = "force-dynamic";
 const ICON_OPTIONS = [
   "BarChart2",
   "FileCheck",

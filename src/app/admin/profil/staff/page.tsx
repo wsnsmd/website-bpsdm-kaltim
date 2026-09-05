@@ -8,7 +8,9 @@ import { DeleteStaffButton } from "@/components/admin/profil/DeleteStaffButton";
 import { SmartImage } from "@/components/ui/SmartImage";
 
 export const metadata: Metadata = { title: "Manajemen Pegawai" };
-
+// PM2 cluster mode (2+ instance) -> Full Route Cache tidak sinkron antar-proses.
+// force-dynamic memastikan halaman ini selalu query fresh dari DB.
+export const dynamic = "force-dynamic";
 const TYPE_LABELS: Record<string, string> = {
   kepala_badan: "Kepala Badan",
   sekretaris: "Sekretaris",

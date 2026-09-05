@@ -7,7 +7,9 @@ import { units } from "@/db/schema";
 import { UnitForm } from "@/components/admin/profil/UnitForm";
 
 export const metadata: Metadata = { title: "Edit Unit Kerja" };
-
+// PM2 cluster mode (2+ instance) -> Full Route Cache tidak sinkron antar-proses.
+// force-dynamic memastikan halaman ini selalu query fresh dari DB.
+export const dynamic = "force-dynamic";
 type Props = { params: Promise<{ id: string }> };
 
 export default async function EditUnitPage({ params }: Props) {

@@ -6,8 +6,9 @@ import { db, eq, desc } from "@/db";
 import { ppidInformasi, documents } from "@/db/schema";
 import { PpidInformasiForm } from "@/components/admin/ppid/PpidInformasiForm";
 
-export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Edit Informasi PPID" };
+// Sama seperti halaman tambah: daftar dokumen sumber harus selalu fresh.
+export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ id: string }> };
 

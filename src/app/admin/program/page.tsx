@@ -8,7 +8,9 @@ import { DeleteProgramButton } from "@/components/admin/DeleteProgramButton";
 import { ToggleProgramStatus } from "@/components/admin/ToggleProgramStatus";
 
 export const metadata: Metadata = { title: "Manajemen Program" };
-
+// PM2 cluster mode (2+ instance) -> Full Route Cache tidak sinkron antar-proses.
+// force-dynamic memastikan halaman ini selalu query fresh dari DB.
+export const dynamic = "force-dynamic";
 const JENIS_BADGE: Record<string, string> = {
   Teknis: "badge-blue",
   Fungsional: "badge-forest",

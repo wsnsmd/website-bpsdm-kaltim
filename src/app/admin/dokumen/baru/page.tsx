@@ -5,8 +5,10 @@ import { db, asc } from "@/db";
 import { documentCategories } from "@/db/schema";
 import { DocumentForm } from "@/components/admin/dokumen/DocumentForm";
 
-export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Tambah Dokumen" };
+// Selalu render dinamis: daftar kategori harus fresh setiap saat form dibuka,
+// tidak boleh ikut ke-cache oleh Full Route Cache Next.js.
+export const dynamic = "force-dynamic";
 
 export default async function TambahDokumenPage() {
   const categories = await db

@@ -8,7 +8,9 @@ import { formatDate } from "@/lib/utils";
 import { DeletePageButton } from "@/components/admin/profil/DeletePageButton";
 
 export const metadata: Metadata = { title: "Manajemen Halaman" };
-
+// PM2 cluster mode (2+ instance) -> Full Route Cache tidak sinkron antar-proses.
+// force-dynamic memastikan halaman ini selalu query fresh dari DB.
+export const dynamic = "force-dynamic";
 const STATUS_STYLE: Record<string, string> = {
   published: "status-pill-published",
   draft: "status-pill-draft",

@@ -7,7 +7,9 @@ import { categories } from "@/db/schema";
 import { CategoryPostForm } from "@/components/admin/CategoryPostForm";
 
 export const metadata: Metadata = { title: "Edit Kategori" };
-
+// PM2 cluster mode (2+ instance) -> Full Route Cache tidak sinkron antar-proses.
+// force-dynamic memastikan halaman ini selalu query fresh dari DB.
+export const dynamic = "force-dynamic";
 type Props = { params: Promise<{ id: string }> };
 
 export default async function EditKategoriPage({ params }: Props) {

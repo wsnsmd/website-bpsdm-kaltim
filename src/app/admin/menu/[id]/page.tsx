@@ -7,7 +7,9 @@ import { menuGroups, menuItems } from "@/db/schema";
 import { MenuItemForm } from "@/components/admin/menu/MenuItemForm";
 
 export const metadata: Metadata = { title: "Edit Item Menu" };
-
+// PM2 cluster mode (2+ instance) -> Full Route Cache tidak sinkron antar-proses.
+// force-dynamic memastikan halaman ini selalu query fresh dari DB.
+export const dynamic = "force-dynamic";
 type Props = { params: Promise<{ id: string }> };
 
 export default async function EditMenuPage({ params }: Props) {

@@ -79,7 +79,8 @@ export async function createDocument(formData: FormData) {
 
   revalidatePath("/web");
   revalidatePath("/unduhan");
-  revalidatePath("/admin/dokumen");
+  revalidatePath("/admin/dokumen", "layout");
+  // Dokumen baru harus langsung tersedia di picker "Sumber Dokumen" PPID.
   revalidatePath("/admin/ppid", "layout");
   redirect("/admin/dokumen");
 }
@@ -132,7 +133,7 @@ export async function updateDocument(id: number, formData: FormData) {
 
   revalidatePath("/web");
   revalidatePath("/unduhan");
-  revalidatePath("/admin/dokumen");
+  revalidatePath("/admin/dokumen", "layout");
   revalidatePath("/admin/ppid", "layout");
   redirect("/admin/dokumen");
 }
@@ -143,7 +144,7 @@ export async function deleteDocument(id: number) {
   await db.delete(documents).where(eq(documents.id, id));
   revalidatePath("/web");
   revalidatePath("/unduhan");
-  revalidatePath("/admin/dokumen");
+  revalidatePath("/admin/dokumen", "layout");
   revalidatePath("/admin/ppid", "layout");
 }
 
@@ -155,7 +156,9 @@ export async function toggleDocumentStatus(
   if (!session) throw new Error("Unauthorized");
   await db.update(documents).set({ status }).where(eq(documents.id, id));
   revalidatePath("/unduhan");
-  revalidatePath("/admin/dokumen");
+  revalidatePath("/admin/dokumen", "layout");
+  // Ubah status jadi published/draft juga memengaruhi ketersediaan dokumen
+  // di picker "Sumber Dokumen" PPID (yang hanya menampilkan status published).
   revalidatePath("/admin/ppid", "layout");
 }
 
@@ -216,7 +219,8 @@ export async function createDocumentCategory(formData: FormData) {
   }
 
   revalidatePath("/unduhan");
-  revalidatePath("/admin/dokumen/kategori");
+  // "layout" agar seluruh halaman turunan /admin/dokumen (baru, [id], list, kategori)
+  // ikut ter-invalidate, tidak hanya /admin/dokumen/kategori.
   revalidatePath("/admin/dokumen", "layout");
   redirect("/admin/dokumen/kategori");
 }
@@ -258,7 +262,6 @@ export async function updateDocumentCategory(id: number, formData: FormData) {
   }
 
   revalidatePath("/unduhan");
-  revalidatePath("/admin/dokumen/kategori");
   revalidatePath("/admin/dokumen", "layout");
   redirect("/admin/dokumen/kategori");
 }
@@ -268,6 +271,5 @@ export async function deleteDocumentCategory(id: number) {
   if (!session) throw new Error("Unauthorized");
   await db.delete(documentCategories).where(eq(documentCategories.id, id));
   revalidatePath("/unduhan");
-  revalidatePath("/admin/dokumen/kategori");
   revalidatePath("/admin/dokumen", "layout");
 }

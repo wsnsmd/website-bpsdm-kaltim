@@ -7,6 +7,11 @@ import { Plus, Edit, BookOpen, Zap, Clock, Lock } from "lucide-react";
 import { DeletePpidInformasiButton } from "@/components/admin/ppid/DeletePpidInformasiButton";
 
 export const metadata: Metadata = { title: "Informasi Publik PPID" };
+// PM2 berjalan dalam cluster mode (2 instance) — Full Route Cache tersimpan
+// per-proses sehingga revalidatePath() dari satu instance tidak menjamin
+// instance lain ikut fresh. force-dynamic memastikan halaman ini selalu
+// query langsung ke DB tanpa bergantung pada sinkronisasi cache antar-proses.
+export const dynamic = "force-dynamic";
 
 const TIPE_CONFIG = {
   berkala: {

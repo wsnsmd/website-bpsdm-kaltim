@@ -8,7 +8,9 @@ import { DeletePlatformButton } from "@/components/admin/platform/DeletePlatform
 import { TogglePlatformButton } from "@/components/admin/platform/TogglePlatformButton";
 
 export const metadata: Metadata = { title: "Platform & Layanan" };
-
+// PM2 cluster mode (2+ instance) -> Full Route Cache tidak sinkron antar-proses.
+// force-dynamic memastikan halaman ini selalu query fresh dari DB.
+export const dynamic = "force-dynamic";
 export default async function AdminPlatformPage() {
   const all = await db
     .select()

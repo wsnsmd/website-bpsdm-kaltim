@@ -7,7 +7,9 @@ import { Plus, Edit } from "lucide-react";
 import { DeleteCategoryPostButton } from "@/components/admin/DeleteCategoryPostButton";
 
 export const metadata: Metadata = { title: "Kategori Berita" };
-
+// PM2 cluster mode (2+ instance) -> Full Route Cache tidak sinkron antar-proses.
+// force-dynamic memastikan halaman ini selalu query fresh dari DB.
+export const dynamic = "force-dynamic";
 type Props = {
   searchParams: Promise<{ cari?: string; sort?: string }>;
 };

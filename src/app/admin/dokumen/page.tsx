@@ -17,7 +17,9 @@ import { Pagination } from "@/components/ui/Pagination";
 import { getDocumentCategories } from "@/lib/queries/documents";
 
 export const metadata: Metadata = { title: "Manajemen Dokumen" };
-
+// PM2 cluster mode (2+ instance) -> Full Route Cache tidak sinkron antar-proses.
+// force-dynamic memastikan halaman ini selalu query fresh dari DB.
+export const dynamic = "force-dynamic";
 const STATUS_CONFIG: Record<string, { label: string; cls: string }> = {
   published: { label: "Terbit", cls: "status-pill-published" },
   draft: { label: "Draft", cls: "status-pill-draft" },

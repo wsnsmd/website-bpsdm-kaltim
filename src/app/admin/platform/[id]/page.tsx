@@ -7,7 +7,9 @@ import { platforms } from "@/db/schema";
 import { PlatformForm } from "@/components/admin/platform/PlatformForm";
 
 export const metadata: Metadata = { title: "Edit Platform" };
-
+// PM2 cluster mode (2+ instance) -> Full Route Cache tidak sinkron antar-proses.
+// force-dynamic memastikan halaman ini selalu query fresh dari DB.
+export const dynamic = "force-dynamic";
 type Props = { params: Promise<{ id: string }> };
 
 export default async function EditPlatformPage({ params }: Props) {

@@ -14,7 +14,9 @@ import {
 import { DeleteAlbumButton } from "@/components/admin/galeri/DeleteAlbumButton";
 
 export const metadata: Metadata = { title: "Manajemen Galeri" };
-
+// PM2 cluster mode (2+ instance) -> Full Route Cache tidak sinkron antar-proses.
+// force-dynamic memastikan halaman ini selalu query fresh dari DB.
+export const dynamic = "force-dynamic";
 export default async function AdminGaleriPage() {
   const albums = await db
     .select()
