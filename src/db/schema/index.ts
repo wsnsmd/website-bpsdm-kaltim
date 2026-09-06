@@ -16,6 +16,7 @@ import {
   primaryKey,
 } from "drizzle-orm/mysql-core";
 import { mysqlEnum } from "drizzle-orm/mysql-core";
+import { json } from "drizzle-orm/mysql-core";
 import { relations, sql } from "drizzle-orm";
 
 // ═══════════════════════════════════════════
@@ -736,8 +737,13 @@ export const ppidPermohonan = mysqlTable(
   {
     id: int("id").autoincrement().primaryKey(),
     // Identitas pemohon
+    kategoriPemohon: mysqlEnum("kategori_pemohon", ["perorangan", "badan_hukum"])
+      .default("perorangan")
+      .notNull(),
+    namaInstansi: varchar("nama_instansi", { length: 255 }), // diisi jika kategori = badan_hukum
     namaPemohon: varchar("nama_pemohon", { length: 255 }).notNull(),
     nik: varchar("nik", { length: 20 }),
+    ktpUrl: varchar("ktp_url", { length: 1000 }), // upload KTP/identitas
     email: varchar("email", { length: 255 }).notNull(),
     noHp: varchar("no_hp", { length: 30 }),
     alamat: text("alamat"),
@@ -746,7 +752,18 @@ export const ppidPermohonan = mysqlTable(
     subjekInfo: varchar("subjek_info", { length: 500 }).notNull(),
     deskripsiInfo: text("deskripsi_info").notNull(),
     tujuanInfo: text("tujuan_info"),
-    caraMendapat: mysqlEnum("cara_mendapat", ["email", "ambil_langsung", "pos"])
+    caraMemperolehInfo: mysqlEnum("cara_memperoleh_info", [
+      "melihat",
+      "membaca",
+      "mendengarkan",
+      "mencatat",
+    ]),
+    caraMendapat: mysqlEnum("cara_mendapat", [
+      "email",
+      "ambil_langsung",
+      "pos",
+      "faksimili",
+    ])
       .default("email")
       .notNull(),
     caraMedia: mysqlEnum("cara_media", ["softcopy", "hardcopy", "keduanya"])
@@ -778,6 +795,62 @@ export const ppidPermohonan = mysqlTable(
     statusIdx: index("ppid_perm_status_idx").on(t.status),
     emailIdx: index("ppid_perm_email_idx").on(t.email),
     nomorIdx: uniqueIndex("ppid_perm_nomor_idx").on(t.nomorPermohonan),
+  }),
+);
+
+// ── PPID: Keberatan Informasi Publik ──────────
+// Formulir keberatan online (Pasal 35 UU KIP No.14/2008) — dibutuhkan agar
+// checklist E-Monev Keterbukaan Informasi (Sarana Prasarana #1.10 & Pelayanan
+// Info #14) bisa dijawab "Ya" dengan bukti link formulir online.
+// Struktur mengikuti pola PPID DKI Jakarta: keberatan divalidasi terhadap
+// permohonan yang sudah ada (kode permohonan + NIK) sebelum bisa diajukan.
+export const ppidKeberatan = mysqlTable(
+  "ppid_keberatan",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    // Referensi ke permohonan yang divalidasi (soft reference, bukan FK keras
+    // agar permohonan tetap bisa dihapus tanpa memblokir data keberatan lama)
+    permohonanId: int("permohonan_id"),
+    kodePermohonan: varchar("kode_permohonan", { length: 50 }).notNull(),
+    // Snapshot identitas pemohon (disalin dari permohonan tervalidasi, agar
+    // data tetap utuh untuk audit walau permohonan aslinya kelak dihapus)
+    namaPemohon: varchar("nama_pemohon", { length: 255 }).notNull(),
+    nik: varchar("nik", { length: 20 }).notNull(),
+    email: varchar("email", { length: 255 }).notNull(),
+    noHp: varchar("no_hp", { length: 30 }),
+    alamat: text("alamat"),
+    // Keberatan
+    alasanKeberatan: json("alasan_keberatan").$type<string[]>().notNull(),
+    dikuasakan: boolean("dikuasakan").default(false),
+    namaKuasa: varchar("nama_kuasa", { length: 255 }), // diisi jika dikuasakan
+    uraianKeberatan: text("uraian_keberatan").notNull(), // kronologi
+    suratKeberatanUrl: varchar("surat_keberatan_url", { length: 1000 }).notNull(),
+    // Status & tracking
+    nomorKeberatan: varchar("nomor_keberatan", { length: 50 }),
+    status: mysqlEnum("status", [
+      "diterima",
+      "diproses",
+      "selesai",
+      "ditolak",
+      "diteruskan_ki",
+    ])
+      .default("diterima")
+      .notNull(),
+    catatan: text("catatan"), // catatan admin
+    jawabanUrl: varchar("jawaban_url", { length: 1000 }),
+    // Audit
+    createdAt: timestamp("created_at")
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updated_at")
+      .default(sql`CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`)
+      .notNull(),
+    selesaiAt: timestamp("selesai_at"),
+  },
+  (t) => ({
+    statusIdx: index("ppid_kbr_status_idx").on(t.status),
+    emailIdx: index("ppid_kbr_email_idx").on(t.email),
+    nomorIdx: uniqueIndex("ppid_kbr_nomor_idx").on(t.nomorKeberatan),
   }),
 );
 

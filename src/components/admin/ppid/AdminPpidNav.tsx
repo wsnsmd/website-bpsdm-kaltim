@@ -3,14 +3,24 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FileText, FolderOpen, Users } from "lucide-react";
+import { FileText, FolderOpen, AlertTriangle, Users } from "lucide-react";
 
 const TABS = [
   { href: "/admin/ppid", label: "Permohonan", icon: FileText },
   {
+    href: "/admin/ppid/keberatan",
+    label: "Keberatan",
+    icon: AlertTriangle,
+  },
+  {
     href: "/admin/ppid/informasi",
     label: "Informasi Publik",
     icon: FolderOpen,
+  },
+  {
+    href: "/admin/ppid/pejabat",
+    label: "Petugas",
+    icon: Users,
   },
 ];
 

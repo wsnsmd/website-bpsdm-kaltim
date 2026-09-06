@@ -105,7 +105,9 @@ const NAV: NavItem[] = [
     roles: ["superadmin", "admin"],
     children: [
       { href: "/admin/ppid", label: "Permohonan" },
+      { href: "/admin/ppid/keberatan", label: "Keberatan" },
       { href: "/admin/ppid/informasi", label: "Informasi Publik" },
+      { href: "/admin/ppid/pejabat", label: "Petugas" },
     ],
   },
   {

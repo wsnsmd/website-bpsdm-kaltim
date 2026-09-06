@@ -151,6 +151,8 @@ export function templateNotifAdmin(data: {
   deskripsi: string;
   caraMendapat: string;
   caraMedia: string;
+  kategoriPemohon?: string;
+  ktpUrl?: string | null;
   siteUrl: string;
 }): { subject: string; html: string } {
   const content = `
@@ -177,10 +179,12 @@ export function templateNotifAdmin(data: {
     <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
       ${[
         ["Nama", data.nama],
+        ["Kategori", data.kategoriPemohon === "badan_hukum" ? "Badan Hukum/Organisasi" : "Perorangan"],
         ["Email", data.email],
         ["No. HP", data.noHp ?? "—"],
         ["Cara Dapat", data.caraMendapat],
         ["Format Media", data.caraMedia],
+        ["KTP", data.ktpUrl ? "Terlampir" : "Tidak dilampirkan"],
       ]
         .map(
           ([label, value], i, arr) => `
@@ -318,5 +322,265 @@ export function templateUpdateStatus(data: {
   return {
     subject: `[PPID BPSDM] Status Permohonan ${data.nomor}: ${cfg.label}`,
     html: baseLayout(content, `Status Permohonan ${cfg.label}`),
+  };
+}
+
+// ── Label alasan keberatan (Pasal 35 UU KIP) ──
+const ALASAN_KEBERATAN_LABEL: Record<string, string> = {
+  penolakan_permohonan: "Penolakan atas permohonan informasi publik",
+  tidak_disediakan_berkala: "Tidak disediakannya informasi berkala",
+  tidak_ditanggapi: "Tidak ditanggapinya permohonan informasi publik",
+  ditanggapi_tidak_sebagaimana_mestinya:
+    "Permohonan ditanggapi tidak sebagaimana mestinya",
+  tidak_dipenuhi: "Tidak dipenuhinya permohonan informasi publik",
+  biaya_tidak_wajar: "Pengenaan biaya yang tidak wajar",
+  melebihi_jangka_waktu: "Penyampaian informasi melebihi jangka waktu",
+};
+
+// ── Email ke PEMOHON — konfirmasi keberatan diterima ──
+export function templateKonfirmasiKeberatan(data: {
+  nomor: string;
+  nama: string;
+  uraian: string;
+  siteUrl: string;
+}): { subject: string; html: string } {
+  const content = `
+    <h2 style="margin:0 0 8px;font-size:22px;font-weight:800;color:#111827;">
+      Keberatan Diterima ✓
+    </h2>
+    <p style="margin:0 0 24px;font-size:14px;color:#6b7280;line-height:1.6;">
+      Halo <strong>${data.nama}</strong>, keberatan atas layanan informasi publik Anda telah kami terima.
+    </p>
+
+    <!-- Nomor keberatan -->
+    <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:20px 24px;margin-bottom:24px;text-align:center;">
+      <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#dc2626;margin-bottom:6px;">
+        Nomor Keberatan Anda
+      </div>
+      <div style="font-size:28px;font-weight:900;color:${BRAND_COLOR};letter-spacing:2px;font-family:monospace;">
+        ${data.nomor}
+      </div>
+      <div style="font-size:12px;color:#6b7280;margin-top:6px;">
+        Simpan nomor ini untuk melacak status keberatan
+      </div>
+    </div>
+
+    <!-- Uraian -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+      <tr>
+        <td style="padding:10px 0;">
+          <span style="font-size:12px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:0.5px;">Uraian Keberatan</span><br/>
+          <span style="font-size:14px;color:#111827;font-weight:500;">${data.uraian}</span>
+        </td>
+      </tr>
+    </table>
+
+    <!-- CTA tracking -->
+    <div style="text-align:center;margin-bottom:24px;">
+      <a href="${data.siteUrl}/ppid/keberatan#tracking"
+        style="display:inline-block;padding:12px 28px;background:${BRAND_COLOR};color:#fff;border-radius:9px;text-decoration:none;font-size:14px;font-weight:700;">
+        Cek Status Keberatan
+      </a>
+    </div>
+
+    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:14px 16px;">
+      <p style="margin:0;font-size:13px;color:#92400e;line-height:1.6;">
+        <strong>ℹ️ Informasi:</strong> Atasan PPID akan memutus keberatan Anda paling lambat
+        30 hari kerja sejak diterima. Jika tidak puas dengan putusan, Anda berhak mengajukan
+        sengketa ke Komisi Informasi Kalimantan Timur.
+      </p>
+    </div>
+  `;
+
+  return {
+    subject: `[PPID BPSDM] Keberatan ${data.nomor} Diterima`,
+    html: baseLayout(content, "Konfirmasi Keberatan PPID"),
+  };
+}
+
+// ── Email ke ADMIN — notifikasi keberatan masuk ──
+export function templateNotifAdminKeberatan(data: {
+  nomor: string;
+  nama: string;
+  email: string;
+  noHp: string | null;
+  alasanKeberatan: string[];
+  uraian: string;
+  nomorPermohonanAsal: string | null;
+  dikuasakan?: boolean;
+  namaKuasa?: string | null;
+  suratKeberatanUrl?: string;
+  siteUrl: string;
+}): { subject: string; html: string } {
+  const alasanLabelList = data.alasanKeberatan
+    .map((a) => ALASAN_KEBERATAN_LABEL[a] ?? a)
+    .join(", ");
+
+  const content = `
+    <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px 16px;margin-bottom:24px;">
+      <strong style="color:#991b1b;font-size:13px;">⚠️ Keberatan Baru Masuk</strong>
+    </div>
+
+    <h2 style="margin:0 0 20px;font-size:20px;font-weight:800;color:#111827;">
+      ${alasanLabelList}
+    </h2>
+
+    <!-- Nomor -->
+    <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;">
+      <span style="font-size:13px;color:#dc2626;font-weight:600;">Nomor:</span>
+      <span style="font-size:16px;font-weight:900;color:${BRAND_COLOR};font-family:monospace;letter-spacing:1px;">
+        ${data.nomor}
+      </span>
+    </div>
+
+    <!-- Data pemohon -->
+    <h3 style="margin:0 0 12px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#9ca3af;">
+      Data Pemohon Keberatan
+    </h3>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
+      ${[
+        ["Nama", data.nama],
+        ["Email", data.email],
+        ["No. HP", data.noHp ?? "—"],
+        ["Kode Permohonan", data.nomorPermohonanAsal ?? "—"],
+        ["Dikuasakan", data.dikuasakan ? `Ya (${data.namaKuasa ?? "—"})` : "Tidak"],
+        ["Surat Keberatan", data.suratKeberatanUrl ? "Terlampir" : "—"],
+      ]
+        .map(
+          ([label, value], i, arr) => `
+        <tr style="background:${i % 2 === 0 ? "#fff" : "#f9fafb"};">
+          <td style="padding:10px 14px;font-size:12px;font-weight:600;color:#6b7280;width:170px;border-bottom:${i < arr.length - 1 ? "1px solid #f3f4f6" : "none"};">
+            ${label}
+          </td>
+          <td style="padding:10px 14px;font-size:13px;color:#111827;border-bottom:${i < arr.length - 1 ? "1px solid #f3f4f6" : "none"};">
+            ${value}
+          </td>
+        </tr>
+      `,
+        )
+        .join("")}
+    </table>
+
+    <!-- Uraian -->
+    <h3 style="margin:0 0 8px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#9ca3af;">
+      Uraian Keberatan
+    </h3>
+    <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:14px 16px;font-size:13px;color:#374151;line-height:1.7;margin-bottom:24px;">
+      ${data.uraian}
+    </div>
+
+    <!-- CTA admin -->
+    <div style="text-align:center;">
+      <a href="${data.siteUrl}/admin/ppid/keberatan"
+        style="display:inline-block;padding:12px 28px;background:${BRAND_COLOR};color:#fff;border-radius:9px;text-decoration:none;font-size:14px;font-weight:700;margin-right:8px;">
+        Buka Panel Admin
+      </a>
+    </div>
+  `;
+
+  return {
+    subject: `[PPID] Keberatan Baru: ${data.nomor} — ${data.nama}`,
+    html: baseLayout(content, "Notifikasi Keberatan PPID"),
+  };
+}
+
+// ── Email update status keberatan ke pemohon ──
+export function templateUpdateStatusKeberatan(data: {
+  nomor: string;
+  nama: string;
+  status: string;
+  catatan: string | null;
+  jawabanUrl: string | null;
+  siteUrl: string;
+}): { subject: string; html: string } {
+  const STATUS_CONFIG: Record<
+    string,
+    { label: string; color: string; bg: string; emoji: string }
+  > = {
+    diterima: {
+      label: "Diterima",
+      color: "#1d4ed8",
+      bg: "#eff6ff",
+      emoji: "📬",
+    },
+    diproses: {
+      label: "Diproses",
+      color: "#d97706",
+      bg: "#fffbeb",
+      emoji: "⚙️",
+    },
+    selesai: { label: "Selesai", color: "#16a34a", bg: "#f0fdf4", emoji: "✅" },
+    ditolak: { label: "Ditolak", color: "#dc2626", bg: "#fef2f2", emoji: "❌" },
+    diteruskan_ki: {
+      label: "Diteruskan ke Komisi Informasi",
+      color: "#7e22ce",
+      bg: "#fdf4ff",
+      emoji: "⚖️",
+    },
+  };
+
+  const cfg = STATUS_CONFIG[data.status] ?? STATUS_CONFIG.diproses;
+
+  const content = `
+    <h2 style="margin:0 0 8px;font-size:22px;font-weight:800;color:#111827;">
+      Update Status Keberatan ${cfg.emoji}
+    </h2>
+    <p style="margin:0 0 24px;font-size:14px;color:#6b7280;">
+      Halo <strong>${data.nama}</strong>, ada pembaruan status untuk keberatan Anda.
+    </p>
+
+    <div style="font-size:13px;color:#6b7280;margin-bottom:8px;">Nomor Keberatan:</div>
+    <div style="font-size:20px;font-weight:900;color:${BRAND_COLOR};font-family:monospace;letter-spacing:1px;margin-bottom:20px;">
+      ${data.nomor}
+    </div>
+
+    <div style="background:${cfg.bg};border:1px solid ${cfg.color}30;border-radius:10px;padding:16px 20px;margin-bottom:20px;display:inline-block;width:100%;box-sizing:border-box;">
+      <div style="font-size:12px;color:${cfg.color};font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">
+        Status Terkini
+      </div>
+      <div style="font-size:22px;font-weight:900;color:${cfg.color};">
+        ${cfg.emoji} ${cfg.label}
+      </div>
+    </div>
+
+    ${
+      data.catatan
+        ? `
+    <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:14px 16px;margin-bottom:20px;">
+      <div style="font-size:12px;font-weight:700;color:#9ca3af;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">
+        Catatan dari PPID
+      </div>
+      <div style="font-size:13.5px;color:#374151;line-height:1.65;">
+        ${data.catatan}
+      </div>
+    </div>
+    `
+        : ""
+    }
+
+    ${
+      data.jawabanUrl
+        ? `
+    <div style="text-align:center;margin-bottom:20px;">
+      <a href="${data.jawabanUrl}"
+        style="display:inline-block;padding:12px 28px;background:#16a34a;color:#fff;border-radius:9px;text-decoration:none;font-size:14px;font-weight:700;">
+        📎 Unduh Dokumen Putusan
+      </a>
+    </div>
+    `
+        : ""
+    }
+
+    <div style="text-align:center;">
+      <a href="${data.siteUrl}/ppid/keberatan#tracking"
+        style="display:inline-block;padding:10px 22px;border:1px solid ${BRAND_COLOR};color:${BRAND_COLOR};border-radius:9px;text-decoration:none;font-size:13px;font-weight:700;">
+        Cek Status Lengkap
+      </a>
+    </div>
+  `;
+
+  return {
+    subject: `[PPID BPSDM] Status Keberatan ${data.nomor}: ${cfg.label}`,
+    html: baseLayout(content, `Status Keberatan ${cfg.label}`),
   };
 }

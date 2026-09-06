@@ -6,6 +6,7 @@ import { db, eq } from "@/db";
 import { ppidPermohonan } from "@/db/schema";
 import { ArrowLeft } from "lucide-react";
 import { UpdatePermohonanForm } from "@/components/admin/ppid/UpdatePermohonanForm";
+import { DeletePermohonanDetailButton } from "@/components/admin/ppid/DeletePermohonanDetailButton";
 
 export const metadata: Metadata = { title: "Detail Permohonan PPID" };
 // PM2 cluster mode (2+ instance) -> Full Route Cache tidak sinkron antar-proses.
@@ -19,6 +20,26 @@ const STATUS_COLOR: Record<string, string> = {
   selesai: "#16a34a",
   ditolak: "#dc2626",
   banding: "#7e22ce",
+};
+
+const CARA_MEMPEROLEH_LABEL: Record<string, string> = {
+  melihat: "Melihat",
+  membaca: "Membaca",
+  mendengarkan: "Mendengarkan",
+  mencatat: "Mencatat",
+};
+
+const CARA_MENDAPAT_LABEL: Record<string, string> = {
+  ambil_langsung: "Mengambil Langsung",
+  faksimili: "Faksimili",
+  email: "Melalui Email",
+  pos: "Dikirim via Pos",
+};
+
+const CARA_MEDIA_LABEL: Record<string, string> = {
+  softcopy: "Softcopy (Digital)",
+  hardcopy: "Hardcopy (Cetak)",
+  keduanya: "Keduanya",
 };
 
 export default async function DetailPermohonanPage({ params }: Props) {
@@ -36,6 +57,13 @@ export default async function DetailPermohonanPage({ params }: Props) {
   const p = result[0];
 
   const INFO_ROWS = [
+    {
+      label: "Kategori Pemohon",
+      value:
+        p.kategoriPemohon === "badan_hukum"
+          ? `Badan Hukum/Organisasi — ${p.namaInstansi ?? "—"}`
+          : "Perorangan",
+    },
     { label: "Nama Pemohon", value: p.namaPemohon },
     { label: "NIK", value: p.nik ?? "—" },
     { label: "Email", value: p.email },
@@ -43,8 +71,20 @@ export default async function DetailPermohonanPage({ params }: Props) {
     { label: "Pekerjaan", value: p.pekerjaan ?? "—" },
     { label: "Alamat", value: p.alamat ?? "—" },
     { label: "Subjek Informasi", value: p.subjekInfo },
-    { label: "Cara Mendapat", value: p.caraMendapat },
-    { label: "Format Media", value: p.caraMedia },
+    {
+      label: "Cara Memperoleh Info",
+      value: p.caraMemperolehInfo
+        ? (CARA_MEMPEROLEH_LABEL[p.caraMemperolehInfo] ?? p.caraMemperolehInfo)
+        : "—",
+    },
+    {
+      label: "Cara Mendapat Salinan",
+      value: CARA_MENDAPAT_LABEL[p.caraMendapat] ?? p.caraMendapat,
+    },
+    {
+      label: "Format Media",
+      value: CARA_MEDIA_LABEL[p.caraMedia] ?? p.caraMedia,
+    },
     {
       label: "Tanggal Masuk",
       value: new Date(p.createdAt).toLocaleDateString("id-ID", {
@@ -94,9 +134,12 @@ export default async function DetailPermohonanPage({ params }: Props) {
             {p.status.charAt(0).toUpperCase() + p.status.slice(1)}
           </span>
         </div>
-        <Link href="/admin/ppid" className="admin-btn-cancel">
-          <ArrowLeft size={14} /> Kembali
-        </Link>
+        <div style={{ display: "flex", gap: "8px" }}>
+          <DeletePermohonanDetailButton id={p.id} />
+          <Link href="/admin/ppid" className="admin-btn-cancel">
+            <ArrowLeft size={14} /> Kembali
+          </Link>
+        </div>
       </div>
 
       {/* Content */}
@@ -226,6 +269,32 @@ export default async function DetailPermohonanPage({ params }: Props) {
                   >
                     {p.tujuanInfo}
                   </div>
+                </div>
+              )}
+
+              {p.ktpUrl && (
+                <div>
+                  <div
+                    style={{
+                      fontSize: "11px",
+                      fontWeight: 700,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.5px",
+                      color: "var(--color-ink-4)",
+                      marginBottom: "6px",
+                    }}
+                  >
+                    Berkas KTP
+                  </div>
+                  <a
+                    href={p.ktpUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="admin-btn-cancel"
+                    style={{ display: "inline-flex" }}
+                  >
+                    Lihat KTP
+                  </a>
                 </div>
               )}
             </div>

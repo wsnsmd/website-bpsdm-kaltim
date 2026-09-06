@@ -1,15 +1,16 @@
-// src/app/admin/ppid/page.tsx
+// src/app/admin/ppid/keberatan/page.tsx
 import type { Metadata } from "next";
 import Link from "next/link";
-import { db, eq, count, desc } from "@/db";
-import { ppidPermohonan } from "@/db/schema";
-import { Plus, Eye, FileText, Clock } from "lucide-react";
-import { DeletePermohonanButton } from "@/components/admin/ppid/DeletePermohonanButton";
+import { db, count, desc } from "@/db";
+import { ppidKeberatan } from "@/db/schema";
+import { Plus, Eye, AlertTriangle, Clock } from "lucide-react";
+import { DeleteKeberatanButton } from "@/components/admin/ppid/DeleteKeberatanButton";
 
-export const metadata: Metadata = { title: "Permohonan PPID" };
+export const metadata: Metadata = { title: "Keberatan PPID" };
 // PM2 cluster mode (2+ instance) -> Full Route Cache tidak sinkron antar-proses.
 // force-dynamic memastikan halaman ini selalu query fresh dari DB.
 export const dynamic = "force-dynamic";
+
 const STATUS_CONFIG: Record<
   string,
   { label: string; cls: string; color: string; bg: string }
@@ -38,29 +39,29 @@ const STATUS_CONFIG: Record<
     color: "#dc2626",
     bg: "#fef2f2",
   },
-  banding: {
-    label: "Banding",
+  diteruskan_ki: {
+    label: "Diteruskan ke KI",
     cls: "status-pill-draft",
     color: "#7e22ce",
     bg: "#fdf4ff",
   },
 };
 
-export default async function AdminPpidPage() {
-  const [permohonan, stats] = await Promise.all([
+export default async function AdminKeberatanPage() {
+  const [keberatan, stats] = await Promise.all([
     db
       .select()
-      .from(ppidPermohonan)
-      .orderBy(desc(ppidPermohonan.createdAt))
+      .from(ppidKeberatan)
+      .orderBy(desc(ppidKeberatan.createdAt))
       .limit(50),
     db
-      .select({ status: ppidPermohonan.status, total: count() })
-      .from(ppidPermohonan)
-      .groupBy(ppidPermohonan.status),
+      .select({ status: ppidKeberatan.status, total: count() })
+      .from(ppidKeberatan)
+      .groupBy(ppidKeberatan.status),
   ]);
 
   const statMap = Object.fromEntries(stats.map((s) => [s.status, s.total]));
-  const totalPermohonan = permohonan.length;
+  const totalKeberatan = keberatan.length;
 
   return (
     <>
@@ -76,7 +77,7 @@ export default async function AdminPpidPage() {
         {[
           {
             label: "Total",
-            value: totalPermohonan,
+            value: totalKeberatan,
             color: "var(--color-forest-700)",
             bg: "var(--color-forest-50)",
           },
@@ -136,11 +137,11 @@ export default async function AdminPpidPage() {
       <div className="admin-card">
         <div className="admin-card-head">
           <div className="admin-card-title">
-            <FileText size={15} />
-            Daftar Permohonan Informasi
+            <AlertTriangle size={15} />
+            Daftar Keberatan
           </div>
           <span style={{ fontSize: "12px", color: "var(--color-ink-4)" }}>
-            {totalPermohonan} permohonan
+            {totalKeberatan} keberatan
           </span>
         </div>
         <div className="admin-table-wrap">
@@ -149,14 +150,14 @@ export default async function AdminPpidPage() {
               <tr>
                 <th>Nomor</th>
                 <th>Pemohon</th>
-                <th>Subjek Informasi</th>
+                <th>Alasan</th>
                 <th style={{ width: "110px" }}>Tanggal</th>
-                <th style={{ width: "100px" }}>Status</th>
+                <th style={{ width: "130px" }}>Status</th>
                 <th style={{ width: "150px" }}>Aksi</th>
               </tr>
             </thead>
             <tbody>
-              {permohonan.length === 0 && (
+              {keberatan.length === 0 && (
                 <tr>
                   <td
                     colSpan={6}
@@ -166,17 +167,17 @@ export default async function AdminPpidPage() {
                       color: "var(--color-ink-4)",
                     }}
                   >
-                    Belum ada permohonan masuk.
+                    Belum ada keberatan masuk.
                   </td>
                 </tr>
               )}
-              {permohonan.map((p) => {
-                const cfg = STATUS_CONFIG[p.status] ?? STATUS_CONFIG.diterima;
+              {keberatan.map((k) => {
+                const cfg = STATUS_CONFIG[k.status] ?? STATUS_CONFIG.diterima;
                 return (
                   <tr
-                    key={p.id}
+                    key={k.id}
                     style={{
-                      background: p.status === "diterima" ? "#fffbf0" : "#fff",
+                      background: k.status === "diterima" ? "#fffbf0" : "#fff",
                     }}
                   >
                     <td>
@@ -190,9 +191,9 @@ export default async function AdminPpidPage() {
                           fontFamily: "monospace",
                         }}
                       >
-                        {p.nomorPermohonan}
+                        {k.nomorKeberatan}
                       </code>
-                      {p.status === "diterima" && (
+                      {k.status === "diterima" && (
                         <span
                           style={{
                             display: "inline-flex",
@@ -214,7 +215,7 @@ export default async function AdminPpidPage() {
                     </td>
                     <td>
                       <div style={{ fontWeight: 600, fontSize: "13px" }}>
-                        {p.namaPemohon}
+                        {k.namaPemohon}
                       </div>
                       <div
                         style={{
@@ -222,7 +223,7 @@ export default async function AdminPpidPage() {
                           color: "var(--color-ink-4)",
                         }}
                       >
-                        {p.email}
+                        {k.email}
                       </div>
                     </td>
                     <td
@@ -234,12 +235,14 @@ export default async function AdminPpidPage() {
                         fontSize: "13px",
                       }}
                     >
-                      {p.subjekInfo}
+                      {k.alasanKeberatan
+                        .map((a) => a.replaceAll("_", " "))
+                        .join(", ")}
                     </td>
                     <td
                       style={{ fontSize: "12px", color: "var(--color-ink-4)" }}
                     >
-                      {new Date(p.createdAt).toLocaleDateString("id-ID", {
+                      {new Date(k.createdAt).toLocaleDateString("id-ID", {
                         day: "numeric",
                         month: "short",
                         year: "numeric",
@@ -253,12 +256,12 @@ export default async function AdminPpidPage() {
                     <td>
                       <div style={{ display: "flex", gap: "6px" }}>
                         <Link
-                          href={`/admin/ppid/${p.id}`}
+                          href={`/admin/ppid/keberatan/${k.id}`}
                           className="admin-table-btn admin-table-btn-view"
                         >
                           <Eye size={13} /> Detail
                         </Link>
-                        <DeletePermohonanButton id={p.id} />
+                        <DeleteKeberatanButton id={k.id} />
                       </div>
                     </td>
                   </tr>

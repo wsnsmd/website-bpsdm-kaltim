@@ -83,14 +83,14 @@ const PEJABAT = [
   },
   {
     nama: "Sari Dewi, S.Sos",
-    jabatan: "PPID Pembantu Bidang Teknis",
+    jabatan: "PPID Pelaksana Bidang Teknis",
     tipe: "pembantu" as const,
     sortOrder: 2,
     isActive: true,
   },
   {
     nama: "Budi Santoso, S.H",
-    jabatan: "PPID Pembantu Bidang Administrasi",
+    jabatan: "PPID Pelaksana Bidang Administrasi",
     tipe: "pembantu" as const,
     sortOrder: 3,
     isActive: true,

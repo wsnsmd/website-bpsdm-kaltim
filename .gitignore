@@ -42,3 +42,4 @@ next-env.d.ts
 .env.local
 public/uploads/images/*
 public/uploads/thumbnails/*
+public/uploads/ppid-submissions/*

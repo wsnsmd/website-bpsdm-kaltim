@@ -2,6 +2,8 @@
 import type { Metadata } from "next";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { PpidPageContent } from "@/components/ppid/PpidPageContent";
+import { KeberatanFormClient } from "@/components/ppid/KeberatanFormClient";
+import { KeberatanTrackClient } from "@/components/ppid/KeberatanTrackClient";
 import { AlertTriangle, Scale, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
@@ -135,6 +137,57 @@ export default function KeberatanPage() {
           title="Prosedur Keberatan & Sengketa"
           fallback="Prosedur keberatan dan sengketa belum diisi"
         />
+
+        {/* Formulir Keberatan Online */}
+        <div
+          style={{
+            background: "#fff",
+            borderRadius: "14px",
+            border: "1px solid var(--color-ink-6)",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              padding: "16px 22px",
+              borderBottom: "1px solid var(--color-ink-7)",
+              fontSize: "16px",
+              fontWeight: 700,
+              color: "var(--color-ink)",
+            }}
+          >
+            Formulir Keberatan Online
+          </div>
+          <div style={{ padding: "24px 22px" }}>
+            <KeberatanFormClient />
+          </div>
+        </div>
+
+        {/* Tracking Keberatan */}
+        <div
+          id="tracking"
+          style={{
+            background: "#fff",
+            borderRadius: "14px",
+            border: "1px solid var(--color-ink-6)",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              padding: "16px 22px",
+              borderBottom: "1px solid var(--color-ink-7)",
+              fontSize: "16px",
+              fontWeight: 700,
+              color: "var(--color-ink)",
+            }}
+          >
+            Cek Status Keberatan
+          </div>
+          <div style={{ padding: "24px 22px" }}>
+            <KeberatanTrackClient />
+          </div>
+        </div>
 
         {/* Link Komisi Informasi */}
         <div

@@ -1,9 +1,15 @@
 // src/lib/queries/ppid.ts
 import { db, eq, and, desc, asc, sql, like, or } from "@/db";
-import { ppidInformasi, ppidPermohonan, ppidPejabat } from "@/db/schema";
+import {
+  ppidInformasi,
+  ppidPermohonan,
+  ppidKeberatan,
+  ppidPejabat,
+} from "@/db/schema";
 
 export type PpidInformasiItem = typeof ppidInformasi.$inferSelect;
 export type PpidPermohonanItem = typeof ppidPermohonan.$inferSelect;
+export type PpidKeberatanItem = typeof ppidKeberatan.$inferSelect;
 export type PpidPejabatItem = typeof ppidPejabat.$inferSelect;
 
 export type PpidTipe =
@@ -59,6 +65,34 @@ export async function getAllPermohonan(
     .from(ppidPermohonan)
     .where(status ? eq(ppidPermohonan.status, status as any) : undefined)
     .orderBy(desc(ppidPermohonan.createdAt))
+    .limit(limit)
+    .offset(offset);
+}
+
+// Keberatan by nomor (untuk tracking publik)
+export async function getKeberatanByNomor(nomor: string) {
+  const result = await db
+    .select()
+    .from(ppidKeberatan)
+    .where(eq(ppidKeberatan.nomorKeberatan, nomor))
+    .limit(1);
+  return result[0] ?? null;
+}
+
+// Semua keberatan (admin)
+export async function getAllKeberatan(
+  options: {
+    status?: string;
+    limit?: number;
+    offset?: number;
+  } = {},
+) {
+  const { status, limit = 20, offset = 0 } = options;
+  return db
+    .select()
+    .from(ppidKeberatan)
+    .where(status ? eq(ppidKeberatan.status, status as any) : undefined)
+    .orderBy(desc(ppidKeberatan.createdAt))
     .limit(limit)
     .offset(offset);
 }
