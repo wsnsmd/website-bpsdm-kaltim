@@ -7767,6 +7767,20 @@ main > *:not(.hero-root) {
   gap: 12px;
 }
 
+/* Kartu statistik layanan (angka besar + bar proporsi) 2 kolom */
+.ppid-layanan-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(140px, 200px) 1fr;
+  gap: 32px;
+  align-items: center;
+}
+
+/* Strip keberatan 4 kolom dengan pembatas tipis */
+.ppid-kbr-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+
 /* ── Tablet 1024px ── */
 @media (max-width: 1024px) {
   /* Sidebar hilang */
@@ -7830,6 +7844,29 @@ main > *:not(.hero-root) {
   .ppid-cta-grid {
     grid-template-columns: 1fr;
     gap: 8px;
+  }
+
+  /* Panel hero jadi 1 kolom (angka di atas, bar di bawah) */
+  .ppid-layanan-hero-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  /* Strip keberatan 2 kolom di tablet/mobile */
+  .ppid-kbr-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .ppid-kbr-strip > div:nth-child(2) {
+    border-right: none !important;
+  }
+
+  .ppid-kbr-strip > div:nth-child(3) {
+    border-top: 1px solid var(--color-ink-7);
+  }
+
+  .ppid-kbr-strip > div:nth-child(4) {
+    border-top: 1px solid var(--color-ink-7);
   }
 }
 

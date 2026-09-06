@@ -5,6 +5,7 @@ import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { getPpidInformasi } from "@/lib/queries/ppid";
 import { Download, ExternalLink, FileText, BarChart2 } from "lucide-react";
 import { formatFileSize } from "@/components/ui/FileIcon";
+import { PpidLayananStats } from "@/components/ppid/PpidLayananStats";
 
 export const metadata: Metadata = {
   title: "Laporan Tahunan PPID",
@@ -13,7 +14,18 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function LaporanTahunanPage() {
+// Data permohonan/keberatan berubah tiap ada layanan baru — jangan
+// dibiarkan ke-cache statis (lihat gotcha Full Route Cache di proyek ini).
+export const revalidate = 3600;
+
+type Props = {
+  searchParams: Promise<{ tahun?: string }>;
+};
+
+export default async function LaporanTahunanPage({ searchParams }: Props) {
+  const params = await searchParams;
+  const tahunFilter = params.tahun ? Number(params.tahun) : undefined;
+
   // Ambil informasi berkala sebagai laporan tahunan
   const laporan = await getPpidInformasi({ tipe: "berkala", limit: 200 });
 
@@ -73,6 +85,12 @@ export default async function LaporanTahunanPage() {
             </div>
           </div>
         </div>
+
+        {/* Statistik layanan permohonan & keberatan (otomatis dari sistem) */}
+        <PpidLayananStats
+          tahun={tahunFilter}
+          basePath="/ppid/laporan-tahunan"
+        />
 
         {/* Daftar per tahun */}
         {tahunList.length === 0 ? (
