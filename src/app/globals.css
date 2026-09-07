@@ -2910,6 +2910,22 @@
     padding: 0 10px;
     font-size: 12px;
   }
+  .tiptap-image-url-btn {
+    width: auto;
+    padding: 0 8px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .tiptap-image-spinner {
+    width: 13px;
+    height: 13px;
+    border: 2px solid var(--color-ink-6);
+    border-top-color: var(--color-forest-600);
+    border-radius: 50%;
+    display: inline-block;
+    animation: spin 0.7s linear infinite;
+  }
   .tiptap-select {
     height: 32px;
     padding: 0 8px;

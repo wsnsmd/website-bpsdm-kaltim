@@ -50,7 +50,13 @@ export function PageForm({ page }: Props) {
   const [showInNav, setShowInNav] = useState(page?.showInNav ?? false);
   const [title, setTitle] = useState(page?.title ?? "");
   const [slug, setSlug] = useState(page?.slug ?? "");
-  const [isAutoSlug, setIsAutoSlug] = useState(true);
+  // BUG LAMA: ini selalu true, jadi tiap buka form EDIT halaman yang
+  // slug-nya sudah di-custom manual, begitu render pertama jalan efek
+  // di bawah langsung menimpa slug dari judul — walau user tidak
+  // mengetik apa pun. Sekarang: mode auto hanya default aktif untuk
+  // halaman BARU; saat edit halaman yang sudah ada, defaultnya manual
+  // supaya slug custom tidak pernah tertimpa diam-diam.
+  const [isAutoSlug, setIsAutoSlug] = useState(!isEdit);
 
   // Auto-generate slug ketika title berubah (jika mode auto aktif)
   useEffect(() => {
@@ -212,7 +218,14 @@ export function PageForm({ page }: Props) {
                         value={slug}
                         onChange={(e) => {
                           setSlug(e.target.value);
-                          if (!isAutoSlug) setIsAutoSlug(false);
+                          // BUG LAMA: `if (!isAutoSlug) setIsAutoSlug(false)`
+                          // adalah no-op saat isAutoSlug masih true (kondisi
+                          // false && ...), jadi mengetik manual di sini TIDAK
+                          // benar-benar mematikan mode auto — akibatnya
+                          // keystroke judul berikutnya menimpa lagi slug yang
+                          // baru saja diketik manual. Sekarang selalu
+                          // dimatikan begitu user mengetik langsung di sini.
+                          setIsAutoSlug(false);
                         }}
                         required
                       />

@@ -3,6 +3,7 @@
 
 import type { Editor } from "@tiptap/react";
 import { useState, useCallback, useRef, useEffect } from "react";
+import { MediaLibrary } from "../MediaLibrary";
 
 type Props = { editor: Editor };
 
@@ -53,8 +54,12 @@ export function EditorToolbar({ editor }: Props) {
   const [linkUrl, setLinkUrl] = useState("");
   const [showYt, setShowYt] = useState(false);
   const [ytUrl, setYtUrl] = useState("");
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [showMediaLibrary, setShowMediaLibrary] = useState(false);
   const linkInputRef = useRef<HTMLInputElement>(null);
   const ytInputRef = useRef<HTMLInputElement>(null);
+  const imageFileInputRef = useRef<HTMLInputElement>(null);
 
   // Focus input saat panel muncul
   useEffect(() => {
@@ -110,9 +115,46 @@ export function EditorToolbar({ editor }: Props) {
   };
 
   const insertImage = () => {
-    const url = window.prompt("Masukkan URL gambar:");
+    setUploadError(null);
+    imageFileInputRef.current?.click();
+  };
+
+  const insertImageByUrl = () => {
+    const url = window.prompt("Atau masukkan URL gambar (kalau gambar sudah ada di internet):");
     if (url?.trim()) {
       editor.chain().focus().setImage({ src: url.trim() }).run();
+    }
+  };
+
+  const handlePickFromLibrary = (url: string) => {
+    editor.chain().focus().setImage({ src: url }).run();
+  };
+
+  const handleImageFileSelected = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // reset supaya file yang sama bisa dipilih lagi
+    if (!file) return;
+
+    setUploadingImage(true);
+    setUploadError(null);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setUploadError(data.error ?? "Upload gambar gagal.");
+        return;
+      }
+
+      editor.chain().focus().setImage({ src: data.url }).run();
+    } catch {
+      setUploadError("Koneksi bermasalah, coba lagi.");
+    } finally {
+      setUploadingImage(false);
     }
   };
 
@@ -170,7 +212,6 @@ export function EditorToolbar({ editor }: Props) {
                   ? "h3"
                   : "p"
           }
-          onMouseDown={(e) => e.preventDefault()}
           onChange={(e) => {
             const v = e.target.value;
             if (v === "p") {
@@ -380,6 +421,24 @@ export function EditorToolbar({ editor }: Props) {
             <line x1="6" y1="18" x2="21" y2="18" />
           </svg>
         </Btn>
+        <Btn
+          onClick={() => editor.chain().focus().setTextAlign("justify").run()}
+          active={editor.isActive({ textAlign: "justify" })}
+          title="Rata Kiri-Kanan (Justify)"
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+        </Btn>
 
         <Sep />
 
@@ -441,8 +500,42 @@ export function EditorToolbar({ editor }: Props) {
           </svg>
         </Btn>
 
-        {/* Gambar */}
-        <Btn onClick={insertImage} title="Insert Gambar dari URL">
+        {/* Gambar — upload dari komputer, atau klik kanan menu untuk via URL */}
+        <Btn
+          onClick={insertImage}
+          disabled={uploadingImage}
+          title="Upload Gambar dari Komputer (klik kanan/tahan: masukkan via URL)"
+        >
+          {uploadingImage ? (
+            <span className="tiptap-image-spinner" aria-hidden="true" />
+          ) : (
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <polyline points="21 15 16 10 5 21" />
+            </svg>
+          )}
+        </Btn>
+        <input
+          ref={imageFileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif"
+          style={{ display: "none" }}
+          onChange={handleImageFileSelected}
+        />
+        {/* Pilih gambar yang sudah pernah diupload sebelumnya — tidak
+            perlu upload ulang file yang sama. */}
+        <Btn
+          onClick={() => setShowMediaLibrary(true)}
+          title="Pilih dari Library (gambar yang sudah pernah diupload)"
+        >
           <svg
             width="14"
             height="14"
@@ -451,11 +544,24 @@ export function EditorToolbar({ editor }: Props) {
             stroke="currentColor"
             strokeWidth="2"
           >
-            <rect x="3" y="3" width="18" height="18" rx="2" />
-            <circle cx="8.5" cy="8.5" r="1.5" />
-            <polyline points="21 15 16 10 5 21" />
+            <rect x="3" y="3" width="7" height="7" rx="1" />
+            <rect x="14" y="3" width="7" height="7" rx="1" />
+            <rect x="3" y="14" width="7" height="7" rx="1" />
+            <rect x="14" y="14" width="7" height="7" rx="1" />
           </svg>
         </Btn>
+        {/* Tombol kecil khusus untuk gambar yang sudah punya URL (mis. dari situs lain) */}
+        <button
+          type="button"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            insertImageByUrl();
+          }}
+          title="Insert Gambar via URL"
+          className="tiptap-btn tiptap-image-url-btn"
+        >
+          URL
+        </button>
 
         {/* YouTube */}
         <Btn onClick={openYt} active={showYt} title="Embed Video YouTube">
@@ -527,6 +633,49 @@ export function EditorToolbar({ editor }: Props) {
       </div>
 
       {/* ── Panel Link ── */}
+      {uploadError && (
+        <div
+          style={{
+            display: "flex",
+            gap: "8px",
+            padding: "8px 12px",
+            background: "#fef2f2",
+            borderBottom: "1px solid #fecaca",
+            alignItems: "center",
+            fontSize: "12.5px",
+            color: "#b91c1c",
+          }}
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            style={{ flexShrink: 0 }}
+          >
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          {uploadError}
+          <button
+            type="button"
+            onClick={() => setUploadError(null)}
+            style={{
+              marginLeft: "auto",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: "#b91c1c",
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {showLink && (
         <div
           style={{
@@ -676,6 +825,13 @@ export function EditorToolbar({ editor }: Props) {
             Batal
           </button>
         </div>
+      )}
+
+      {showMediaLibrary && (
+        <MediaLibrary
+          onSelect={handlePickFromLibrary}
+          onClose={() => setShowMediaLibrary(false)}
+        />
       )}
     </div>
   );

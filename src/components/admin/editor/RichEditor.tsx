@@ -3,7 +3,7 @@
 
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { Image } from "@tiptap/extension-image";
+import { CustomImage } from "./CustomImage";
 import { Link } from "@tiptap/extension-link";
 import { Placeholder } from "@tiptap/extension-placeholder";
 import { CharacterCount } from "@tiptap/extension-character-count";
@@ -55,7 +55,7 @@ export function RichEditor({
       // Extensions tambahan (tidak ada di StarterKit)
       Highlight.configure({ multicolor: false }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
-      Image.configure({
+      CustomImage.configure({
         HTMLAttributes: { class: "editor-image" },
       }),
       Placeholder.configure({ placeholder }),

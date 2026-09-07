@@ -40,6 +40,10 @@ const PPID_MENU = [
     href: "/ppid/keberatan",
     children: [
       { label: "Mekanisme Keberatan", href: "/ppid/keberatan" },
+      {
+        label: "Pengaduan Pelanggaran",
+        href: "/ppid/pengaduan-pelanggaran",
+      },
       { label: "Regulasi", href: "/ppid/regulasi" },
     ],
   },
