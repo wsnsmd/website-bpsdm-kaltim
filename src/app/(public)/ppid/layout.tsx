@@ -7,7 +7,10 @@ export default function PpidLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
+    // id ini jadi target zoom (ukuran teks), kontras tinggi, garis bawah
+    // tautan & hentikan animasi dari menu aksesibilitas — lihat
+    // PpidAccessibilityMenu.tsx
+    <div id="ppid-a11y-scope">
       {/* Header PPID menggantikan header utama */}
       <PpidHeader />
       {/* Content */}
@@ -19,9 +22,9 @@ export default function PpidLayout({
         }}
       >
         <div className="container-content">
-          <main>{children}</main>
+          <main id="ppid-main-content">{children}</main>
         </div>
       </div>
-    </>
+    </div>
   );
 }

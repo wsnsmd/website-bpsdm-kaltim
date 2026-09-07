@@ -5,7 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Shield, ChevronDown, ArrowLeft, Menu, X } from "lucide-react";
+import { ChevronDown, ArrowLeft, Menu, X } from "lucide-react";
+import { PpidAccessibilityMenu } from "./PpidAccessibilityMenu";
 
 const PPID_MENU = [
   {
@@ -157,6 +158,8 @@ export function PpidHeader() {
           </Link>
 
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <PpidAccessibilityMenu />
+
             <Link
               href="/web"
               style={{
