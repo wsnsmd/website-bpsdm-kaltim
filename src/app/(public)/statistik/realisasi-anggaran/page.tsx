@@ -147,11 +147,11 @@ function KpiCell({
 }) {
   return (
     <div style={{ padding: "18px 20px" }}>
-      <div style={{ fontSize: "11px", color: "var(--color-ink-4)" }}>{label}</div>
+      <div style={{ fontSize: "11px", color: "var(--color-ink-2)" }}>{label}</div>
       <div
         style={{
           fontSize: "17px",
-          fontWeight: 700,
+          fontWeight: 800,
           color: valueColor ?? "var(--color-ink)",
           marginTop: "5px",
           lineHeight: 1.2,
@@ -161,7 +161,7 @@ function KpiCell({
         {value}
       </div>
       {sub && (
-        <div style={{ fontSize: "10.5px", color: "var(--color-ink-5)", marginTop: "6px" }}>
+        <div style={{ fontSize: "10.5px", color: "var(--color-ink-3)", marginTop: "6px" }}>
           {sub}
         </div>
       )}
@@ -181,7 +181,7 @@ function DevItem({
 }) {
   return (
     <div>
-      <div style={{ fontSize: "10.5px", color: "var(--color-ink-5)" }}>{label}</div>
+      <div style={{ fontSize: "10.5px", color: "var(--color-ink-3)" }}>{label}</div>
       <div
         style={{
           fontSize: "15px",
@@ -253,13 +253,13 @@ function KegiatanRows({ keg }: { keg: SiraKegiatanWithSub }) {
         >
           <td style={{ ...tdStyle, paddingLeft: "38px", color: "var(--color-ink-3)", whiteSpace: "normal" }}>
             <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-              <ChevronRight size={11} color="var(--color-ink-5)" />
+              <ChevronRight size={11} color="var(--color-ink-4)" />
               {sub.nama}
             </span>
             <div
               style={{
                 fontSize: "10px",
-                color: "var(--color-ink-5)",
+                color: "var(--color-ink-4)",
                 fontFamily: "monospace",
                 marginLeft: "15px",
                 marginTop: "2px",
@@ -397,7 +397,7 @@ function RealisasiAnggaranContent({
                 <div
                   style={{
                     fontSize: "11px",
-                    color: "rgba(255,255,255,0.38)",
+                    color: "rgba(255,255,255,0.8)",
                     marginTop: "2px",
                   }}
                 >
@@ -428,22 +428,13 @@ function RealisasiAnggaranContent({
 
           <div className="sira-hero-grid">
             <div>
-              <div
-                style={{
-                  fontSize: "68px",
-                  fontWeight: 900,
-                  color: "#fff",
-                  lineHeight: 1,
-                  letterSpacing: "-2px",
-                  fontVariantNumeric: "tabular-nums",
-                }}
-              >
+              <div className="sira-hero-number">
                 {fmtPersen(summary.persenKeuangan)}%
               </div>
               <div
                 style={{
                   fontSize: "12px",
-                  color: "rgba(255,255,255,0.45)",
+                  color: "rgba(255,255,255,0.8)",
                   marginTop: "10px",
                 }}
               >
@@ -452,11 +443,11 @@ function RealisasiAnggaranContent({
               <div
                 style={{
                   fontSize: "11px",
-                  color: "rgba(255,255,255,0.28)",
+                  color: "rgba(255,255,255,0.8)",
                   marginTop: "3px",
                 }}
               >
-                Periode {bulanNama} {summary.tahun}
+                Periode <span style={{ fontWeight: 700 }}>{bulanNama} {summary.tahun}</span>
               </div>
             </div>
 
@@ -483,7 +474,7 @@ function RealisasiAnggaranContent({
                     gap: "16px",
                   }}
                 >
-                  <span style={{ fontSize: "11.5px", color: "rgba(255,255,255,0.42)" }}>
+                  <span style={{ fontSize: "11.5px", color: "rgba(255,255,255,0.8)", fontWeight: 800 }}>
                     {label}
                   </span>
                   <span
@@ -530,19 +521,7 @@ function RealisasiAnggaranContent({
       </div>
 
       {/* ── 3. Target & Deviasi ─────────────────────────────────────────── */}
-      <div
-        style={{
-          background: "#fff",
-          borderRadius: "14px",
-          border: "1px solid var(--color-ink-6)",
-          padding: "18px 22px",
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: "16px",
-        }}
-      >
+      <div className="sira-target-row">
         <div>
           <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--color-ink)" }}>
             Target &amp; Deviasi Kinerja BPSDM Kaltim
@@ -551,7 +530,7 @@ function RealisasiAnggaranContent({
             Perbandingan target rekapitulasi SKPD terhadap realisasi aktual
           </div>
         </div>
-        <div style={{ display: "flex", gap: "24px", flexWrap: "wrap" }}>
+        <div className="sira-dev-items">
           <DevItem label="Target keuangan" value={`${fmtPersen(summary.targetKeuangan ?? 0)}%`} />
           <DevItem
             label="Deviasi keuangan"
@@ -627,27 +606,24 @@ function RealisasiAnggaranContent({
             overflow: "hidden",
           }}
         >
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 2fr 80px 80px",
-              gap: "12px",
-              padding: "10px 22px",
-              borderBottom: "1px solid var(--color-ink-6)",
-              background: "var(--color-ink-8, #f9fafb)",
-            }}
-          >
-            {["Program", "Progress keuangan", "Keuangan", "Fisik"].map((h) => (
+          <div className="sira-prog-header">
+            {[
+              { label: "Program",            cls: "sira-prog-header-name" },
+              { label: "Progress keuangan",  cls: "sira-prog-header-bar" },
+              { label: "Keuangan",           cls: "sira-prog-header-keu" },
+              { label: "Fisik",              cls: "sira-prog-header-fis" },
+            ].map(({ label, cls }) => (
               <div
-                key={h}
+                key={label}
+                className={cls}
                 style={{
                   fontSize: "10.5px",
                   fontWeight: 600,
                   color: "var(--color-ink-4)",
-                  textAlign: h === "Program" || h === "Progress keuangan" ? "left" : "center",
+                  textAlign: cls.includes("name") || cls.includes("bar") ? "left" : "center",
                 }}
               >
-                {h}
+                {label}
               </div>
             ))}
           </div>
@@ -655,19 +631,15 @@ function RealisasiAnggaranContent({
           {programs.map((prog, i) => (
             <div
               key={prog.id}
+              className="sira-prog-row"
               style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 2fr 80px 80px",
-                gap: "12px",
-                alignItems: "center",
-                padding: "14px 22px",
                 borderBottom:
                   i < programs.length - 1
                     ? "1px solid var(--color-ink-7, #f3f4f6)"
                     : "none",
               }}
             >
-              <div>
+              <div className="sira-prog-name">
                 <div
                   style={{
                     fontSize: "12.5px",
@@ -681,7 +653,7 @@ function RealisasiAnggaranContent({
                 <div
                   style={{
                     fontSize: "10px",
-                    color: "var(--color-ink-5)",
+                    color: "var(--color-ink-4)",
                     fontFamily: "monospace",
                     marginTop: "3px",
                   }}
@@ -689,16 +661,16 @@ function RealisasiAnggaranContent({
                   {prog.kodeProgram}
                 </div>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+              <div className="sira-prog-bar" style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                 <ProgressBar value={prog.persenKeuangan} />
-                <div style={{ fontSize: "10.5px", color: "var(--color-ink-4)" }}>
+                <div style={{ fontSize: "10.5px", color: "var(--color-ink-3)" }}>
                   {fmtRupiah(prog.realisasiKeuangan)} / {fmtRupiah(prog.pagu)}
                 </div>
               </div>
-              <div style={{ textAlign: "center" }}>
+              <div className="sira-prog-keu" style={{ textAlign: "center" }}>
                 <Badge value={prog.persenKeuangan} />
               </div>
-              <div style={{ textAlign: "center" }}>
+              <div className="sira-prog-fis" style={{ textAlign: "center" }}>
                 <Badge value={prog.persenFisik} />
               </div>
             </div>
@@ -720,8 +692,8 @@ function RealisasiAnggaranContent({
             overflow: "hidden",
           }}
         >
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
+          <div className="sira-table-wrap">
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr
                   style={{
@@ -776,20 +748,6 @@ function RealisasiAnggaranContent({
           </div>
         </div>
       </div>
-
-      {/* ── Footer note ─────────────────────────────────────────────────── */}
-      <p
-        style={{
-          fontSize: "11px",
-          color: "var(--color-ink-5)",
-          lineHeight: 1.6,
-          margin: "0 2px",
-        }}
-      >
-        Sumber: Sistem Informasi Rencana Anggaran (SIRA) Provinsi Kalimantan
-        Timur — ditarik otomatis secara berkala dan tayang setelah lolos
-        verifikasi.
-      </p>
     </div>
   );
 }
@@ -811,5 +769,5 @@ const tdStyle: CSSProperties = {
   fontSize: "12px",
   color: "var(--color-ink-2)",
   fontVariantNumeric: "tabular-nums",
-  whiteSpace: "nowrap",
+  whiteSpace: "nowrap", /* kolom angka tetap nowrap; kolom nama di-override via .sira-table-wrap td:first-child */
 };

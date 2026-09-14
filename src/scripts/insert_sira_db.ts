@@ -10,11 +10,11 @@ async function insertData() {
   const summary = data.summary;
 
   const conn = await mysql.createConnection({
-    host: process.env.DB_WEB_HOST || "127.0.0.1",
-    port: Number(process.env.DB_WEB_PORT) || 3306,
-    user: process.env.DB_WEB_USER || "root",
-    password: process.env.DB_WEB_PASSWORD || "1Sampai9!@#",
-    database: process.env.DB_WEB_NAME || "app_website",
+    host: "127.0.0.1",
+    port: 3307,
+    user: "user_atlas",
+    password: "1Sampai9!@#",
+    database: "app_website",
   });
 
   console.log("Menyimpan summary ke DB...");
