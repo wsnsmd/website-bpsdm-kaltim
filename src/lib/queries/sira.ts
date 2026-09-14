@@ -6,13 +6,13 @@ export type SiraSummaryItem = typeof siraSummary.$inferSelect;
 export type SiraProgramItem = typeof siraPrograms.$inferSelect;
 export type SiraActivityItem = typeof siraActivities.$inferSelect;
 
-export type SiraProgramWithActivities = SiraProgramItem & {
-  // Tanpa parentId di skema, Kegiatan (level 1) dan Sub Kegiatan (level 2)
-  // TIDAK bisa dipasangkan induk-anak yang benar kalau satu program punya
-  // lebih dari satu Kegiatan — jadi disajikan sebagai dua daftar terpisah,
-  // bukan pohon nested yang bisa salah pasang.
-  kegiatan: SiraActivityItem[];
+/** Sub kegiatan diembed langsung di dalam kegiatan induknya. */
+export type SiraKegiatanWithSub = SiraActivityItem & {
   subKegiatan: SiraActivityItem[];
+};
+
+export type SiraProgramWithActivities = SiraProgramItem & {
+  kegiatan: SiraKegiatanWithSub[];
 };
 
 export type SiraDashboardData = {
@@ -22,8 +22,14 @@ export type SiraDashboardData = {
 
 /**
  * Ambil satu periode (tahun+bulan) realisasi anggaran.
- * Skema saat ini tidak punya kolom status draft/published, jadi ini selalu
- * mengambil periode terbaru yang ada di tabel apa adanya.
+ *
+ * Hierarki kode rekening:
+ *   Program      5.04.01          → 3 segmen  (dari tabel sira_programs)
+ *   Kegiatan     5.04.01.1.01     → 5 segmen  (level di DB tidak reliable, pakai split)
+ *   Sub Kegiatan 5.04.01.1.01.0001 → 6 segmen
+ *
+ * Sub kegiatan dipasangkan ke kegiatan induknya via startsWith(keg.kode + "."),
+ * sehingga tampil nested dan tidak terbalik meski satu program punya banyak kegiatan.
  */
 export async function getSiraDashboardData(params?: {
   tahun?: number;
@@ -65,10 +71,26 @@ export async function getSiraDashboardData(params?: {
       const activitiesForProgram = allActivities.filter(
         (a) => a.programId === program.id,
       );
+
+      // Kegiatan: 5 segmen kode (5.04.01.1.01)
+      const kegiatanList = activitiesForProgram.filter(
+        (a) => a.kode.split(".").length === 5,
+      );
+
+      // Sub Kegiatan: 6 segmen kode (5.04.01.1.01.0001)
+      const subKegiatanList = activitiesForProgram.filter(
+        (a) => a.kode.split(".").length === 6,
+      );
+
       return {
         ...program,
-        kegiatan: activitiesForProgram.filter((a) => a.level === 1),
-        subKegiatan: activitiesForProgram.filter((a) => a.level === 2),
+        kegiatan: kegiatanList.map((keg) => ({
+          ...keg,
+          // Pasangkan sub kegiatan ke induknya via prefix kode
+          subKegiatan: subKegiatanList.filter((sub) =>
+            sub.kode.startsWith(keg.kode + "."),
+          ),
+        })),
       };
     },
   );
@@ -76,7 +98,7 @@ export async function getSiraDashboardData(params?: {
   return { summary, programs: programsWithActivities };
 }
 
-/** Daftar tahun yang ada datanya — untuk selector periode nanti. */
+/** Daftar tahun yang ada datanya — untuk selector periode. */
 export async function getSiraAvailableYears(): Promise<number[]> {
   const rows = await db
     .selectDistinct({ tahun: siraSummary.tahun })

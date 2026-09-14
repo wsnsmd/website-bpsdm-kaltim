@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import { Fragment } from "react";
 import { getSiraDashboardData } from "@/lib/queries/sira";
+import type { SiraKegiatanWithSub } from "@/lib/queries/sira";
 import {
   Wallet,
   Trophy,
@@ -106,452 +107,13 @@ function ProgressBar({ value }: { value: string | number }) {
   );
 }
 
-// ─── Page ───────────────────────────────────────────────────────────────────
-
-export default async function RealisasiAnggaranPage() {
-  const data = await getSiraDashboardData();
-
-  if (!data) {
-    return (
-      <div
-        style={{
-          background: "#fff",
-          borderRadius: "14px",
-          border: "1px solid var(--color-ink-6)",
-          padding: "56px 48px",
-          textAlign: "center",
-          color: "var(--color-ink-4)",
-          fontSize: "13.5px",
-        }}
-      >
-        <Landmark size={36} style={{ margin: "0 auto 14px", opacity: 0.25 }} />
-        <p style={{ fontWeight: 600, color: "var(--color-ink-2)", marginBottom: "6px" }}>
-          Data belum tersedia
-        </p>
-        <p>Data realisasi anggaran belum tersedia untuk periode ini.</p>
-      </div>
-    );
-  }
-
-  return <RealisasiAnggaranContent data={data} />;
-}
-
-// ─── Content ─────────────────────────────────────────────────────────────────
-
-function RealisasiAnggaranContent({
-  data,
+function SectionTitle({
+  icon,
+  children,
 }: {
-  data: NonNullable<Awaited<ReturnType<typeof getSiraDashboardData>>>;
+  icon: React.ReactNode;
+  children: React.ReactNode;
 }) {
-  const { summary, programs } = data;
-
-  const bulanNama = new Date(summary.tahun, summary.periodeBulan - 1).toLocaleDateString(
-    "id-ID",
-    { month: "long" },
-  );
-
-  // Data untuk chart (dikirim ke client component)
-  const chartData = programs.map((p) => ({
-    label: p.namaProgram.replace(/^Program\s+/i, ""),
-    keuangan: Number(p.persenKeuangan),
-    fisik: Number(p.persenFisik),
-  }));
-
-  const devKeu = Number(summary.deviasiKeuangan ?? 0);
-  const devFis = Number(summary.deviasiFisik ?? 0);
-
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-
-      {/* ── 1. Hero ─────────────────────────────────────────────────────── */}
-      <div
-        style={{
-          background: "#0F2D1F",
-          borderRadius: "16px",
-          padding: "24px 28px",
-          position: "relative",
-          overflow: "hidden",
-        }}
-      >
-        {/* dot pattern */}
-        <div
-          aria-hidden
-          style={{
-            position: "absolute",
-            inset: 0,
-            backgroundImage:
-              "radial-gradient(rgba(255,255,255,0.035) 1px, transparent 1px)",
-            backgroundSize: "18px 18px",
-            pointerEvents: "none",
-          }}
-        />
-
-        <div style={{ position: "relative" }}>
-          {/* top row */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: "12px",
-              flexWrap: "wrap",
-              marginBottom: "24px",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <div
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: "9px",
-                  background: "rgba(255,255,255,0.08)",
-                  border: "1px solid rgba(255,255,255,0.12)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                }}
-              >
-                <Wallet size={17} color="rgba(255,255,255,0.75)" />
-              </div>
-              <div>
-                <div style={{ fontSize: "14px", fontWeight: 600, color: "#fff" }}>
-                  Realisasi Anggaran BPSDM Kaltim
-                </div>
-                <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.38)", marginTop: "2px" }}>
-                  Ditarik otomatis dari SIRA Provinsi Kalimantan Timur
-                </div>
-              </div>
-            </div>
-
-            {summary.peringkatSkpd && summary.totalSkpd ? (
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  padding: "5px 12px",
-                  borderRadius: "20px",
-                  background: "rgba(252,211,77,0.12)",
-                  border: "1px solid rgba(252,211,77,0.28)",
-                }}
-              >
-                <Trophy size={12} color="#FCD34D" />
-                <span style={{ fontSize: "11.5px", fontWeight: 700, color: "#FCD34D" }}>
-                  Peringkat #{summary.peringkatSkpd} dari {summary.totalSkpd} SKPD
-                </span>
-              </div>
-            ) : null}
-          </div>
-
-          {/* hero body: big % + stats */}
-          <div className="sira-hero-grid">
-            {/* big number */}
-            <div>
-              <div
-                style={{
-                  fontSize: "68px",
-                  fontWeight: 900,
-                  color: "#fff",
-                  lineHeight: 1,
-                  letterSpacing: "-2px",
-                  fontVariantNumeric: "tabular-nums",
-                }}
-              >
-                {fmtPersen(summary.persenKeuangan)}%
-              </div>
-              <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.45)", marginTop: "10px" }}>
-                Realisasi keuangan terhadap pagu
-              </div>
-              <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.28)", marginTop: "3px" }}>
-                Periode {bulanNama} {summary.tahun}
-              </div>
-            </div>
-
-            {/* right stats */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "14px", justifyContent: "center" }}>
-              {[
-                { label: "Pagu total",           val: fmtRupiah(summary.paguTotal),          gold: false },
-                { label: "Realisasi keuangan",   val: fmtRupiah(summary.realisasiKeuangan),  gold: false },
-                { label: "Sisa pagu",            val: fmtRupiah(summary.sisaPagu),           gold: false },
-                { label: "Realisasi fisik",      val: `${fmtPersen(summary.persenFisik)}%`,  gold: true  },
-              ].map(({ label, val, gold }) => (
-                <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "16px" }}>
-                  <span style={{ fontSize: "11.5px", color: "rgba(255,255,255,0.42)" }}>{label}</span>
-                  <span style={{ fontSize: "13px", fontWeight: 700, color: gold ? "#FCD34D" : "#fff", fontVariantNumeric: "tabular-nums", flexShrink: 0 }}>{val}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── 2. KPI Strip ────────────────────────────────────────────────── */}
-      <div className="sira-kpi-strip">
-        <KpiCell
-          label="Pagu anggaran"
-          value={fmtRupiah(summary.paguTotal)}
-          sub={`Penyedia: ${fmtRupiah(summary.paguPenyedia)} · Non: ${fmtRupiah(summary.paguNonPenyedia)}`}
-        />
-        <KpiCell
-          label="Realisasi keuangan"
-          value={fmtRupiah(summary.realisasiKeuangan)}
-          valueColor="#166534"
-          badge={<Badge value={summary.persenKeuangan} />}
-        />
-        <KpiCell
-          label="Sisa pagu"
-          value={fmtRupiah(summary.sisaPagu)}
-          sub={`Belum terserap hingga ${bulanNama}`}
-        />
-        <KpiCell
-          label="Realisasi fisik"
-          value={`${fmtPersen(summary.persenFisik)}%`}
-          badge={<Badge value={summary.persenFisik} />}
-        />
-      </div>
-
-      {/* ── 3. Target & Deviasi ─────────────────────────────────────────── */}
-      <div
-        style={{
-          background: "#fff",
-          borderRadius: "14px",
-          border: "1px solid var(--color-ink-6)",
-          padding: "18px 22px",
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: "16px",
-        }}
-      >
-        <div>
-          <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--color-ink)" }}>
-            Target &amp; Deviasi Kinerja BPSDM Kaltim
-          </div>
-          <div style={{ fontSize: "11px", color: "var(--color-ink-4)", marginTop: "2px" }}>
-            Perbandingan target rekapitulasi SKPD terhadap realisasi aktual
-          </div>
-        </div>
-        <div style={{ display: "flex", gap: "24px", flexWrap: "wrap" }}>
-          <DevItem label="Target keuangan" value={`${fmtPersen(summary.targetKeuangan ?? 0)}%`} />
-          <DevItem
-            label="Deviasi keuangan"
-            value={devKeu > 0 ? `+${fmtPersen(devKeu)}%` : `${fmtPersen(devKeu)}%`}
-            color={devKeu < 0 ? "#991b1b" : "#166534"}
-          />
-          <DevItem label="Target fisik" value={`${fmtPersen(summary.targetFisik ?? 0)}%`} />
-          <DevItem
-            label="Deviasi fisik"
-            value={devFis > 0 ? `+${fmtPersen(devFis)}%` : `${fmtPersen(devFis)}%`}
-            color={devFis < 0 ? "#991b1b" : "#166534"}
-          />
-        </div>
-      </div>
-
-      {/* ── 4. Chart (client component) ─────────────────────────────────── */}
-      <div>
-        <SectionTitle icon={<BarChart2 size={16} color="#166534" />}>
-          Realisasi per program
-        </SectionTitle>
-        <div
-          style={{
-            background: "#fff",
-            borderRadius: "14px",
-            border: "1px solid var(--color-ink-6)",
-            padding: "20px 22px",
-          }}
-        >
-          {/* legend */}
-          <div style={{ display: "flex", gap: "16px", marginBottom: "16px", flexWrap: "wrap" }}>
-            {[
-              { color: "#16a34a", label: "≥ 75% — baik" },
-              { color: "#ca8a04", label: "50–74% — sedang" },
-              { color: "#dc2626", label: "< 50% — rendah" },
-            ].map(({ color, label }) => (
-              <span key={label} style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "11.5px", color: "var(--color-ink-4)" }}>
-                <span style={{ width: 10, height: 10, borderRadius: "2px", background: color, flexShrink: 0 }} />
-                {label}
-              </span>
-            ))}
-          </div>
-          <RealisasiChart data={chartData} />
-        </div>
-      </div>
-
-      {/* ── 5. Program breakdown bars ───────────────────────────────────── */}
-      <div>
-        <SectionTitle icon={<TrendingUp size={16} color="#166534" />}>
-          Rincian per program
-        </SectionTitle>
-
-        <div
-          style={{
-            background: "#fff",
-            borderRadius: "14px",
-            border: "1px solid var(--color-ink-6)",
-            overflow: "hidden",
-          }}
-        >
-          {/* header */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 2fr 80px 80px",
-              gap: "12px",
-              padding: "10px 22px",
-              borderBottom: "1px solid var(--color-ink-6)",
-              background: "var(--color-ink-8, #f9fafb)",
-            }}
-          >
-            {["Program", "Progress keuangan", "Keuangan", "Fisik"].map((h) => (
-              <div key={h} style={{ fontSize: "10.5px", fontWeight: 600, color: "var(--color-ink-4)", textAlign: h === "Program" || h === "Progress keuangan" ? "left" : "center" }}>
-                {h}
-              </div>
-            ))}
-          </div>
-
-          {programs.map((prog, i) => (
-            <div
-              key={prog.id}
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 2fr 80px 80px",
-                gap: "12px",
-                alignItems: "center",
-                padding: "14px 22px",
-                borderBottom: i < programs.length - 1 ? "1px solid var(--color-ink-7, #f3f4f6)" : "none",
-              }}
-            >
-              <div>
-                <div style={{ fontSize: "12.5px", fontWeight: 600, color: "var(--color-ink)", lineHeight: 1.3 }}>
-                  {prog.namaProgram}
-                </div>
-                <div style={{ fontSize: "10px", color: "var(--color-ink-5)", fontFamily: "monospace", marginTop: "3px" }}>
-                  {prog.kodeProgram}
-                </div>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                <ProgressBar value={prog.persenKeuangan} />
-                <div style={{ fontSize: "10.5px", color: "var(--color-ink-4)" }}>
-                  {fmtRupiah(prog.realisasiKeuangan)} / {fmtRupiah(prog.pagu)}
-                </div>
-              </div>
-              <div style={{ textAlign: "center" }}><Badge value={prog.persenKeuangan} /></div>
-              <div style={{ textAlign: "center" }}><Badge value={prog.persenFisik} /></div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ── 6. Tabel rincian kegiatan & sub kegiatan ────────────────────── */}
-      <div>
-        <SectionTitle icon={<TableProperties size={16} color="#166534" />}>
-          Rincian kegiatan &amp; sub kegiatan
-        </SectionTitle>
-
-        <div
-          style={{
-            background: "#fff",
-            borderRadius: "14px",
-            border: "1px solid var(--color-ink-6)",
-            overflow: "hidden",
-          }}
-        >
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr style={{ background: "var(--color-ink-8, #f9fafb)", borderBottom: "1px solid var(--color-ink-6)" }}>
-                  <th style={thStyle}>Kegiatan / Sub Kegiatan</th>
-                  <th style={{ ...thStyle, textAlign: "right" }}>Pagu</th>
-                  <th style={{ ...thStyle, textAlign: "right" }}>Realisasi</th>
-                  <th style={{ ...thStyle, textAlign: "center" }}>Keuangan</th>
-                  <th style={{ ...thStyle, textAlign: "center" }}>Fisik</th>
-                </tr>
-              </thead>
-              <tbody>
-                {programs.map((prog) => (
-                  <Fragment key={prog.id}>
-                    {/* Program header row */}
-                    <tr style={{ background: "#f0fdf4" }}>
-                      <td
-                        colSpan={5}
-                        style={{
-                          padding: "9px 22px",
-                          fontSize: "12px",
-                          fontWeight: 700,
-                          color: "#166534",
-                          borderBottom: "1px solid #dcfce7",
-                        }}
-                      >
-                        <span style={{ fontFamily: "monospace", fontSize: "11px", color: "#4ade80", marginRight: "8px" }}>
-                          {prog.kodeProgram}
-                        </span>
-                        {prog.namaProgram}
-                      </td>
-                    </tr>
-
-                    {/* Kegiatan */}
-                    {prog.kegiatan.map((keg) => (
-                      <tr key={keg.id} style={{ borderBottom: "1px solid var(--color-ink-7, #f3f4f6)" }}>
-                        <td style={{ ...tdStyle, fontWeight: 600 }}>
-                          {keg.nama}
-                          <div style={{ fontSize: "10px", color: "var(--color-ink-5)", fontFamily: "monospace", marginTop: "2px" }}>
-                            {keg.kode}
-                          </div>
-                        </td>
-                        <td style={{ ...tdStyle, textAlign: "right" }}>{fmtRupiah(keg.pagu)}</td>
-                        <td style={{ ...tdStyle, textAlign: "right", fontWeight: 600, color: "#166534" }}>{fmtRupiah(keg.realisasiKeuangan)}</td>
-                        <td style={{ ...tdStyle, textAlign: "center" }}><Badge value={keg.persenKeuangan} /></td>
-                        <td style={{ ...tdStyle, textAlign: "center" }}><Badge value={keg.persenFisik} /></td>
-                      </tr>
-                    ))}
-
-                    {/* Sub Kegiatan */}
-                    {prog.subKegiatan.map((sub) => (
-                      <tr key={sub.id} style={{ borderBottom: "1px solid var(--color-ink-7, #f3f4f6)" }}>
-                        <td style={{ ...tdStyle, paddingLeft: "38px", color: "var(--color-ink-3)" }}>
-                          <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                            <ChevronRight size={11} color="var(--color-ink-5)" />
-                            {sub.nama}
-                          </span>
-                          <div style={{ fontSize: "10px", color: "var(--color-ink-5)", fontFamily: "monospace", marginLeft: "15px", marginTop: "2px" }}>
-                            {sub.kode}
-                          </div>
-                        </td>
-                        <td style={{ ...tdStyle, textAlign: "right", fontWeight: 600 }}>{fmtRupiah(sub.pagu)}</td>
-                        <td style={{ ...tdStyle, textAlign: "right", fontWeight: 600, color: "#166534" }}>{fmtRupiah(sub.realisasiKeuangan)}</td>
-                        <td style={{ ...tdStyle, textAlign: "center" }}><Badge value={sub.persenKeuangan} /></td>
-                        <td style={{ ...tdStyle, textAlign: "center" }}><Badge value={sub.persenFisik} /></td>
-                      </tr>
-                    ))}
-                  </Fragment>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Footer note ─────────────────────────────────────────────────── */}
-      <p
-        style={{
-          fontSize: "11px",
-          color: "var(--color-ink-5)",
-          lineHeight: 1.6,
-          margin: "0 2px",
-        }}
-      >
-        Sumber: Sistem Informasi Rencana Anggaran (SIRA) Provinsi Kalimantan Timur —
-        ditarik otomatis secara berkala.
-      </p>
-    </div>
-  );
-}
-
-// ─── Small helpers ───────────────────────────────────────────────────────────
-
-function SectionTitle({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
   return (
     <div
       style={{
@@ -635,10 +197,607 @@ function DevItem({
   );
 }
 
+// ─── Tabel baris kegiatan + sub kegiatannya ──────────────────────────────────
+
+function KegiatanRows({ keg }: { keg: SiraKegiatanWithSub }) {
+  return (
+    <Fragment>
+      {/* Baris kegiatan — background biru abu muda */}
+      <tr
+        style={{
+          background: "#f0f4ff",
+          borderBottom: keg.subKegiatan.length > 0
+            ? "none"
+            : "1px solid #e0e7ff",
+        }}
+      >
+        <td style={{ ...tdStyle, fontWeight: 700, color: "var(--color-ink)", whiteSpace: "normal" }}>
+          {keg.nama}
+          <div
+            style={{
+              fontSize: "10px",
+              color: "#6366f1",
+              fontFamily: "monospace",
+              marginTop: "2px",
+              fontWeight: 400,
+            }}
+          >
+            {keg.kode}
+          </div>
+        </td>
+        <td style={{ ...tdStyle, textAlign: "right", fontWeight: 600 }}>
+          {fmtRupiah(keg.pagu)}
+        </td>
+        <td style={{ ...tdStyle, textAlign: "right", fontWeight: 600, color: "#166534" }}>
+          {fmtRupiah(keg.realisasiKeuangan)}
+        </td>
+        <td style={{ ...tdStyle, textAlign: "center" }}>
+          <Badge value={keg.persenKeuangan} />
+        </td>
+        <td style={{ ...tdStyle, textAlign: "center" }}>
+          <Badge value={keg.persenFisik} />
+        </td>
+      </tr>
+
+      {/* Baris sub kegiatan — putih, indent, tepat di bawah kegiatan induknya */}
+      {keg.subKegiatan.map((sub, idx) => (
+        <tr
+          key={sub.id}
+          style={{
+            background: "#fff",
+            borderBottom:
+              idx < keg.subKegiatan.length - 1
+                ? "1px solid var(--color-ink-7, #f3f4f6)"
+                : "1px solid #e0e7ff",
+          }}
+        >
+          <td style={{ ...tdStyle, paddingLeft: "38px", color: "var(--color-ink-3)", whiteSpace: "normal" }}>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+              <ChevronRight size={11} color="var(--color-ink-5)" />
+              {sub.nama}
+            </span>
+            <div
+              style={{
+                fontSize: "10px",
+                color: "var(--color-ink-5)",
+                fontFamily: "monospace",
+                marginLeft: "15px",
+                marginTop: "2px",
+              }}
+            >
+              {sub.kode}
+            </div>
+          </td>
+          <td style={{ ...tdStyle, textAlign: "right", fontWeight: 600 }}>
+            {fmtRupiah(sub.pagu)}
+          </td>
+          <td style={{ ...tdStyle, textAlign: "right", fontWeight: 600, color: "#166534" }}>
+            {fmtRupiah(sub.realisasiKeuangan)}
+          </td>
+          <td style={{ ...tdStyle, textAlign: "center" }}>
+            <Badge value={sub.persenKeuangan} />
+          </td>
+          <td style={{ ...tdStyle, textAlign: "center" }}>
+            <Badge value={sub.persenFisik} />
+          </td>
+        </tr>
+      ))}
+    </Fragment>
+  );
+}
+
+// ─── Page ───────────────────────────────────────────────────────────────────
+
+export default async function RealisasiAnggaranPage() {
+  const data = await getSiraDashboardData();
+
+  if (!data) {
+    return (
+      <div
+        style={{
+          background: "#fff",
+          borderRadius: "14px",
+          border: "1px solid var(--color-ink-6)",
+          padding: "56px 48px",
+          textAlign: "center",
+          color: "var(--color-ink-4)",
+          fontSize: "13.5px",
+        }}
+      >
+        <Landmark size={36} style={{ margin: "0 auto 14px", opacity: 0.25 }} />
+        <p style={{ fontWeight: 600, color: "var(--color-ink-2)", marginBottom: "6px" }}>
+          Data belum tersedia
+        </p>
+        <p>Data realisasi anggaran belum tersedia untuk periode ini.</p>
+      </div>
+    );
+  }
+
+  return <RealisasiAnggaranContent data={data} />;
+}
+
+// ─── Content ─────────────────────────────────────────────────────────────────
+
+function RealisasiAnggaranContent({
+  data,
+}: {
+  data: NonNullable<Awaited<ReturnType<typeof getSiraDashboardData>>>;
+}) {
+  const { summary, programs } = data;
+
+  const bulanNama = new Date(
+    summary.tahun,
+    summary.periodeBulan - 1,
+  ).toLocaleDateString("id-ID", { month: "long" });
+
+  const chartData = programs.map((p) => ({
+    label: p.namaProgram.replace(/^Program\s+/i, ""),
+    keuangan: Number(p.persenKeuangan),
+    fisik: Number(p.persenFisik),
+  }));
+
+  const devKeu = Number(summary.deviasiKeuangan ?? 0);
+  const devFis = Number(summary.deviasiFisik ?? 0);
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+
+      {/* ── 1. Hero ─────────────────────────────────────────────────────── */}
+      <div
+        style={{
+          background: "#0F2D1F",
+          borderRadius: "16px",
+          padding: "24px 28px",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundImage:
+              "radial-gradient(rgba(255,255,255,0.035) 1px, transparent 1px)",
+            backgroundSize: "18px 18px",
+            pointerEvents: "none",
+          }}
+        />
+        <div style={{ position: "relative" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "12px",
+              flexWrap: "wrap",
+              marginBottom: "24px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <div
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: "9px",
+                  background: "rgba(255,255,255,0.08)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                <Wallet size={17} color="rgba(255,255,255,0.75)" />
+              </div>
+              <div>
+                <div style={{ fontSize: "14px", fontWeight: 600, color: "#fff" }}>
+                  Realisasi Anggaran BPSDM Kaltim
+                </div>
+                <div
+                  style={{
+                    fontSize: "11px",
+                    color: "rgba(255,255,255,0.38)",
+                    marginTop: "2px",
+                  }}
+                >
+                  Ditarik otomatis dari SIRA Provinsi Kalimantan Timur
+                </div>
+              </div>
+            </div>
+
+            {summary.peringkatSkpd && summary.totalSkpd ? (
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "5px 12px",
+                  borderRadius: "20px",
+                  background: "rgba(252,211,77,0.12)",
+                  border: "1px solid rgba(252,211,77,0.28)",
+                }}
+              >
+                <Trophy size={12} color="#FCD34D" />
+                <span style={{ fontSize: "11.5px", fontWeight: 700, color: "#FCD34D" }}>
+                  Peringkat #{summary.peringkatSkpd} dari {summary.totalSkpd} SKPD
+                </span>
+              </div>
+            ) : null}
+          </div>
+
+          <div className="sira-hero-grid">
+            <div>
+              <div
+                style={{
+                  fontSize: "68px",
+                  fontWeight: 900,
+                  color: "#fff",
+                  lineHeight: 1,
+                  letterSpacing: "-2px",
+                  fontVariantNumeric: "tabular-nums",
+                }}
+              >
+                {fmtPersen(summary.persenKeuangan)}%
+              </div>
+              <div
+                style={{
+                  fontSize: "12px",
+                  color: "rgba(255,255,255,0.45)",
+                  marginTop: "10px",
+                }}
+              >
+                Realisasi keuangan terhadap pagu
+              </div>
+              <div
+                style={{
+                  fontSize: "11px",
+                  color: "rgba(255,255,255,0.28)",
+                  marginTop: "3px",
+                }}
+              >
+                Periode {bulanNama} {summary.tahun}
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "14px",
+                justifyContent: "center",
+              }}
+            >
+              {[
+                { label: "Pagu total",         val: fmtRupiah(summary.paguTotal),         gold: false },
+                { label: "Realisasi keuangan", val: fmtRupiah(summary.realisasiKeuangan), gold: false },
+                { label: "Sisa pagu",          val: fmtRupiah(summary.sisaPagu),          gold: false },
+                { label: "Realisasi fisik",    val: `${fmtPersen(summary.persenFisik)}%`, gold: true  },
+              ].map(({ label, val, gold }) => (
+                <div
+                  key={label}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "baseline",
+                    gap: "16px",
+                  }}
+                >
+                  <span style={{ fontSize: "11.5px", color: "rgba(255,255,255,0.42)" }}>
+                    {label}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "13px",
+                      fontWeight: 700,
+                      color: gold ? "#FCD34D" : "#fff",
+                      fontVariantNumeric: "tabular-nums",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {val}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── 2. KPI Strip ────────────────────────────────────────────────── */}
+      <div className="sira-kpi-strip">
+        <KpiCell
+          label="Pagu anggaran"
+          value={fmtRupiah(summary.paguTotal)}
+          sub={`Penyedia: ${fmtRupiah(summary.paguPenyedia)} · Non: ${fmtRupiah(summary.paguNonPenyedia)}`}
+        />
+        <KpiCell
+          label="Realisasi keuangan"
+          value={fmtRupiah(summary.realisasiKeuangan)}
+          valueColor="#166534"
+          badge={<Badge value={summary.persenKeuangan} />}
+        />
+        <KpiCell
+          label="Sisa pagu"
+          value={fmtRupiah(summary.sisaPagu)}
+          sub={`Belum terserap hingga ${bulanNama}`}
+        />
+        <KpiCell
+          label="Realisasi fisik"
+          value={`${fmtPersen(summary.persenFisik)}%`}
+          badge={<Badge value={summary.persenFisik} />}
+        />
+      </div>
+
+      {/* ── 3. Target & Deviasi ─────────────────────────────────────────── */}
+      <div
+        style={{
+          background: "#fff",
+          borderRadius: "14px",
+          border: "1px solid var(--color-ink-6)",
+          padding: "18px 22px",
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: "16px",
+        }}
+      >
+        <div>
+          <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--color-ink)" }}>
+            Target &amp; Deviasi Kinerja BPSDM Kaltim
+          </div>
+          <div style={{ fontSize: "11px", color: "var(--color-ink-4)", marginTop: "2px" }}>
+            Perbandingan target rekapitulasi SKPD terhadap realisasi aktual
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: "24px", flexWrap: "wrap" }}>
+          <DevItem label="Target keuangan" value={`${fmtPersen(summary.targetKeuangan ?? 0)}%`} />
+          <DevItem
+            label="Deviasi keuangan"
+            value={devKeu > 0 ? `+${fmtPersen(devKeu)}%` : `${fmtPersen(devKeu)}%`}
+            color={devKeu < 0 ? "#991b1b" : "#166534"}
+          />
+          <DevItem label="Target fisik" value={`${fmtPersen(summary.targetFisik ?? 0)}%`} />
+          <DevItem
+            label="Deviasi fisik"
+            value={devFis > 0 ? `+${fmtPersen(devFis)}%` : `${fmtPersen(devFis)}%`}
+            color={devFis < 0 ? "#991b1b" : "#166534"}
+          />
+        </div>
+      </div>
+
+      {/* ── 4. Chart ────────────────────────────────────────────────────── */}
+      <div>
+        <SectionTitle icon={<BarChart2 size={16} color="#166534" />}>
+          Realisasi per program
+        </SectionTitle>
+        <div
+          style={{
+            background: "#fff",
+            borderRadius: "14px",
+            border: "1px solid var(--color-ink-6)",
+            padding: "20px 22px",
+          }}
+        >
+          <div style={{ display: "flex", gap: "16px", marginBottom: "16px", flexWrap: "wrap" }}>
+            {[
+              { color: "#16a34a", label: "≥ 75% — baik" },
+              { color: "#ca8a04", label: "50–74% — sedang" },
+              { color: "#dc2626", label: "< 50% — rendah" },
+            ].map(({ color, label }) => (
+              <span
+                key={label}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "5px",
+                  fontSize: "11.5px",
+                  color: "var(--color-ink-4)",
+                }}
+              >
+                <span
+                  style={{
+                    width: 10,
+                    height: 10,
+                    borderRadius: "2px",
+                    background: color,
+                    flexShrink: 0,
+                  }}
+                />
+                {label}
+              </span>
+            ))}
+          </div>
+          <RealisasiChart data={chartData} />
+        </div>
+      </div>
+
+      {/* ── 5. Program breakdown bars ───────────────────────────────────── */}
+      <div>
+        <SectionTitle icon={<TrendingUp size={16} color="#166534" />}>
+          Rincian per program
+        </SectionTitle>
+
+        <div
+          style={{
+            background: "#fff",
+            borderRadius: "14px",
+            border: "1px solid var(--color-ink-6)",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 2fr 80px 80px",
+              gap: "12px",
+              padding: "10px 22px",
+              borderBottom: "1px solid var(--color-ink-6)",
+              background: "var(--color-ink-8, #f9fafb)",
+            }}
+          >
+            {["Program", "Progress keuangan", "Keuangan", "Fisik"].map((h) => (
+              <div
+                key={h}
+                style={{
+                  fontSize: "10.5px",
+                  fontWeight: 600,
+                  color: "var(--color-ink-4)",
+                  textAlign: h === "Program" || h === "Progress keuangan" ? "left" : "center",
+                }}
+              >
+                {h}
+              </div>
+            ))}
+          </div>
+
+          {programs.map((prog, i) => (
+            <div
+              key={prog.id}
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 2fr 80px 80px",
+                gap: "12px",
+                alignItems: "center",
+                padding: "14px 22px",
+                borderBottom:
+                  i < programs.length - 1
+                    ? "1px solid var(--color-ink-7, #f3f4f6)"
+                    : "none",
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    fontSize: "12.5px",
+                    fontWeight: 600,
+                    color: "var(--color-ink)",
+                    lineHeight: 1.3,
+                  }}
+                >
+                  {prog.namaProgram}
+                </div>
+                <div
+                  style={{
+                    fontSize: "10px",
+                    color: "var(--color-ink-5)",
+                    fontFamily: "monospace",
+                    marginTop: "3px",
+                  }}
+                >
+                  {prog.kodeProgram}
+                </div>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                <ProgressBar value={prog.persenKeuangan} />
+                <div style={{ fontSize: "10.5px", color: "var(--color-ink-4)" }}>
+                  {fmtRupiah(prog.realisasiKeuangan)} / {fmtRupiah(prog.pagu)}
+                </div>
+              </div>
+              <div style={{ textAlign: "center" }}>
+                <Badge value={prog.persenKeuangan} />
+              </div>
+              <div style={{ textAlign: "center" }}>
+                <Badge value={prog.persenFisik} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── 6. Tabel rincian kegiatan & sub kegiatan ────────────────────── */}
+      <div>
+        <SectionTitle icon={<TableProperties size={16} color="#166534" />}>
+          Rincian kegiatan &amp; sub kegiatan
+        </SectionTitle>
+
+        <div
+          style={{
+            background: "#fff",
+            borderRadius: "14px",
+            border: "1px solid var(--color-ink-6)",
+            overflow: "hidden",
+          }}
+        >
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
+              <thead>
+                <tr
+                  style={{
+                    background: "var(--color-ink-8, #f9fafb)",
+                    borderBottom: "1px solid var(--color-ink-6)",
+                  }}
+                >
+                  <th style={{ ...thStyle, width: "40%" }}>Kegiatan / Sub Kegiatan</th>
+                  <th style={{ ...thStyle, textAlign: "right", width: "20%" }}>Pagu</th>
+                  <th style={{ ...thStyle, textAlign: "right", width: "20%" }}>Realisasi</th>
+                  <th style={{ ...thStyle, textAlign: "center", width: "10%" }}>Keuangan</th>
+                  <th style={{ ...thStyle, textAlign: "center", width: "10%" }}>Fisik</th>
+                </tr>
+              </thead>
+              <tbody>
+                {programs.map((prog) => (
+                  <Fragment key={prog.id}>
+                    {/* Header program — hijau muda */}
+                    <tr style={{ background: "#f0fdf4" }}>
+                      <td
+                        colSpan={5}
+                        style={{
+                          padding: "9px 16px",
+                          fontSize: "12px",
+                          fontWeight: 700,
+                          color: "#166534",
+                          borderBottom: "1px solid #dcfce7",
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontFamily: "monospace",
+                            fontSize: "11px",
+                            color: "#4ade80",
+                            marginRight: "8px",
+                          }}
+                        >
+                          {prog.kodeProgram}
+                        </span>
+                        {prog.namaProgram}
+                      </td>
+                    </tr>
+
+                    {/* Kegiatan + sub kegiatannya masing-masing, nested */}
+                    {prog.kegiatan.map((keg) => (
+                      <KegiatanRows key={keg.id} keg={keg} />
+                    ))}
+                  </Fragment>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Footer note ─────────────────────────────────────────────────── */}
+      <p
+        style={{
+          fontSize: "11px",
+          color: "var(--color-ink-5)",
+          lineHeight: 1.6,
+          margin: "0 2px",
+        }}
+      >
+        Sumber: Sistem Informasi Rencana Anggaran (SIRA) Provinsi Kalimantan
+        Timur — ditarik otomatis secara berkala dan tayang setelah lolos
+        verifikasi.
+      </p>
+    </div>
+  );
+}
+
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
 const thStyle: CSSProperties = {
-  padding: "10px 22px",
+  padding: "10px 16px",
   fontSize: "10.5px",
   fontWeight: 600,
   color: "var(--color-ink-4)",
@@ -648,8 +807,9 @@ const thStyle: CSSProperties = {
 };
 
 const tdStyle: CSSProperties = {
-  padding: "10px 22px",
+  padding: "10px 16px",
   fontSize: "12px",
   color: "var(--color-ink-2)",
   fontVariantNumeric: "tabular-nums",
+  whiteSpace: "nowrap",
 };
