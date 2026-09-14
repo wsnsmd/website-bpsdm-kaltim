@@ -8072,3 +8072,68 @@ html:has(.pimpinan-section) .pimpinan-section {
   height: 100%;
   object-fit: cover;
 }
+
+.sira-hero-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  align-items: center;
+}
+
+@media (max-width: 580px) {
+  .sira-hero-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+/* KPI strip: 4 kolom dengan border pemisah */
+.sira-kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid var(--color-ink-6);
+  overflow: hidden;
+}
+
+.sira-kpi-strip > div {
+  border-right: 1px solid var(--color-ink-6);
+}
+
+.sira-kpi-strip > div:last-child {
+  border-right: none;
+}
+
+@media (max-width: 700px) {
+  .sira-kpi-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .sira-kpi-strip > div:nth-child(2) {
+    border-right: none;
+  }
+
+  .sira-kpi-strip > div:nth-child(3) {
+    border-top: 1px solid var(--color-ink-6);
+  }
+
+  .sira-kpi-strip > div:nth-child(4) {
+    border-top: 1px solid var(--color-ink-6);
+  }
+}
+
+@media (max-width: 420px) {
+  .sira-kpi-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .sira-kpi-strip > div {
+    border-right: none;
+    border-top: 1px solid var(--color-ink-6);
+  }
+
+  .sira-kpi-strip > div:first-child {
+    border-top: none;
+  }
+}

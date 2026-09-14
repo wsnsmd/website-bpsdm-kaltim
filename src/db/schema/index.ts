@@ -1008,3 +1008,9 @@ export const schedulesRelations = relations(schedules, ({ one, many }) => ({
 export const menuGroupsRelations = relations(menuGroups, ({ many }) => ({
   items: many(menuItems),
 }));
+
+// ═══════════════════════════════════════════
+// SIRA STATISIK REALISASI ANGGARAN
+// ═══════════════════════════════════════════
+export * from "./sira";
+

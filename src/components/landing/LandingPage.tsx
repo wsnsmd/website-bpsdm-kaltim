@@ -308,7 +308,7 @@ const APPS = [
     id: "statistik",
     title: "Statistik",
     desc: "Data & Analitik",
-    href: "/web",
+    href: "/statistik/realisasi-anggaran",
   },
   {
     id: "bantuan",

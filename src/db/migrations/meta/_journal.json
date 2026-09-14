@@ -85,6 +85,13 @@
       "when": 1788589399172,
       "tag": "0011_chief_greymalkin",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "5",
+      "when": 1789343402182,
+      "tag": "0012_jazzy_susan_delgado",
+      "breakpoints": true
     }
   ]
 }

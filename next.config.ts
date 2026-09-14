@@ -2,6 +2,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ["atlas", "atlas:30001", "100.92.53.89", "100.92.53.89:30001"],
   serverExternalPackages: ["mysql2", "nodemailer"],
 
   experimental: {
