@@ -47,7 +47,7 @@ export async function createMenuItem(formData: FormData) {
     isActive: data.isActive,
   });
 
-  revalidatePath("/");
+  revalidatePath("/", "layout");
   revalidatePath("/admin/menu");
   redirect("/admin/menu");
 }
@@ -83,7 +83,7 @@ export async function updateMenuItem(id: number, formData: FormData) {
     })
     .where(eq(menuItems.id, id));
 
-  revalidatePath("/");
+  revalidatePath("/", "layout");
   revalidatePath("/admin/menu");
   redirect("/admin/menu");
 }
@@ -96,7 +96,7 @@ export async function deleteMenuItem(id: number) {
   await db.delete(menuItems).where(eq(menuItems.parentId, id));
   await db.delete(menuItems).where(eq(menuItems.id, id));
 
-  revalidatePath("/");
+  revalidatePath("/", "layout");
   revalidatePath("/admin/menu");
 }
 
@@ -106,7 +106,7 @@ export async function toggleMenuItemActive(id: number, isActive: boolean) {
 
   await db.update(menuItems).set({ isActive }).where(eq(menuItems.id, id));
 
-  revalidatePath("/");
+  revalidatePath("/", "layout");
   revalidatePath("/admin/menu");
 }
 
@@ -124,6 +124,7 @@ export async function updateMenuItemOrder(
       }
     });
 
+    revalidatePath("/", "layout");
     revalidatePath("/admin/menu");
     return { success: true };
   } catch (error) {
