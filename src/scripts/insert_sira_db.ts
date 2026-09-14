@@ -10,19 +10,19 @@ async function insertData() {
   const summary = data.summary;
 
   const conn = await mysql.createConnection({
-    host: process.env.DB_HOST || "127.0.0.1",
-    port: Number(process.env.DB_PORT) || 3306,
-    user: process.env.DB_USER || "root",
-    password: process.env.DB_PASSWORD || "1Sampai9!@#",
-    database: process.env.DB_NAME || "app_website",
+    host: process.env.DB_WEB_HOST || "127.0.0.1",
+    port: Number(process.env.DB_WEB_PORT) || 3306,
+    user: process.env.DB_WEB_USER || "root",
+    password: process.env.DB_WEB_PASSWORD || "1Sampai9!@#",
+    database: process.env.DB_WEB_NAME || "app_website",
   });
 
   console.log("Menyimpan summary ke DB...");
   const [sumRes] = await conn.execute(
-    `INSERT INTO sira_summary 
+    `INSERT INTO sira_summary
       (tahun, periode_bulan, pagu_total, realisasi_keuangan, persen_keuangan, sisa_pagu, persen_fisik, pagu_penyedia, pagu_non_penyedia, peringkat_skpd, total_skpd, target_keuangan, target_fisik, deviasi_keuangan, deviasi_fisik)
      VALUES (2026, 9, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-     ON DUPLICATE KEY UPDATE 
+     ON DUPLICATE KEY UPDATE
       pagu_total = VALUES(pagu_total),
       realisasi_keuangan = VALUES(realisasi_keuangan),
       persen_keuangan = VALUES(persen_keuangan),
@@ -65,10 +65,10 @@ async function insertData() {
 
   for (const prog of data.programs) {
     await conn.execute(
-      `INSERT INTO sira_programs 
+      `INSERT INTO sira_programs
         (summary_id, kode_program, nama_program, pagu, realisasi_keuangan, persen_keuangan, sisa_pagu, persen_fisik, pagu_penyedia, pagu_non_penyedia)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-       ON DUPLICATE KEY UPDATE 
+       ON DUPLICATE KEY UPDATE
         nama_program = VALUES(nama_program),
         pagu = VALUES(pagu),
         realisasi_keuangan = VALUES(realisasi_keuangan),
@@ -100,10 +100,10 @@ async function insertData() {
 
     for (const act of prog.activities) {
       await conn.execute(
-        `INSERT INTO sira_activities 
+        `INSERT INTO sira_activities
           (program_id, kode, nama, level, pagu, realisasi_keuangan, persen_keuangan, sisa_pagu, persen_fisik, paket_rup, jumlah_sp2d)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-         ON DUPLICATE KEY UPDATE 
+         ON DUPLICATE KEY UPDATE
           nama = VALUES(nama),
           level = VALUES(level),
           pagu = VALUES(pagu),
