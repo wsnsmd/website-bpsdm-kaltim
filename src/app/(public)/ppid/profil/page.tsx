@@ -4,6 +4,8 @@ import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { PpidPageContent } from "@/components/ppid/PpidPageContent";
 import { PpidPejabatSection } from "@/components/ppid/PpidPejabatSection";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Profil PPID",
   alternates: {

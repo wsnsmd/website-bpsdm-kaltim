@@ -4,6 +4,8 @@ import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { PpidPageContent } from "@/components/ppid/PpidPageContent";
 import { Clock, CheckCircle2 } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Standar Layanan PPID",
   alternates: {

@@ -7,6 +7,8 @@ import { KeberatanTrackClient } from "@/components/ppid/KeberatanTrackClient";
 import { AlertTriangle, Scale, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Keberatan & Sengketa Informasi",
   alternates: {

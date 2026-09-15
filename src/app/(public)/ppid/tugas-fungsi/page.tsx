@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { PpidPageContent } from "@/components/ppid/PpidPageContent";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Tugas & Fungsi PPID",
   alternates: {

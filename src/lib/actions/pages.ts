@@ -77,6 +77,7 @@ export async function createPage(formData: FormData) {
   }
 
   revalidatePath("/profil");
+  revalidatePath("/ppid", "layout"); // cover semua sub-halaman ppid
   revalidatePath("/admin/profil/pages");
 
   return { success: true };
@@ -132,6 +133,7 @@ export async function updatePage(id: number, formData: FormData) {
   }
 
   revalidatePath("/profil");
+  revalidatePath("/ppid", "layout"); // cover semua sub-halaman ppid
   revalidatePath("/admin/profil/pages");
 
   return { success: true };
@@ -144,6 +146,7 @@ export async function deletePage(id: number) {
   try {
     await db.delete(pages).where(eq(pages.id, id));
     revalidatePath("/profil");
+    revalidatePath("/ppid", "layout"); // cover semua sub-halaman ppid
     revalidatePath("/admin/profil/pages");
     return { success: true };
   } catch (error) {
