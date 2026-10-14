@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 
 const TYPE_LABELS: Record<string, string> = {
-  kepala_badan: "Kepala Badan",
+  kepala_badan: "Pimpinan",
   sekretaris: "Sekretaris",
   kepala_bidang: "Kepala Bidang",
   widyaiswara: "Widyaiswara",

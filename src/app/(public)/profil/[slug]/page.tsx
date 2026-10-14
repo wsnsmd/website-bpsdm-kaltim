@@ -175,7 +175,7 @@ export default async function ProfilSubPage({ params }: Props) {
                       marginBottom: "8px",
                     }}
                   >
-                    Kepala Badan
+                    Pimpinan
                   </div>
                   <h2
                     style={{
