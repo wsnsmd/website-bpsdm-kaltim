@@ -238,7 +238,7 @@ const APPS = [
     id: "dinov",
     title: "Dinov",
     desc: "Database Inovasi",
-    href: "https://bpsdm.kaltimprov.go.id/apps/dinov",
+    href: "https://dinov.bpsdmkaltim.net",
     external: true,
   },
   {
